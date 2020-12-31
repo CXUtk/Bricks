@@ -33,7 +33,7 @@ Game::Game(int width, int height) : _width(width), _height(height) {
 }
 
 Game& Game::GetInstance() {
-    static Game game(500, 500);
+    static Game game(500, 600);
     return game;
 }
 
@@ -46,6 +46,7 @@ void Game::init() {
     _curScene = Scene::makeScene("DEFAULT");
     _shaderManager = std::make_shared<ShaderManager>();
     _graphics = std::make_shared<Graphics>();
+    _inputManager = std::make_shared<InputManager>(_window);
 
 }
 
@@ -58,7 +59,7 @@ void Game::run() {
     oldTime = oldTime2 = glfwGetTime();
     cnt = 0;
     while (!glfwWindowShouldClose(_window)) {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         update();

@@ -3,7 +3,11 @@
 #include <glm/gtx/transform.hpp>
 
 DefaultScene::DefaultScene() {
-    _board = std::make_shared<Board>(10, 10);
+    _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
+    _curKeysDown = 0;
+    _oldKeysDown = 0;
+    _isMouseDown = false;
+    _wasMouseDown = false;
     Brick o1(3, 5,
         "...OO"
         ".O.OO"
@@ -35,14 +39,21 @@ DefaultScene::DefaultScene() {
     bricks.push_back(o2);
     bricks.push_back(o3);
     bricks.push_back(o4);
-    bricks.push_back(o4);
-    bricks.push_back(o4);
-    bricks.push_back(o5);
-    bricks.push_back(o5);
+    //bricks.push_back(o4);
+    //bricks.push_back(o4);
     //bricks.push_back(o5);
+    //bricks.push_back(o5);
+    // bricks.push_back(o5);
     dfs(0, bricks);
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
     printf("%d\n", 5);
+    Brick test(4, 4,
+        ".OO."
+        "OOOO"
+        "O..O"
+        "O..O");
+
+    _handBrick = test;
 }
 
 DefaultScene::~DefaultScene() {
@@ -51,16 +62,36 @@ DefaultScene::~DefaultScene() {
 void DefaultScene::update() {
     _board->update();
     auto& game = Game::GetInstance();
-    auto mousePos = Game::GetInstance().getMousePos();
-    Brick test(4, 4,
-        ".OO."
-        "OOOO"
-        "O..O"
-        "O..O");
+    auto input = game.getInputManager();
+    auto mousePos = input->getMousePosition();
+
 
 
     auto pos = _board->getIndexFromPos(glm::vec2(mousePos.x, game.getHeight() - mousePos.y));
-    _board->placeShadow(test, pos);
+    bool canplace = _board->canPlace(_handBrick, pos);
+    _board->placeShadow(_handBrick, pos, canplace ? 1 : 2);
+
+
+    // Input start
+    _isMouseDown = input->isMouseLeftDown();
+    for (int i = 32; i < 200; i++) {
+        _curKeysDown.set(i, input->isKeyDown(i));
+    }
+
+    if (_isMouseDown && !_wasMouseDown && canplace) {
+        _board->place(_handBrick, pos, 1, TileType::BRICK);
+    }
+    if (_curKeysDown.test(GLFW_KEY_Z) && !_oldKeysDown.test(GLFW_KEY_Z)) {
+        _handBrick = _handBrick.rotateClockwise();
+    }
+
+    if (_curKeysDown.test(GLFW_KEY_X) && !_oldKeysDown.test(GLFW_KEY_X)) {
+        _handBrick = _handBrick.flip();
+    }
+    // Input end
+    _wasMouseDown = _isMouseDown;
+    _oldKeysDown = _curKeysDown;
+
 }
 
 void DefaultScene::draw() {
@@ -78,12 +109,12 @@ void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
         found = true;
         return;
     }
-    Brick b = bricks[x];
+    Brick b = bricks[x].flip();
     int r = _board->getRows(), c = _board->getCols();
     for (int s = 0; s < 2; s++) {
         for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < r; j++) {
-                for (int k = 0; k < c; k++) {
+            for (int j = 0; j <= r - b.n; j++) {
+                for (int k = 0; k <= c - b.m; k++) {
                     auto coord = glm::ivec2(j, k);
                     if (_board->canPlace(b, coord)) {
                         _board->place(b, coord, x, TileType::BRICK);
