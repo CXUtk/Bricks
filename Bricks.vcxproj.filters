@@ -54,6 +54,12 @@
     <ClCompile Include="src\Input\InputManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\Texture2D.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Renderer\SpriteRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -89,10 +95,18 @@
     <ClInclude Include="src\Input\InputManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Render\Renderer\SpriteRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\Texture2D.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\color.vs" />
     <None Include="Resources\Shaders\color.frag" />
     <None Include="Resources\Shaders\default.vs" />
+    <None Include="Resources\Shaders\sprite.frag" />
+    <None Include="Resources\Shaders\sprite.vs" />
   </ItemGroup>
 </Project>

@@ -28,11 +28,9 @@ void LineRenderer::drawLines(const std::vector<glm::vec2>& lines, const glm::vec
 
     auto& game = Game::GetInstance();
     auto model = glm::identity<glm::mat4>();
-    auto proj = glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f);
     _shaderData->apply();
-    glUniformMatrix4fv(glGetUniformLocation(_shaderData->getID(), "projection"), 1, false, glm::value_ptr(proj));
+    glUniformMatrix4fv(glGetUniformLocation(_shaderData->getID(), "projection"), 1, false, glm::value_ptr(game.getGraphics()->getProjectionMatrix()));
     glUniformMatrix4fv(glGetUniformLocation(_shaderData->getID(), "model"), 1, false, glm::value_ptr(model));
-
     glUniform3f(glGetUniformLocation(_shaderData->getID(), "uColor"), color.r, color.g, color.b);
 
 

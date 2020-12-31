@@ -21,4 +21,5 @@ private:
     std::bitset<256> _oldKeysDown;
 
     Brick _handBrick;
+    std::vector<Brick> _bricks;
 };

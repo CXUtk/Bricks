@@ -24,6 +24,8 @@ struct Brick {
     // Generator
     Brick flip() const;
     Brick rotateClockwise() const;
+
+    std::shared_ptr<Texture2D> generateTexture(glm::vec3 color) const;
 };
 
 

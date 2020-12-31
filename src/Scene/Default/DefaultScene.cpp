@@ -1,6 +1,7 @@
 ﻿#include "DefaultScene.h"
 #include "Game.h"
 #include <glm/gtx/transform.hpp>
+#include <algorithm>
 
 DefaultScene::DefaultScene() {
     _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
@@ -34,17 +35,17 @@ DefaultScene::DefaultScene() {
         ".O..."
         ".OO.."
         "..OOO");
-    std::vector<Brick> bricks;
-    bricks.push_back(o1);
-    bricks.push_back(o2);
-    bricks.push_back(o3);
-    bricks.push_back(o4);
+
+    _bricks.push_back(o1);
+    _bricks.push_back(o2);
+    _bricks.push_back(o3);
+    _bricks.push_back(o4);
     //bricks.push_back(o4);
     //bricks.push_back(o4);
     //bricks.push_back(o5);
     //bricks.push_back(o5);
     // bricks.push_back(o5);
-    dfs(0, bricks);
+    dfs(0, _bricks);
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
     printf("%d\n", 5);
     Brick test(4, 4,
@@ -64,8 +65,6 @@ void DefaultScene::update() {
     auto& game = Game::GetInstance();
     auto input = game.getInputManager();
     auto mousePos = input->getMousePosition();
-
-
 
     auto pos = _board->getIndexFromPos(glm::vec2(mousePos.x, game.getHeight() - mousePos.y));
     bool canplace = _board->canPlace(_handBrick, pos);
@@ -97,6 +96,14 @@ void DefaultScene::update() {
 void DefaultScene::draw() {
     _board->draw();
     _board->clearShadow();
+
+    for (int i = 0; i < _bricks.size(); i++) {
+        auto texture = _bricks[i].generateTexture(glm::vec3(1, 1, 0));
+        int startX = 69 * i;
+        float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
+        scale = std::min(scale, 1.0f);
+        Game::GetInstance().getGraphics()->drawSprite(texture, glm::vec2(startX, 0), scale, glm::vec3(1));
+    }
     //std::vector<glm::vec2> lines;
     //lines.push_back(glm::vec2(0, 0));
     //lines.push_back(glm::vec2(500, 500));

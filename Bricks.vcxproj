@@ -157,8 +157,10 @@
     <ClCompile Include="src\Render\Graphic.cpp" />
     <ClCompile Include="src\Render\Renderer\LineRenderer.cpp" />
     <ClCompile Include="src\Render\Renderer\QuadRenderer.cpp" />
+    <ClCompile Include="src\Render\Renderer\SpriteRenderer.cpp" />
     <ClCompile Include="src\Render\Shader\ShaderData.cpp" />
     <ClCompile Include="src\Render\Shader\ShaderManager.cpp" />
+    <ClCompile Include="src\Render\Texture2D.cpp" />
     <ClCompile Include="src\Scene\Default\DefaultScene.cpp" />
     <ClCompile Include="src\Scene\Default\Strucures\Board.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
@@ -170,8 +172,10 @@
     <ClInclude Include="src\Render\Graphic.h" />
     <ClInclude Include="src\Render\Renderer\LineRenderer.h" />
     <ClInclude Include="src\Render\Renderer\QuadRenderer.h" />
+    <ClInclude Include="src\Render\Renderer\SpriteRenderer.h" />
     <ClInclude Include="src\Render\Shader\ShaderData.h" />
     <ClInclude Include="src\Render\Shader\ShaderManager.h" />
+    <ClInclude Include="src\Render\Texture2D.h" />
     <ClInclude Include="src\Scene\Default\DefaultScene.h" />
     <ClInclude Include="src\Scene\Default\Strucures\Board.h" />
     <ClInclude Include="src\Scene\Scene.h" />
@@ -180,6 +184,8 @@
     <None Include="Resources\Shaders\color.frag" />
     <None Include="Resources\Shaders\color.vs" />
     <None Include="Resources\Shaders\default.vs" />
+    <None Include="Resources\Shaders\sprite.frag" />
+    <None Include="Resources\Shaders\sprite.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,7 @@
 ﻿#include "Board.h"
 #include "Game.h"
 #include <algorithm>
-
+#include <glm/gtx/transform.hpp>
 
 
 Brick::Brick(int n, int m) : n(n), m(m) {
@@ -51,6 +51,62 @@ Brick Brick::rotateClockwise() const {
         }
     }
     return out;
+}
+
+
+
+std::shared_ptr<Texture2D> Brick::generateTexture(glm::vec3 color) const {
+
+    constexpr int BLOCK_SIZE_DRAW = 32;
+    auto& game = Game::GetInstance();
+
+    // 生成一个临时framebuffer，然后绘制物块，最后把framebuffer保存为纹理
+    unsigned int fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    // 绑定纹理
+    unsigned int texID;
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+
+    int width = m * BLOCK_SIZE_DRAW;
+    int height = n * BLOCK_SIZE_DRAW;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m * BLOCK_SIZE_DRAW, n * BLOCK_SIZE_DRAW, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texID, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        printf("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
+
+    glViewport(0, 0, width, height);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    auto savedProj = game.getGraphics()->getProjectionMatrix();
+    game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, (float)m * BLOCK_SIZE_DRAW, 0.f, (float)n * BLOCK_SIZE_DRAW, -1.0f, 1.0f));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            int id = i * m + j;
+            if (S.test(id)) {
+                auto pos = glm::vec2(j * BLOCK_SIZE_DRAW, i * BLOCK_SIZE_DRAW);
+                // 不用反转Y，因为纹理绘制已经是正确的坐标
+                // pos.y = n * BLOCK_SIZE_DRAW - pos.y;
+                game.getGraphics()->drawQuad(pos, glm::vec2(BLOCK_SIZE_DRAW), color);
+            }
+        }
+    }
+
+
+    // 解除绑定
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDeleteFramebuffers(1, &fbo);
+    glViewport(0, 0, game.getWidth(), game.getHeight());
+    game.getGraphics()->setProjectionMatrix(savedProj);
+
+    return std::shared_ptr<Texture2D>(new Texture2D(texID, glm::ivec2(m * BLOCK_SIZE_DRAW, n * BLOCK_SIZE_DRAW)));
 }
 
 
@@ -112,6 +168,8 @@ void Board::update() {
 
 void Board::draw() {
     auto& game = Game::GetInstance();
+    game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f));
+
     auto pos = glm::vec2(_topLeft.x, _topLeft.y + BLOCK_SIZE * MAX_BOARD_SIZE);
     auto height = game.getHeight();
     pos.y = height - pos.y;
