@@ -1,14 +1,26 @@
 ﻿#include "DefaultScene.h"
 #include "Game.h"
+#include "ImUI/ImUI.h"
 #include <glm/gtx/transform.hpp>
 #include <algorithm>
 
+static glm::vec3 colors[] = {
+    glm::vec3(1, 0, 1),
+    glm::vec3(1, 0, 0),
+    glm::vec3(1, 0.8, 0),
+    glm::vec3(0, 1, 0),
+    glm::vec3(0, 0.9, 0),
+    glm::vec3(0, 0.8, 0),
+    glm::vec3(0, 1, 1),
+    glm::vec3(0, 0.9, 0.9),
+    glm::vec3(0, 0.8, 0.8),
+};
+
+
+static int selectedColor = 1;
+
 DefaultScene::DefaultScene() {
     _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
-    _curKeysDown = 0;
-    _oldKeysDown = 0;
-    _isMouseDown = false;
-    _wasMouseDown = false;
     Brick o1(3, 5,
         "...OO"
         ".O.OO"
@@ -65,49 +77,55 @@ void DefaultScene::update() {
     auto& game = Game::GetInstance();
     auto input = game.getInputManager();
     auto mousePos = input->getMousePosition();
+    mousePos.y = game.getHeight() - mousePos.y;
 
-    auto pos = _board->getIndexFromPos(glm::vec2(mousePos.x, game.getHeight() - mousePos.y));
+    auto pos = _board->getIndexFromPos(_handBrick, mousePos);
     bool canplace = _board->canPlace(_handBrick, pos);
     _board->placeShadow(_handBrick, pos, canplace ? 1 : 2);
 
 
-    // Input start
-    _isMouseDown = input->isMouseLeftDown();
-    for (int i = 32; i < 200; i++) {
-        _curKeysDown.set(i, input->isKeyDown(i));
+    input->beginInput();
+    if (input->getCurMouseDown() && !input->getOldMouseDown() && canplace && _board->mouseInside(mousePos)) {
+        _board->place(_handBrick, pos, selectedColor, TileType::BRICK);
     }
-
-    if (_isMouseDown && !_wasMouseDown && canplace) {
-        _board->place(_handBrick, pos, 1, TileType::BRICK);
-    }
-    if (_curKeysDown.test(GLFW_KEY_Z) && !_oldKeysDown.test(GLFW_KEY_Z)) {
+    if (input->getIsKeyDown(GLFW_KEY_Z) && !input->getWasKeyDown(GLFW_KEY_Z)) {
         _handBrick = _handBrick.rotateClockwise();
     }
 
-    if (_curKeysDown.test(GLFW_KEY_X) && !_oldKeysDown.test(GLFW_KEY_X)) {
+    if (input->getIsKeyDown(GLFW_KEY_X) && !input->getWasKeyDown(GLFW_KEY_X)) {
         _handBrick = _handBrick.flip();
     }
-    // Input end
-    _wasMouseDown = _isMouseDown;
-    _oldKeysDown = _curKeysDown;
 
 }
 
 void DefaultScene::draw() {
+    auto& game = Game::GetInstance();
+    auto input = game.getInputManager();
+
     _board->draw();
     _board->clearShadow();
 
+
+    // Gap: 64 + 10
     for (int i = 0; i < _bricks.size(); i++) {
         auto texture = _bricks[i].generateTexture(glm::vec3(1, 1, 0));
-        int startX = 69 * i;
+        int startX = 74 * i;
         float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
         scale = std::min(scale, 1.0f);
-        Game::GetInstance().getGraphics()->drawSprite(texture, glm::vec2(startX, 0), scale, glm::vec3(1));
+        if (ImUI::GetInstance().button(texture, glm::vec2(startX, 0), scale, glm::vec3(1))) {
+            printf("%d is Clicked!\n", i);
+            _handBrick = _bricks[i];
+            selectedColor = i;
+        }
     }
     //std::vector<glm::vec2> lines;
     //lines.push_back(glm::vec2(0, 0));
     //lines.push_back(glm::vec2(500, 500));
     //Game::GetInstance().getGraphics()->drawLines(lines, glm::vec3(1, 1, 1), 2);
+
+
+     // Input end
+    input->endInput();
 }
 
 bool found = false;

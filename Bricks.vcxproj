@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="..\PhysicsEngine\PhysicsEngine\src\glad.c" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\ImUI\ImUI.cpp" />
     <ClCompile Include="src\Input\InputManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Render\GLUtils.cpp" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\ImUI\ImUI.h" />
     <ClInclude Include="src\Input\InputManager.h" />
     <ClInclude Include="src\Render\GLUtils.h" />
     <ClInclude Include="src\Render\Graphic.h" />

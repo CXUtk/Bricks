@@ -60,6 +60,9 @@
     <ClCompile Include="src\Render\Renderer\SpriteRenderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\ImUI\ImUI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -99,6 +102,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Render\Texture2D.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ImUI\ImUI.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

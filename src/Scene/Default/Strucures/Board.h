@@ -41,7 +41,8 @@ public:
     void place(const Brick& brick, glm::ivec2 pos, int id, TileType type);
     void placeShadow(const Brick& brick, glm::ivec2 pos, int color);
     bool canPlace(const Brick& brick, glm::ivec2 pos);
-    glm::ivec2 getIndexFromPos(glm::vec2 pos) const;
+    glm::ivec2 getIndexFromPos(const Brick& brick, glm::vec2 pos) const;
+    bool mouseInside(glm::vec2 mousePos) const;
     void clearShadow();
     void update();
     void draw();

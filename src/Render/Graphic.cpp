@@ -28,6 +28,11 @@ void Graphics::drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, flo
     _spriteRenderer->drawSprite(texture, pos, texture->getSize(), origin, scale, 0, color);
 }
 
+void Graphics::drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 size, float scale, const glm::vec3& color) {
+    glm::vec2 origin = glm::vec2(0.f, 0.f);
+    _spriteRenderer->drawSprite(texture, pos, size, origin, scale, 0, color);
+}
+
 void Graphics::drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 origin, float scale, float rotation, const glm::vec3& color) {
     _spriteRenderer->drawSprite(texture, pos, texture->getSize(), origin, scale, rotation, color);
 }

@@ -14,11 +14,6 @@ public:
     void dfs(int x, std::vector<Brick>& bricks);
 private:
     std::shared_ptr<Board> _board;
-    bool _wasMouseDown;
-    bool _isMouseDown;
-
-    std::bitset<256> _curKeysDown;
-    std::bitset<256> _oldKeysDown;
 
     Brick _handBrick;
     std::vector<Brick> _bricks;

@@ -3,6 +3,17 @@
 #include <algorithm>
 #include <glm/gtx/transform.hpp>
 
+static glm::vec3 colors[] = {
+    glm::vec3(1, 0, 1),
+    glm::vec3(1, 0, 0),
+    glm::vec3(1, 0.8, 0),
+    glm::vec3(0, 1, 0),
+    glm::vec3(0, 0.9, 0),
+    glm::vec3(0, 0.8, 0),
+    glm::vec3(0, 1, 1),
+    glm::vec3(0, 0.9, 0.9),
+    glm::vec3(0, 0.8, 0.8),
+};
 
 Brick::Brick(int n, int m) : n(n), m(m) {
 }
@@ -91,14 +102,12 @@ std::shared_ptr<Texture2D> Brick::generateTexture(glm::vec3 color) const {
         for (int j = 0; j < m; j++) {
             int id = i * m + j;
             if (S.test(id)) {
-                auto pos = glm::vec2(j * BLOCK_SIZE_DRAW, i * BLOCK_SIZE_DRAW);
-                // 不用反转Y，因为纹理绘制已经是正确的坐标
-                // pos.y = n * BLOCK_SIZE_DRAW - pos.y;
+                auto pos = glm::vec2(j * BLOCK_SIZE_DRAW, (i + 1) * BLOCK_SIZE_DRAW);
+                pos.y = n * BLOCK_SIZE_DRAW - pos.y;
                 game.getGraphics()->drawQuad(pos, glm::vec2(BLOCK_SIZE_DRAW), color);
             }
         }
     }
-
 
     // 解除绑定
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -152,9 +161,20 @@ bool Board::canPlace(const Brick& brick, glm::ivec2 pos) {
     return true;
 }
 
-glm::ivec2 Board::getIndexFromPos(glm::vec2 pos) const {
-    pos -= _topLeft;
-    return glm::ivec2(std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.y / BLOCK_SIZE))), std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.x / BLOCK_SIZE))));
+glm::ivec2 Board::getIndexFromPos(const Brick& brick, glm::vec2 pos) const {
+    auto halfSize = glm::vec2(brick.m, brick.n) * 16.f;
+    pos -= glm::vec2(_topLeft.x + halfSize.x, _topLeft.y + halfSize.y);
+
+    int r = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.y / BLOCK_SIZE)));
+    r = std::min(r, MAX_BOARD_SIZE - brick.n);
+    int c = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.x / BLOCK_SIZE)));
+    c = std::min(c, MAX_BOARD_SIZE - brick.m);
+    return glm::ivec2(r, c);
+}
+
+bool Board::mouseInside(glm::vec2 mousePos) const {
+    return mousePos.x >= _topLeft.x && mousePos.x <= _topLeft.x + MAX_BOARD_SIZE * BLOCK_SIZE
+        && mousePos.y >= _topLeft.y && mousePos.y <= _topLeft.y + MAX_BOARD_SIZE * BLOCK_SIZE;
 }
 
 void Board::clearShadow() {
@@ -204,14 +224,14 @@ void Board::draw() {
             drawCell(i, j, game.getGraphics(), edges);
         }
     }
-    //game.getGraphics()->drawLines(edges, glm::vec3(0, 0, 0), 1);
 
+    //game.getGraphics()->drawLines(edges, glm::vec3(0, 0, 0), 1);
     for (int i = 0; i < _rows; i++) {
         for (int j = 0; j < _columns; j++) {
             if (shadow[i][j]) {
                 glm::vec2 bl = glm::vec2(_topLeft.x + j * BLOCK_SIZE, _topLeft.y + (i + 1) * BLOCK_SIZE);
                 bl.y = height - bl.y;
-                auto color = (shadow[i][j] == 1) ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0);
+                auto color = (shadow[i][j] == 1) ? glm::vec3(0.5, 1, 0.5) : glm::vec3(1, 0.5, 0.5);
                 game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), color);
             }
         }
@@ -235,17 +255,7 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vecto
     auto& game = Game::GetInstance();
     auto height = game.getHeight();
     bl.y = height - bl.y;
-    static glm::vec3 colors[] = {
-        glm::vec3(1, 0, 1),
-        glm::vec3(1, 0, 0),
-        glm::vec3(1, 0.8, 0),
-        glm::vec3(0, 1, 0),
-        glm::vec3(0, 0.9, 0),
-        glm::vec3(0, 0.8, 0),
-        glm::vec3(0, 1, 1),
-        glm::vec3(0, 0.9, 0.9),
-        glm::vec3(0, 0.8, 0.8),
-    };
+
     // 下，上，右，左
     static int dr[4] = { 1, -1, 0, 0 };
     static int dc[4] = { 0, 0, 1, -1 };
@@ -261,7 +271,7 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vecto
             int nr = r + dr[i];
             int nc = c + dc[i];
             if (nr < 0 || nr >= _rows || nc < 0 || nc >= _columns || tiles[nr][nc].type != TileType::BRICK
-                || (tiles[nr][nc].type == TileType::BRICK && tiles[nr][nc].color != tiles[r][c].color)) {
+                /*|| (tiles[nr][nc].type == TileType::BRICK && tiles[nr][nc].color != tiles[r][c].color)*/) {
                 glm::vec2 start = curTL, end = curTL;
                 if (i == 0) {
                     start = glm::vec2(curTL.x, curTL.y + BLOCK_SIZE);
