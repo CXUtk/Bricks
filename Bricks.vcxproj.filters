@@ -120,6 +120,9 @@
     <None Include="Resources\Shaders\default.vs" />
     <None Include="Resources\Shaders\sprite.frag" />
     <None Include="Resources\Shaders\sprite.vs" />
+    <None Include=".gitignore" />
+    <None Include=".gitattributes" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="test233.gif">

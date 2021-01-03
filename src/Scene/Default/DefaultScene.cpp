@@ -44,17 +44,20 @@ DefaultScene::DefaultScene() {
     //_bricks.push_back(o2);
     //_bricks.push_back(o3);
     //_bricks.push_back(o4);
-    ////bricks.push_back(o4);
-    ////bricks.push_back(o4);
-    ////bricks.push_back(o5);
+    //_bricks.push_back(o4);
+    //_bricks.push_back(o4);
     //_bricks.push_back(o5);
-    //// bricks.push_back(o5);
+    //_bricks.push_back(o5);
+    //_bricks.push_back(o5);
     for (int i = 0; i < _bricks.size(); i++) {
         _cnt[i] = 1;
     }
+
+    auto time = glfwGetTime();
     dfs(0, _bricks);
+
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
-    printf("%d\n", 5);
+    printf("%lf seconds\n", glfwGetTime() - time);
     Brick test(4, 4,
         ".OO."
         "OOOO"
@@ -142,33 +145,6 @@ void DefaultScene::draw() {
     input->endInput();
 }
 
-bool found = false;
-void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
-    if (x == bricks.size()) {
-        found = true;
-        return;
-    }
-    Brick b = bricks[x].flip();
-    int r = _board->getRows(), c = _board->getCols();
-    for (int s = 0; s < 2; s++) {
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j <= r - b.n; j++) {
-                for (int k = 0; k <= c - b.m; k++) {
-                    auto coord = glm::ivec2(j, k);
-                    if (_board->canPlace(b, coord)) {
-                        _board->place(b, coord, x, TileType::BRICK);
-                        dfs(x + 1, bricks);
-                        if (found)return;
-                        _board->remove(b, coord);
-                    }
-                }
-            }
-            b = b.rotateClockwise();
-        }
-        b = b.flip();
-    }
-
-}
 
 
 struct Node {
@@ -188,6 +164,41 @@ static int dc[4] = { 0, 0, 1, -1 };
 static int vis[Board::MAX_BOARD_SIZE][Board::MAX_BOARD_SIZE];
 static std::mt19937 mt;
 
+
+bool found = false;
+void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
+    if (x == bricks.size()) {
+        found = true;
+        return;
+    }
+    int r = _board->getRows(), c = _board->getCols();
+    Brick b = bricks[x];
+
+    // 剪枝1：如果剩余空间的未放置方块最大大小小于这个块的大小，剪掉
+    //if (!_board->testCanPlace(b)) return;
+
+
+    for (int s = 0; s < 2; s++) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j <= r - b.n; j++) {
+                for (int k = 0; k <= c - b.m; k++) {
+                    auto coord = glm::ivec2(j, k);
+                    if (_board->canPlace(b, coord)) {
+                        _board->place(b, coord, x, TileType::BRICK);
+                        dfs(x + 1, bricks);
+                        if (found)return;
+                        _board->remove(b, coord);
+                    }
+                }
+            }
+            b = b.rotateClockwise();
+        }
+        b = b.flip();
+    }
+}
+
+
+
 void DefaultScene::randomGenerate() {
     mt.seed(19284321);
     for (int i = 0; i < Board::MAX_BOARD_SIZE; i++) {
@@ -195,9 +206,7 @@ void DefaultScene::randomGenerate() {
             vis[i][j] = 1;
         }
     }
-
     cutBoard();
-
 }
 
 void DefaultScene::cutBoard() {
@@ -277,7 +286,7 @@ void DefaultScene::dfsCut(int r, int c) {
         if (vis[node.r][node.c] == 2) continue;
         vis[node.r][node.c] = 2;
         cnt++;
-        if (cnt == 30) {
+        if (cnt == 14) {
             break;
         }
         for (int i = 0; i < 4; i++) {

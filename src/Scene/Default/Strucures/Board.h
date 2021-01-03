@@ -12,6 +12,7 @@ enum class TileType {
 struct Brick {
     int n, m;
     std::bitset<128> S;
+    std::bitset<128> G;
 
     Brick() = default;
     Brick(int n, int m);
@@ -24,6 +25,7 @@ struct Brick {
     // Generator
     Brick flip() const;
     Brick rotateClockwise() const;
+    void gBit();
 
     std::shared_ptr<Texture2D> generateTexture(glm::vec3 color) const;
 };
@@ -52,6 +54,7 @@ public:
     glm::ivec2 getShadowIndexFromMousePos(const Brick& brick, glm::vec2 pos) const;
     bool mouseInside(glm::vec2 mousePos) const;
 
+    bool testCanPlace(const Brick& brick) const;
 
     void clearShadow();
     void update();
@@ -66,6 +69,7 @@ private:
 
     Tile tiles[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
     int shadow[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
+    std::bitset<128> S;
 
     int _rows, _columns;
 
@@ -75,4 +79,5 @@ private:
     // 查询这一行这一列是哪个砖块，或者-1空气
     int checkID(glm::ivec2 pos);
     void drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vector<glm::vec2>& edges);
+    void setTile(int r, int c, TileType type, int color);
 };
