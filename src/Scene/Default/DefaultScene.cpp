@@ -52,7 +52,7 @@ DefaultScene::DefaultScene() {
     for (int i = 0; i < _bricks.size(); i++) {
         _cnt[i] = 1;
     }
-    //dfs(0, _bricks);
+    dfs(0, _bricks);
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
     printf("%d\n", 5);
     Brick test(4, 4,

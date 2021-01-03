@@ -121,4 +121,12 @@
     <None Include="Resources\Shaders\sprite.frag" />
     <None Include="Resources\Shaders\sprite.vs" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\Pictures\FS49\test233.gif">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\文本.txt" />
+  </ItemGroup>
 </Project>
