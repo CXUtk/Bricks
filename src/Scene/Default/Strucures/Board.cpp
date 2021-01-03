@@ -1,6 +1,7 @@
 ﻿#include "Board.h"
 #include "Game.h"
 #include <algorithm>
+#include <queue>
 #include <glm/gtx/transform.hpp>
 
 static glm::vec3 colors[] = {
@@ -137,6 +138,30 @@ void Board::place(const Brick& brick, glm::ivec2 pos, int id, TileType type) {
     }
 }
 
+static int dr[4] = { 1, -1, 0, 0 };
+static int dc[4] = { 0, 0, 1, -1 };
+int Board::unplace(glm::ivec2 pos) {
+    std::queue<glm::ivec2> Q;
+    Q.push(pos);
+    int color = checkID(pos);
+    if (color == -1) return -1;
+    while (!Q.empty()) {
+        auto p = Q.front();
+        tiles[p.x][p.y].type = TileType::EMPTY;
+        tiles[p.x][p.y].color = -1;
+        Q.pop();
+        for (int i = 0; i < 4; i++) {
+            int nr = p.x + dr[i];
+            int nc = p.y + dc[i];
+            if (nr < 0 || nc < 0 || nr >= MAX_BOARD_SIZE || nc >= MAX_BOARD_SIZE
+                || tiles[nr][nc].type != TileType::BRICK || tiles[nr][nc].color != color)
+                continue;
+            Q.push(glm::ivec2(nr, nc));
+        }
+    }
+    return color;
+}
+
 void Board::placeShadow(const Brick& brick, glm::ivec2 pos, int color) {
     for (int i = pos.x; i < std::min(pos.x + brick.n, MAX_BOARD_SIZE); i++) {
         for (int j = pos.y; j < std::min(pos.y + brick.m, MAX_BOARD_SIZE); j++) {
@@ -162,8 +187,17 @@ bool Board::canPlace(const Brick& brick, glm::ivec2 pos) {
     return true;
 }
 
-glm::ivec2 Board::getIndexFromPos(const Brick& brick, glm::vec2 pos) const {
-    auto halfSize = glm::vec2(brick.m, brick.n) * 16.f;
+glm::ivec2 Board::getIndexFromMousePos(const Brick& brick, glm::vec2 pos) const {
+
+    pos -= _topLeft;// glm::vec2(_topLeft.x + halfSize.x, _topLeft.y + halfSize.y);
+
+    int r = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.y / BLOCK_SIZE)));
+    int c = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.x / BLOCK_SIZE)));
+    return glm::ivec2(r, c);
+}
+
+glm::ivec2 Board::getShadowIndexFromMousePos(const Brick& brick, glm::vec2 pos) const {
+    auto halfSize = glm::ivec2(brick.m, brick.n) * 16;
     pos -= glm::vec2(_topLeft.x + halfSize.x, _topLeft.y + halfSize.y);
 
     int r = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.y / BLOCK_SIZE)));
@@ -176,6 +210,10 @@ glm::ivec2 Board::getIndexFromPos(const Brick& brick, glm::vec2 pos) const {
 bool Board::mouseInside(glm::vec2 mousePos) const {
     return mousePos.x >= _topLeft.x && mousePos.x <= _topLeft.x + MAX_BOARD_SIZE * BLOCK_SIZE
         && mousePos.y >= _topLeft.y && mousePos.y <= _topLeft.y + MAX_BOARD_SIZE * BLOCK_SIZE;
+}
+
+int Board::checkID(glm::ivec2 pos) {
+    return tiles[pos.x][pos.y].type == TileType::EMPTY ? -1 : tiles[pos.x][pos.y].color;
 }
 
 void Board::clearShadow() {

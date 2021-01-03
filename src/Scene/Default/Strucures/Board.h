@@ -43,10 +43,16 @@ public:
 
     Board(int rows, int columns, glm::vec2 center);
     void place(const Brick& brick, glm::ivec2 pos, int id, TileType type);
+
+    // 拿走这个位置所代表的砖块，返回砖块的颜色
+    int unplace(glm::ivec2 pos);
     void placeShadow(const Brick& brick, glm::ivec2 pos, int color);
     bool canPlace(const Brick& brick, glm::ivec2 pos);
-    glm::ivec2 getIndexFromPos(const Brick& brick, glm::vec2 pos) const;
+    glm::ivec2 getIndexFromMousePos(const Brick& brick, glm::vec2 pos) const;
+    glm::ivec2 getShadowIndexFromMousePos(const Brick& brick, glm::vec2 pos) const;
     bool mouseInside(glm::vec2 mousePos) const;
+
+
     void clearShadow();
     void update();
     void draw();
@@ -66,6 +72,7 @@ private:
     glm::vec2 _topLeft;
     glm::vec2 _center;
 
-
+    // 查询这一行这一列是哪个砖块，或者-1空气
+    int checkID(glm::ivec2 pos);
     void drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vector<glm::vec2>& edges);
 };

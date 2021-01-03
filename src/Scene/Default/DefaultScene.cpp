@@ -75,16 +75,24 @@ void DefaultScene::update() {
     auto mousePos = input->getMousePosition();
     mousePos.y = game.getHeight() - mousePos.y;
 
-    auto pos = _board->getIndexFromPos(_handBrick, mousePos);
-    bool canplace = (_handBrickID != -1 && _board->canPlace(_handBrick, pos) && _cnt[_handBrickID]);
+    auto pos = _board->getIndexFromMousePos(_handBrick, mousePos);
+    auto shadowPos = _board->getShadowIndexFromMousePos(_handBrick, mousePos);
+    bool canplace = (_handBrickID != -1 && _board->canPlace(_handBrick, shadowPos) && _cnt[_handBrickID]);
     if (_handBrickID != -1)
-        _board->placeShadow(_handBrick, pos, canplace ? 1 : 2);
+        _board->placeShadow(_handBrick, shadowPos, canplace ? 1 : 2);
 
 
     input->beginInput();
     if (input->getCurMouseDown() && !input->getOldMouseDown() && canplace && _board->mouseInside(mousePos)) {
-        _board->place(_handBrick, pos, _handBrickID, TileType::BRICK);
+        _board->place(_handBrick, shadowPos, _handBrickID, TileType::BRICK);
         _cnt[_handBrickID]--;
+    }
+    if (input->getCurMouseRightDown() && !input->getOldMouseRightDown() && _board->mouseInside(mousePos)) {
+        int c = _board->unplace(pos);
+        printf("%d %d\n", pos.x, pos.y);
+        if (c != -1) {
+            _cnt[c]++;
+        }
     }
     if (input->getIsKeyDown(GLFW_KEY_Z) && !input->getWasKeyDown(GLFW_KEY_Z)) {
         _handBrick = _handBrick.rotateClockwise();
@@ -93,6 +101,8 @@ void DefaultScene::update() {
     if (input->getIsKeyDown(GLFW_KEY_X) && !input->getWasKeyDown(GLFW_KEY_X)) {
         _handBrick = _handBrick.flip();
     }
+
+
 
 }
 
@@ -267,7 +277,7 @@ void DefaultScene::dfsCut(int r, int c) {
         if (vis[node.r][node.c] == 2) continue;
         vis[node.r][node.c] = 2;
         cnt++;
-        if (cnt == 20) {
+        if (cnt == 30) {
             break;
         }
         for (int i = 0; i < 4; i++) {

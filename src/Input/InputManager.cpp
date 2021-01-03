@@ -20,6 +20,7 @@ bool InputManager::isKeyDown(int key) {
 void InputManager::beginInput() {
     // Input start
     _isMouseDown = isMouseLeftDown();
+    _isMouseRightDown = isMouseRightDown();
     for (int i = 32; i < 200; i++) {
         _curKeysDown.set(i, isKeyDown(i));
     }
@@ -27,5 +28,6 @@ void InputManager::beginInput() {
 
 void InputManager::endInput() {
     _wasMouseDown = _isMouseDown;
+    _wasMouseRightDown = _isMouseRightDown;
     _oldKeysDown = _curKeysDown;
 }
