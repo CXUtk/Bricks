@@ -192,10 +192,7 @@
     <None Include="Resources\Shaders\sprite.vs" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\Pictures\FS49\test233.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="src\文本.txt" />
+    <Image Include="test233.gif" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
