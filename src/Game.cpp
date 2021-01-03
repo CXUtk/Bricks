@@ -33,7 +33,7 @@ Game::Game(int width, int height) : _width(width), _height(height) {
 }
 
 Game& Game::GetInstance() {
-    static Game game(500, 600);
+    static Game game(500, 700);
     return game;
 }
 

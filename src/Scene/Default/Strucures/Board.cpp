@@ -12,7 +12,8 @@ static glm::vec3 colors[] = {
     glm::vec3(0, 0.8, 0),
     glm::vec3(0, 1, 1),
     glm::vec3(0, 0.9, 0.9),
-    glm::vec3(0, 0.8, 0.8),
+    glm::vec3(0.3, 0.8, 0.1),
+    glm::vec3(0.3, 0.7, 0.5),
 };
 
 Brick::Brick(int n, int m) : n(n), m(m) {
@@ -263,7 +264,7 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vecto
     if (filled) {
 
         if (!shadow[r][c] && tiles[r][c].type == TileType::BRICK) {
-            game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), colors[tiles[r][c].color]);
+            game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), colors[tiles[r][c].color % 10]);
         }
 
         auto curTL = _topLeft + glm::vec2(c * BLOCK_SIZE, r * BLOCK_SIZE);

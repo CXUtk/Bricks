@@ -63,6 +63,9 @@
     <ClCompile Include="src\ImUI\ImUI.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -105,6 +108,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\ImUI\ImUI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

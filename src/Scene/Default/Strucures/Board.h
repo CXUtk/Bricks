@@ -37,6 +37,10 @@ struct Tile {
 
 class Board {
 public:
+    static constexpr int MAX_BOARD_SIZE = 10;
+    static constexpr int BLOCK_SIZE = 32;
+    static constexpr int BLOCK_EDGE = 1;
+
     Board(int rows, int columns, glm::vec2 center);
     void place(const Brick& brick, glm::ivec2 pos, int id, TileType type);
     void placeShadow(const Brick& brick, glm::ivec2 pos, int color);
@@ -51,10 +55,9 @@ public:
     int getRows() const { return _rows; }
     int getCols() const { return _columns; }
 
+
 private:
-    static constexpr int MAX_BOARD_SIZE = 10;
-    static constexpr int BLOCK_SIZE = 32;
-    static constexpr int BLOCK_EDGE = 1;
+
     Tile tiles[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
     int shadow[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
 
