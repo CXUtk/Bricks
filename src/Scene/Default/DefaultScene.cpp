@@ -54,7 +54,7 @@ DefaultScene::DefaultScene() {
     }
 
     auto time = glfwGetTime();
-    dfs(0, _bricks);
+    //dfs(0, _bricks);
 
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
     printf("%lf seconds\n", glfwGetTime() - time);
@@ -121,10 +121,14 @@ void DefaultScene::draw() {
     int startX = 32;
     int startY = 200;
     for (int i = 0; i < _bricks.size(); i++) {
-        auto texture = _bricks[i].generateTexture(glm::vec3(1, 1, 1));
+        auto texture = _textures[i];
         float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
         scale = std::min(scale, 1.0f);
-        if (ImUI::GetInstance().button(texture, glm::vec2(startX, startY), scale, _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0))) {
+        scale *= 0.9f;
+        if (ImUI::GetInstance().img_button(texture, glm::vec2(startX, startY),
+            glm::vec2(64, 64), scale,
+            _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
+            _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
             printf("%d is Clicked!\n", i);
             _handBrick = _bricks[i];
             _handBrickID = i;
@@ -207,6 +211,13 @@ void DefaultScene::randomGenerate() {
         }
     }
     cutBoard();
+    generateBrickTextures();
+}
+
+void DefaultScene::generateBrickTextures() {
+    for (auto& b : _bricks) {
+        _textures.push_back(b.generateTexture(glm::vec3(1, 1, 1)));
+    }
 }
 
 void DefaultScene::cutBoard() {

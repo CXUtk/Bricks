@@ -12,6 +12,7 @@ public:
     ~LineRenderer();
 
     void drawLines(const std::vector<glm::vec2>& lines, const glm::vec3& color, float width);
+    void drawLines(const std::vector<std::pair<glm::vec2, glm::vec2>>& lines, const glm::vec3& color, float width);
 
 private:
 
