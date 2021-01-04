@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\PhysicsEngine\PhysicsEngine\src\glad.c" />
+    <ClCompile Include="src\Algorithm\DLXSolver.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\ImUI\ImUI.cpp" />
     <ClCompile Include="src\Input\InputManager.cpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Algorithm\DLXSolver.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\ImUI\ImUI.h" />
     <ClInclude Include="src\Input\InputManager.h" />

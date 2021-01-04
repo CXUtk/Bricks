@@ -66,6 +66,9 @@
     <ClCompile Include="src\Utils.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Algorithm\DLXSolver.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -111,6 +114,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Algorithm\DLXSolver.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
