@@ -22,21 +22,21 @@ void DLXSolver::link(int r, int c) {
 
     nodes[p].U = c, nodes[p].D = down;
     // 把p链接在列链表的头部
-    nodes[down].U = p, nodes[c].D = p;
+    nodes[down].U = nodes[c].D = p;
 
     // 行链表加入这个节点
     if (!rowLink[r].head) {
+        rowLink[r].head = p;
         nodes[p].L = nodes[p].R = p;
     }
     else {
-        int last = rowLink[r].head;
-        // 把p加入行链表的头部
-        nodes[nodes[last].L].R = p;
-        nodes[p].L = nodes[last].L;
-        nodes[last].L = p;
-        nodes[p].R = last;
+        int last = nodes[rowLink[r].head].L;
+        nodes[p].R = rowLink[r].head;
+        nodes[p].L = last;
+        nodes[last].R = p;
+        nodes[rowLink[r].head].L = p;
     }
-    rowLink[r].head = p;
+
 }
 
 void DLXSolver::remove(int c) {
@@ -85,10 +85,11 @@ void DLXSolver::_dfs() {
     }
     int tar = nodes[0].R;
     for (int i = tar; i; i = nodes[i].R) {
-        if (colLink[i].sz < colLink[tar].sz) {
+        if (colLink[i].sz < colLink[tar].sz && colLink[i].sz != 0) {
             tar = i;
         }
     }
+    if (colLink[tar].sz == 0)return;
     remove(tar);
 
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {

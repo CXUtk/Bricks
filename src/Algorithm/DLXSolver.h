@@ -13,7 +13,7 @@ public:
 
 private:
     static constexpr int MAX_ROW = 100 * 8 * 105;
-    static constexpr int MAX_COL = 105;
+    static constexpr int MAX_COL = 250;
 
     // 双向十字链表
     struct DLXNode {

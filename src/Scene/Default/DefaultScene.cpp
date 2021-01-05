@@ -14,15 +14,16 @@
 
 DefaultScene::DefaultScene() {
     _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
-    Brick o1(3, 5,
-        "...OO"
-        ".O.OO"
-        "OOOO.");
-    Brick o2(4, 4,
-        ".O.."
-        "OOO."
-        ".OOO"
-        "..O.");
+    Brick o1(5, 3,
+        "OOO"
+        "..O"
+        ".OO"
+        ".O."
+        ".O.");
+    Brick o2(3, 3,
+        ".O."
+        "OOO"
+        ".O.");
     Brick o3(5, 6,
         "O....."
         "O....."
@@ -40,7 +41,13 @@ DefaultScene::DefaultScene() {
         ".O..."
         ".OO.."
         "..OOO");
-    randomGenerate();
+    // randomGenerate();
+    for (int i = 0; i < 10; i++) {
+        _bricks.push_back(o1);
+    }
+    //_bricks.push_back(o2);
+    generateBrickTextures();
+
     //_bricks.push_back(o1);
     //_bricks.push_back(o2);
     //_bricks.push_back(o3);
@@ -50,23 +57,26 @@ DefaultScene::DefaultScene() {
     //_bricks.push_back(o5);
     //_bricks.push_back(o5);
     //_bricks.push_back(o5);
-    //generateBrickTextures();
+    ////generateBrickTextures();
     //Brick b;
-    //b.m = 10;
-    //b.n = 5;
+    //b.m = 11;
+    //b.n = 11;
     //b.S = 0;
-    //for (int i = 0; i < 50; i++)
+    //for (int i = 0; i < 121; i++)
     //    b.S.set(i);
     //_bricks.push_back(b);
-    //_bricks.push_back(b);
+    //// _bricks.push_back(b);
     //generateBrickTextures();
     /*  randomGenerate();*/
+
+
+
     for (int i = 0; i < _bricks.size(); i++) {
         _cnt[i] = 1;
     }
 
     auto time = glfwGetTime();
-    //dfs(0, _bricks);
+    // dfs(0, _bricks);
     solve();
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
     printf("%lf seconds\n", glfwGetTime() - time);
@@ -189,6 +199,7 @@ void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
     }
     int r = _board->getRows(), c = _board->getCols();
     Brick b = bricks[x];
+    b.gBit();
 
     // 剪枝1：如果剩余空间的未放置方块最大大小小于这个块的大小，剪掉
     //if (!_board->testCanPlace(b)) return;
@@ -222,7 +233,7 @@ void DefaultScene::solve() {
     printf("Number of bricks: %d\n", n);
 
     // 列号 1 ~ n 是砖块的ID，n + 1 ~ n + 100 是格子ID约束
-    solver = new DLXSolver(n * 8 * 100, n + 100, n);
+    solver = new DLXSolver(n * 8 * 100, n + Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE, n);
     // 储存格式：0-7位存砖块ID，8-11位存，12-32存坐标
     std::map<int, int> idMap;
     int tot = 0;
@@ -246,7 +257,7 @@ void DefaultScene::solve() {
 
                         auto res = b.G << id;
                         solver->link(tot, 1 + i);
-                        for (int l = 0; l < 100; l++) {
+                        for (int l = 0; l < Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE; l++) {
                             if (res.test(l)) {
                                 solver->link(tot, l + n + 1);
                             }
