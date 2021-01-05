@@ -49,7 +49,7 @@ void DLXSolver::remove(int c) {
             // 删除其垂直链表，但是水平链表不动
             nodes[nodes[j].U].D = nodes[j].D;
             nodes[nodes[j].D].U = nodes[j].U;
-            colLink[c].sz--;
+            colLink[nodes[j].col].sz--;
         }
     }
 }
@@ -61,7 +61,7 @@ void DLXSolver::recover(int c) {
             // 恢复垂直链表
             nodes[nodes[j].U].D = j;
             nodes[nodes[j].D].U = j;
-            colLink[c].sz++;
+            colLink[nodes[j].col].sz++;
         }
     }
     nodes[nodes[c].L].R = c;
@@ -90,6 +90,7 @@ void DLXSolver::_dfs() {
         }
     }
     remove(tar);
+
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
         ans[top++] = nodes[i].row;
         for (int j = nodes[i].R; j != i; j = nodes[j].R) remove(nodes[j].col);

@@ -60,7 +60,7 @@ DefaultScene::DefaultScene() {
     //_bricks.push_back(b);
     //_bricks.push_back(b);
     //generateBrickTextures();
-  /*  randomGenerate();*/
+    /*  randomGenerate();*/
     for (int i = 0; i < _bricks.size(); i++) {
         _cnt[i] = 1;
     }
@@ -343,15 +343,15 @@ void DefaultScene::genBrick() {
         }
     }
     brick.gBit();
-    //for (int i = 0; i < 8; i++) {
-    //    int r = mt() % 8;
-    //    if (r >> 2 & 1) {
-    //        brick = brick.flip();
-    //    }
-    //    for (int j = 0; j < (r & 3); j++) {
-    //        brick = brick.rotateClockwise();
-    //    }
-    //}
+    for (int i = 0; i < 8; i++) {
+        int r = mt() % 8;
+        if (r >> 2 & 1) {
+            brick = brick.flip();
+        }
+        for (int j = 0; j < (r & 3); j++) {
+            brick = brick.rotateClockwise();
+        }
+    }
     _bricks.push_back(brick);
 }
 
