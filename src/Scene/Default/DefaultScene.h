@@ -28,5 +28,7 @@ private:
     void genBrick();
     bool checkRemain();
     void dfsCut(int r, int c);
+
     void dfs(int x, std::vector<Brick>& bricks);
+    void solve();
 };

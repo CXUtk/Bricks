@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "ImUI/ImUI.h"
 #include "Utils.h"
+#include "Algorithm/DLXSolver.h"
 #include <glm/gtx/transform.hpp>
 
 #include <random>
@@ -49,13 +50,24 @@ DefaultScene::DefaultScene() {
     //_bricks.push_back(o5);
     //_bricks.push_back(o5);
     //_bricks.push_back(o5);
+    //generateBrickTextures();
+    //Brick b;
+    //b.m = 10;
+    //b.n = 5;
+    //b.S = 0;
+    //for (int i = 0; i < 50; i++)
+    //    b.S.set(i);
+    //_bricks.push_back(b);
+    //_bricks.push_back(b);
+    //generateBrickTextures();
+  /*  randomGenerate();*/
     for (int i = 0; i < _bricks.size(); i++) {
         _cnt[i] = 1;
     }
 
     auto time = glfwGetTime();
     //dfs(0, _bricks);
-
+    solve();
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
     printf("%lf seconds\n", glfwGetTime() - time);
     Brick test(4, 4,
@@ -202,6 +214,74 @@ void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
 }
 
 
+DLXSolver* solver;
+
+void DefaultScene::solve() {
+
+    int n = _bricks.size();
+    printf("Number of bricks: %d\n", n);
+
+    // 列号 1 ~ n 是砖块的ID，n + 1 ~ n + 100 是格子ID约束
+    solver = new DLXSolver(n * 8 * 100, n + 100, n);
+    // 储存格式：0-7位存砖块ID，8-11位存，12-32存坐标
+    std::map<int, int> idMap;
+    int tot = 0;
+
+    for (int i = 0; i < _bricks.size(); i++) {
+        int col = 1 + i;
+        Brick b = _bricks[i];
+        b.gBit();
+
+        for (int j = 0; j < 2; j++) {
+            for (int k = 0; k < 4; k++) {
+                for (int r = 0; r <= Board::MAX_BOARD_SIZE - b.n; r++) {
+                    for (int c = 0; c <= Board::MAX_BOARD_SIZE - b.m; c++) {
+                        int id = r * Board::MAX_BOARD_SIZE + c;
+                        int info = i;
+                        info <<= 3;
+                        info |= ((j << 2) | k);
+                        info <<= 20;
+                        info |= id;
+                        idMap[++tot] = info;
+
+                        auto res = b.G << id;
+                        solver->link(tot, 1 + i);
+                        for (int l = 0; l < 100; l++) {
+                            if (res.test(l)) {
+                                solver->link(tot, l + n + 1);
+                            }
+                        }
+                    }
+                }
+                b = b.rotateClockwise();
+            }
+            b = b.flip();
+        }
+    }
+    auto  res = solver->solve();
+    for (auto a : res) {
+        int info = idMap[a];
+        int id = info & ((1 << 20) - 1);
+        int r = id / Board::MAX_BOARD_SIZE;
+        int c = id % Board::MAX_BOARD_SIZE;
+        info >>= 20;
+        int state = info & 7;
+        info >>= 3;
+        int x = info & 0xff;
+        Brick b = _bricks[x];
+        if (state >> 2 & 1) {
+            b = b.flip();
+        }
+        for (int i = 0; i < (state & 3); i++) {
+            b = b.rotateClockwise();
+        }
+        _board->place(b, glm::ivec2(r, c), x, TileType::BRICK);
+    }
+
+    delete solver;
+}
+
+
 
 void DefaultScene::randomGenerate() {
     mt.seed(19284321);
@@ -262,15 +342,16 @@ void DefaultScene::genBrick() {
             }
         }
     }
-    for (int i = 0; i < 8; i++) {
-        int r = mt() % 8;
-        if (r >> 2 & 1) {
-            brick = brick.flip();
-        }
-        for (int j = 0; j < (r & 3); j++) {
-            brick = brick.rotateClockwise();
-        }
-    }
+    brick.gBit();
+    //for (int i = 0; i < 8; i++) {
+    //    int r = mt() % 8;
+    //    if (r >> 2 & 1) {
+    //        brick = brick.flip();
+    //    }
+    //    for (int j = 0; j < (r & 3); j++) {
+    //        brick = brick.rotateClockwise();
+    //    }
+    //}
     _bricks.push_back(brick);
 }
 
@@ -297,7 +378,7 @@ void DefaultScene::dfsCut(int r, int c) {
         if (vis[node.r][node.c] == 2) continue;
         vis[node.r][node.c] = 2;
         cnt++;
-        if (cnt == 14) {
+        if (cnt == 20) {
             break;
         }
         for (int i = 0; i < 4; i++) {
