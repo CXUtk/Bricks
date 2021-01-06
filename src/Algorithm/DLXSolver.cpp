@@ -72,7 +72,7 @@ void DLXSolver::recover(int c) {
 std::vector<int> DLXSolver::solve() {
     top = 0;
     found = false;
-    _dfs();
+    _dfs(0);
     std::vector<int> res;
     for (int i = 0; i < top; i++) res.push_back(ans[i]);
     printf("Finished\n");
@@ -89,39 +89,41 @@ std::vector<int> DLXSolver::getIntermidiateResult() {
     return res;
 }
 
-void DLXSolver::_dfs() {
+void DLXSolver::_dfs(int numHold) {
     if (found) return;
-    if (!nodes[0].R || nodes[0].R > hold) {
+    if (!nodes[0].R) {
         found = true;
         printf("Solution Found!\n");
         return;
     }
+
     int tar = nodes[0].R;
+    std::vector<int> removed;
     for (int i = tar; i; i = nodes[i].R) {
+        if (sz[i] == 0) {
+            remove(i);
+            removed.push_back(i);
+            continue;
+        }
         if (sz[i] < sz[tar]) {
             tar = i;
         }
     }
-
+    numHold += removed.size();
+    if (numHold > hold) return;
     //if (!sz[tar])return;
     remove(tar);
     // printf("%d\n", tar);
+
+    int lastColor = -1;
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
-        //std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         _mutexLock.lock();
         ans[top++] = nodes[i].row;
         _mutexLock.unlock();
 
-        //int info = (*_idMap)[nodes[i].row];
-        //int id = info & ((1 << 20) - 1);
-        //int r = id / Board::MAX_BOARD_SIZE;
-        //int c = id % Board::MAX_BOARD_SIZE;
-        //info >>= 20;
-        //int state = info & 7;
-        //info >>= 3;
-        //int num = info & 0xff;
         for (int j = nodes[i].R; j != i; j = nodes[j].R) remove(nodes[j].col);
-        _dfs();
+        _dfs(numHold);
         if (found) return;
 
         _mutexLock.lock();
@@ -129,10 +131,9 @@ void DLXSolver::_dfs() {
         _mutexLock.unlock();
 
         for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
-
     }
     recover(tar);
-    //for (auto r : removed) {
-    //    recover(r);
-    //}
+    for (auto r : removed) {
+        recover(r);
+    }
 }

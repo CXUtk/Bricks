@@ -18,6 +18,20 @@ struct Brick {
     Brick(int n, int m);
     Brick(int n, int m, const char* shape);
     Brick(int n, int m, std::bitset<128> set);
+
+    bool operator==(const Brick& other) const {
+        return n == other.n && m == other.m && S == other.S;
+    }
+
+    bool operator<(const Brick& other) const {
+        return S.to_string() < other.S.to_string();
+    }
+
+    size_t operator()(const Brick& b) const noexcept {
+        auto fn = std::hash<std::bitset<128>>();
+        return fn(b.S) + n + m;
+    }
+
     bool get(int r, int c) const {
         return S.test(r * m + c);
     }
@@ -39,7 +53,7 @@ struct Tile {
 
 class Board {
 public:
-    static constexpr int MAX_BOARD_SIZE = 10;
+    static constexpr int MAX_BOARD_SIZE = 11;
     static constexpr int BLOCK_SIZE = 32;
     static constexpr int BLOCK_EDGE = 1;
 
