@@ -1,8 +1,11 @@
 ﻿#include "DLXSolver.h"
+#include <Scene\Default\Strucures\Board.h>
+
+std::mutex _mutexLock;
 
 DLXSolver::DLXSolver(int r, int c, int hold) :rows(r), cols(c), hold(hold) {
-    memset(colLink, 0, sizeof(ColLink) * (c + 1));
-    memset(rowLink, 0, sizeof(RowLink) * (r + 1));
+    memset(sz, 0, sizeof(ColLink) * (c + 1));
+    memset(head, 0, sizeof(RowLink) * (r + 1));
     memset(nodes, 0, sizeof(DLXNode) * (r * c + 5));
     for (int i = 0; i <= c; i++) {
         nodes[i].R = i + 1, nodes[i].L = i - 1;
@@ -18,23 +21,21 @@ DLXSolver::DLXSolver(int r, int c, int hold) :rows(r), cols(c), hold(hold) {
 
 void DLXSolver::link(int r, int c) {
     int p = newNode(r, c), down = nodes[c].D;
-    colLink[c].sz++;
+    sz[c]++;
 
     nodes[p].U = c, nodes[p].D = down;
     // 把p链接在列链表的头部
     nodes[down].U = nodes[c].D = p;
 
     // 行链表加入这个节点
-    if (!rowLink[r].head) {
-        rowLink[r].head = p;
+    if (!head[r]) {
+        head[r] = p;
         nodes[p].L = nodes[p].R = p;
     }
     else {
-        int last = nodes[rowLink[r].head].L;
-        nodes[p].R = rowLink[r].head;
-        nodes[p].L = last;
-        nodes[last].R = p;
-        nodes[rowLink[r].head].L = p;
+        int last = nodes[head[r]].L;
+        nodes[p].R = head[r], nodes[p].L = last;
+        nodes[last].R = p, nodes[head[r]].L = p;
     }
 
 }
@@ -49,7 +50,7 @@ void DLXSolver::remove(int c) {
             // 删除其垂直链表，但是水平链表不动
             nodes[nodes[j].U].D = nodes[j].D;
             nodes[nodes[j].D].U = nodes[j].U;
-            colLink[nodes[j].col].sz--;
+            sz[nodes[j].col]--;
         }
     }
 }
@@ -61,7 +62,7 @@ void DLXSolver::recover(int c) {
             // 恢复垂直链表
             nodes[nodes[j].U].D = j;
             nodes[nodes[j].D].U = j;
-            colLink[nodes[j].col].sz++;
+            sz[nodes[j].col]++;
         }
     }
     nodes[nodes[c].L].R = c;
@@ -74,6 +75,17 @@ std::vector<int> DLXSolver::solve() {
     _dfs();
     std::vector<int> res;
     for (int i = 0; i < top; i++) res.push_back(ans[i]);
+    printf("Finished\n");
+    return res;
+}
+
+std::vector<int> DLXSolver::getIntermidiateResult() {
+    std::vector<int> res;
+    _mutexLock.lock();
+    for (int i = 0; i < top; i++) {
+        res.push_back(ans[i]);
+    }
+    _mutexLock.unlock();
     return res;
 }
 
@@ -81,24 +93,46 @@ void DLXSolver::_dfs() {
     if (found) return;
     if (!nodes[0].R || nodes[0].R > hold) {
         found = true;
+        printf("Solution Found!\n");
         return;
     }
     int tar = nodes[0].R;
     for (int i = tar; i; i = nodes[i].R) {
-        if (colLink[i].sz < colLink[tar].sz && colLink[i].sz != 0) {
+        if (sz[i] < sz[tar]) {
             tar = i;
         }
     }
-    if (colLink[tar].sz == 0)return;
-    remove(tar);
 
+    //if (!sz[tar])return;
+    remove(tar);
+    // printf("%d\n", tar);
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
+        //std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        _mutexLock.lock();
         ans[top++] = nodes[i].row;
+        _mutexLock.unlock();
+
+        //int info = (*_idMap)[nodes[i].row];
+        //int id = info & ((1 << 20) - 1);
+        //int r = id / Board::MAX_BOARD_SIZE;
+        //int c = id % Board::MAX_BOARD_SIZE;
+        //info >>= 20;
+        //int state = info & 7;
+        //info >>= 3;
+        //int num = info & 0xff;
         for (int j = nodes[i].R; j != i; j = nodes[j].R) remove(nodes[j].col);
         _dfs();
         if (found) return;
-        for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
+
+        _mutexLock.lock();
         top--;
+        _mutexLock.unlock();
+
+        for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
+
     }
     recover(tar);
+    //for (auto r : removed) {
+    //    recover(r);
+    //}
 }

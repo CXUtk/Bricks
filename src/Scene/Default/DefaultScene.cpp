@@ -12,14 +12,26 @@
 #include <algorithm>
 
 
+DLXSolver* solver;
+
 DefaultScene::DefaultScene() {
-    _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
+    _board = std::make_shared<Board>(Board::MAX_BOARD_SIZE, Board::MAX_BOARD_SIZE, glm::vec2(250, 250));
+    Brick fill(1, 1, "O");
     Brick o1(5, 3,
         "OOO"
         "..O"
         ".OO"
         ".O."
         ".O.");
+    Brick orz(2, 2,
+        ".O"
+        "OO");
+    Brick full(5, 5,
+        "OOOOO"
+        "OOOOO"
+        "OOOOO"
+        "OOO.O"
+        "OO...");
     Brick o2(3, 3,
         ".O."
         "OOO"
@@ -41,12 +53,20 @@ DefaultScene::DefaultScene() {
         ".O..."
         ".OO.."
         "..OOO");
-    // randomGenerate();
-    for (int i = 0; i < 10; i++) {
-        _bricks.push_back(o1);
+    randomGenerate();
+    /*int curSum = 0;
+    for (int i = 0; i < 4; i++) {
+        _bricks.push_back(orz);
+        curSum += orz.S.count();
     }
+    int need = Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE - curSum;
+    for (int i = 0; i < need; i++) {
+        _bricks.push_back(fill);
+        curSum += fill.S.count();
+    }*/
+
     //_bricks.push_back(o2);
-    generateBrickTextures();
+   // generateBrickTextures();
 
     //_bricks.push_back(o1);
     //_bricks.push_back(o2);
@@ -91,6 +111,8 @@ DefaultScene::DefaultScene() {
 }
 
 DefaultScene::~DefaultScene() {
+    delete solver;
+    delete _solverThread;
 }
 
 void DefaultScene::update() {
@@ -135,9 +157,47 @@ void DefaultScene::draw() {
     auto& game = Game::GetInstance();
     auto input = game.getInputManager();
 
+    auto res = solver->getIntermidiateResult();
+    for (auto a : res) {
+        int info = _idMap[a];
+        int id = info & ((1 << 20) - 1);
+        int r = id / Board::MAX_BOARD_SIZE;
+        int c = id % Board::MAX_BOARD_SIZE;
+        info >>= 20;
+        int state = info & 7;
+        info >>= 3;
+        int x = info & 0xff;
+        Brick b = _bricks[x];
+        if (state >> 2 & 1) {
+            b = b.flip();
+        }
+        for (int i = 0; i < (state & 3); i++) {
+            b = b.rotateClockwise();
+        }
+        _board->place(b, glm::ivec2(r, c), x, TileType::BRICK);
+    }
+
     _board->draw();
     _board->clearShadow();
 
+    for (auto a : res) {
+        int info = _idMap[a];
+        int id = info & ((1 << 20) - 1);
+        int r = id / Board::MAX_BOARD_SIZE;
+        int c = id % Board::MAX_BOARD_SIZE;
+        info >>= 20;
+        int state = info & 7;
+        info >>= 3;
+        int x = info & 0xff;
+        Brick b = _bricks[x];
+        if (state >> 2 & 1) {
+            b = b.flip();
+        }
+        for (int i = 0; i < (state & 3); i++) {
+            b = b.rotateClockwise();
+        }
+        _board->remove(b, glm::ivec2(r, c));
+    }
 
     // Gap: 64 + 10
     int startX = 32;
@@ -225,7 +285,6 @@ void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
 }
 
 
-DLXSolver* solver;
 
 void DefaultScene::solve() {
 
@@ -233,9 +292,9 @@ void DefaultScene::solve() {
     printf("Number of bricks: %d\n", n);
 
     // 列号 1 ~ n 是砖块的ID，n + 1 ~ n + 100 是格子ID约束
-    solver = new DLXSolver(n * 8 * 100, n + Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE, n);
+    solver = new DLXSolver(n * 8 * Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE, n + Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE, n);
     // 储存格式：0-7位存砖块ID，8-11位存，12-32存坐标
-    std::map<int, int> idMap;
+
     int tot = 0;
 
     for (int i = 0; i < _bricks.size(); i++) {
@@ -253,7 +312,7 @@ void DefaultScene::solve() {
                         info |= ((j << 2) | k);
                         info <<= 20;
                         info |= id;
-                        idMap[++tot] = info;
+                        _idMap[++tot] = info;
 
                         auto res = b.G << id;
                         solver->link(tot, 1 + i);
@@ -269,27 +328,11 @@ void DefaultScene::solve() {
             b = b.flip();
         }
     }
-    auto  res = solver->solve();
-    for (auto a : res) {
-        int info = idMap[a];
-        int id = info & ((1 << 20) - 1);
-        int r = id / Board::MAX_BOARD_SIZE;
-        int c = id % Board::MAX_BOARD_SIZE;
-        info >>= 20;
-        int state = info & 7;
-        info >>= 3;
-        int x = info & 0xff;
-        Brick b = _bricks[x];
-        if (state >> 2 & 1) {
-            b = b.flip();
-        }
-        for (int i = 0; i < (state & 3); i++) {
-            b = b.rotateClockwise();
-        }
-        _board->place(b, glm::ivec2(r, c), x, TileType::BRICK);
-    }
-
-    delete solver;
+    //solver->solve();
+    _solverThread = new std::thread([]() {
+        solver->solve();
+        });
+    // 传入idMap为了追踪砖块信息
 }
 
 

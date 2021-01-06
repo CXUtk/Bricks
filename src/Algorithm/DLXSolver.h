@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <memory>
 #include <vector>
+#include <map>
+#include <mutex>
 struct DLXSolver {
 public:
     DLXSolver(int r, int c, int hold);
@@ -10,6 +12,7 @@ public:
     void remove(int c);
     void recover(int c);
     std::vector<int>  solve();
+    std::vector<int> getIntermidiateResult();
 
 private:
     static constexpr int MAX_ROW = 100 * 8 * 105;
@@ -28,12 +31,15 @@ private:
     };
     int rows, cols, tot;
     DLXNode nodes[MAX_ROW * MAX_COL];
-    ColLink colLink[MAX_COL];
-    RowLink rowLink[MAX_ROW];
+    int sz[MAX_COL];
+    int head[MAX_ROW];
     int ans[MAX_ROW], top;
     bool found;
+
+
     // 如果使用完所有的砖块也可以结束
     int hold;
+
 
 
     int newNode(int r, int c) {

@@ -7,14 +7,15 @@
 static glm::vec3 colors[] = {
     glm::vec3(1, 0, 1),
     glm::vec3(1, 0, 0),
-    glm::vec3(1, 0.8, 0),
-    glm::vec3(0, 1, 0),
+    glm::vec3(0.3, 0.7, 0.5),
     glm::vec3(0, 0.9, 0),
     glm::vec3(0, 0.8, 0),
-    glm::vec3(0, 1, 1),
+    glm::vec3(1, 0.8, 0),
+    glm::vec3(0, 1, 0),
     glm::vec3(0, 0.9, 0.9),
     glm::vec3(0.3, 0.8, 0.1),
-    glm::vec3(0.3, 0.7, 0.5),
+    glm::vec3(0, 1, 1),
+
 };
 
 Brick::Brick(int n, int m) : n(n), m(m) {
@@ -82,6 +83,7 @@ void Brick::gBit() {
         }
     }
 }
+
 
 
 

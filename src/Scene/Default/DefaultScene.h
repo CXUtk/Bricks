@@ -2,6 +2,9 @@
 #include "Scene/Scene.h"
 #include "Strucures/Board.h"
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <map>
 
 class DefaultScene : public Scene {
 public:
@@ -20,7 +23,10 @@ private:
     int _handBrickID;
     std::vector<Brick> _bricks;
     std::vector<std::shared_ptr<Texture2D>> _textures;
+    std::map<int, int> _idMap;
     int _cnt[MAX_BLOCKS];
+
+    std::thread* _solverThread;
 
     void randomGenerate();
     void generateBrickTextures();
