@@ -8,6 +8,7 @@ struct DLXSolver {
 public:
     DLXSolver(int r, int c, int hold);
 
+    bool isFinished() const;
     void link(int r, int c);
     void remove(int c);
     void recover(int c);
@@ -34,7 +35,7 @@ private:
     int sz[MAX_COL];
     int head[MAX_ROW];
     int ans[MAX_ROW], top;
-    bool found;
+    bool found, finished;
 
 
     // 如果使用完所有的砖块也可以结束

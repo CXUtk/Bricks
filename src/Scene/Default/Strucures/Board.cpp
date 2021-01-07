@@ -352,6 +352,14 @@ void Board::remove(const Brick& brick, glm::ivec2 pos) {
     }
 }
 
+void Board::clear() {
+    for (int i = 0; i < MAX_BOARD_SIZE; i++) {
+        for (int j = 0; j < MAX_BOARD_SIZE; j++) {
+            setTile(i, j, TileType::EMPTY, -1);
+        }
+    }
+}
+
 void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vector<glm::vec2>& edges) {
     glm::vec2 bl = glm::vec2(_topLeft.x + c * BLOCK_SIZE, _topLeft.y + (r + 1) * BLOCK_SIZE);
     auto& game = Game::GetInstance();

@@ -119,11 +119,13 @@ DefaultScene::DefaultScene() {
 
     _handBrick = test;
     _handBrickID = -1;
+    _oldFinished = false;
 }
 
 DefaultScene::~DefaultScene() {
     delete solver;
-    delete _solverThread;
+    if (_solverThread)
+        delete _solverThread;
 }
 
 void DefaultScene::update() {
@@ -168,47 +170,15 @@ void DefaultScene::draw() {
     auto& game = Game::GetInstance();
     auto input = game.getInputManager();
 
-    auto res = solver->getIntermidiateResult();
-    for (auto a : res) {
-        int info = _idMap[a];
-        int id = info & ((1 << 20) - 1);
-        int r = id / Board::MAX_BOARD_SIZE;
-        int c = id % Board::MAX_BOARD_SIZE;
-        info >>= 20;
-        int state = info & 7;
-        info >>= 3;
-        int x = info & 0xff;
-        Brick b = _bricks[x];
-        if (state >> 2 & 1) {
-            b = b.flip();
-        }
-        for (int i = 0; i < (state & 3); i++) {
-            b = b.rotateClockwise();
-        }
-        _board->place(b, glm::ivec2(r, c), x, TileType::BRICK);
+
+    if (!solver->isFinished() || (!_oldFinished && solver->isFinished())) {
+        _oldFinished = solver->isFinished();
+        applySolverToBoard();
     }
+
 
     _board->draw();
     _board->clearShadow();
-
-    for (auto a : res) {
-        int info = _idMap[a];
-        int id = info & ((1 << 20) - 1);
-        int r = id / Board::MAX_BOARD_SIZE;
-        int c = id % Board::MAX_BOARD_SIZE;
-        info >>= 20;
-        int state = info & 7;
-        info >>= 3;
-        int x = info & 0xff;
-        Brick b = _bricks[x];
-        if (state >> 2 & 1) {
-            b = b.flip();
-        }
-        for (int i = 0; i < (state & 3); i++) {
-            b = b.rotateClockwise();
-        }
-        _board->remove(b, glm::ivec2(r, c));
-    }
 
     // Gap: 64 + 10
     int startX = 32;
@@ -232,6 +202,17 @@ void DefaultScene::draw() {
             startY -= 74;
         }
     }
+
+
+    if (ImUI::GetInstance().pure_button(glm::vec2(32, 30), glm::vec2(120, 60), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0))) {
+        _board->clear();
+        for (int i = 0; i < _bricks.size(); i++) {
+            _cnt[i] = 1;
+        }
+    }
+    if (ImUI::GetInstance().pure_button(glm::vec2(game.getWidth() - 120 - 32, 30), glm::vec2(120, 60), glm::vec3(1, 0.5, 0.5), glm::vec3(1, 0, 0))) {
+
+    }
     //std::vector<glm::vec2> lines;
     //lines.push_back(glm::vec2(0, 0));
     //lines.push_back(glm::vec2(500, 500));
@@ -240,6 +221,7 @@ void DefaultScene::draw() {
 
      // Input end
     input->endInput();
+
 }
 
 
@@ -467,5 +449,28 @@ void DefaultScene::dfsCut(int r, int c) {
                 vis[nr][nc] != 1) continue;
             Q.push(Node(nr, nc, mt() % 10000 + cnt * 1000));
         }
+    }
+}
+
+void DefaultScene::applySolverToBoard() {
+    _board->clear();
+    auto res = solver->getIntermidiateResult();
+    for (auto a : res) {
+        int info = _idMap[a];
+        int id = info & ((1 << 20) - 1);
+        int r = id / Board::MAX_BOARD_SIZE;
+        int c = id % Board::MAX_BOARD_SIZE;
+        info >>= 20;
+        int state = info & 7;
+        info >>= 3;
+        int x = info & 0xff;
+        Brick b = _bricks[x];
+        if (state >> 2 & 1) {
+            b = b.flip();
+        }
+        for (int i = 0; i < (state & 3); i++) {
+            b = b.rotateClockwise();
+        }
+        _board->place(b, glm::ivec2(r, c), x, TileType::BRICK);
     }
 }

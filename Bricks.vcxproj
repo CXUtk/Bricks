@@ -196,6 +196,8 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="README.md" />
+    <None Include="Resources\Bricks\README.md" />
+    <None Include="Resources\Bricks\test.in" />
     <None Include="Resources\Shaders\color.frag" />
     <None Include="Resources\Shaders\color.vs" />
     <None Include="Resources\Shaders\default.vs" />

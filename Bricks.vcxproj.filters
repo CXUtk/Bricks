@@ -129,6 +129,8 @@
     <None Include=".gitignore" />
     <None Include=".gitattributes" />
     <None Include="README.md" />
+    <None Include="Resources\Bricks\test.in" />
+    <None Include="Resources\Bricks\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="test233.gif">

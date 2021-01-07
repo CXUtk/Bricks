@@ -25,6 +25,7 @@ private:
     std::vector<std::shared_ptr<Texture2D>> _textures;
     std::map<int, int> _idMap;
     int _cnt[MAX_BLOCKS];
+    bool _oldFinished;
 
     std::thread* _solverThread;
 
@@ -34,6 +35,8 @@ private:
     void genBrick();
     bool checkRemain();
     void dfsCut(int r, int c);
+
+    void applySolverToBoard();
 
     void dfs(int x, std::vector<Brick>& bricks);
     void solve();

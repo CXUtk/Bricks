@@ -16,7 +16,15 @@ DLXSolver::DLXSolver(int r, int c, int hold) :rows(r), cols(c), hold(hold) {
     tot = c;
 
     top = 0;
-    found = false;
+    found = false, finished = false;
+}
+
+bool DLXSolver::isFinished() const {
+    bool f;
+    _mutexLock.lock();
+    f = finished;
+    _mutexLock.unlock();
+    return f;
 }
 
 void DLXSolver::link(int r, int c) {
@@ -72,9 +80,13 @@ void DLXSolver::recover(int c) {
 std::vector<int> DLXSolver::solve() {
     top = 0;
     found = false;
+    finished = false;
     _dfs();
     std::vector<int> res;
     for (int i = 0; i < top; i++) res.push_back(ans[i]);
+    _mutexLock.lock();
+    finished = true;
+    _mutexLock.unlock();
     printf("Finished\n");
     return res;
 }

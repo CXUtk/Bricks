@@ -74,6 +74,7 @@ public:
     void update();
     void draw();
     void remove(const Brick& brick, glm::ivec2 pos);
+    void clear();
 
     int getRows() const { return _rows; }
     int getCols() const { return _columns; }
