@@ -31,12 +31,10 @@ Brick::Brick(int n, int m, const char* shape) : n(n), m(m) {
             }
         }
     }
-    gBit();
 }
 
 Brick::Brick(int n, int m, std::bitset<128> set) : n(n), m(m) {
     S = set;
-    gBit();
 }
 
 Brick Brick::flip() const {
@@ -51,7 +49,6 @@ Brick Brick::flip() const {
             }
         }
     }
-    out.gBit();
     return out;
 }
 
@@ -67,23 +64,22 @@ Brick Brick::rotateClockwise() const {
             }
         }
     }
-    out.gBit();
     return out;
 }
 
-void Brick::gBit() {
-    G = 0;
+std::bitset<128> Brick::gBit(int colNum) const {
+    std::bitset<128> G = 0;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             int id = i * m + j;
             if (S.test(id)) {
-                int id2 = i * Board::MAX_BOARD_SIZE + j;
+                int id2 = i * colNum + j;
                 G.set(id2);
             }
         }
     }
+    return G;
 }
-
 
 
 
@@ -143,20 +139,32 @@ std::shared_ptr<Texture2D> Brick::generateTexture(glm::vec3 color) const {
 
 
 Board::Board(int rows, int columns, glm::vec2 center) :_rows(rows), _columns(columns), _center(center) {
-    memset(tiles, 0, sizeof(tiles));
-    memset(shadow, 0, sizeof(shadow));
+    tiles = new Tile[_rows * _columns];
+    shadow = new int[_rows * _columns];
+    memset(tiles, 0, sizeof(Tile) * _rows * _columns);
+    memset(shadow, 0, sizeof(int) * _rows * _columns);
     S = 0;
 }
 
 void Board::place(const Brick& brick, glm::ivec2 pos, int id, TileType type) {
-    for (int i = pos.x; i < std::min(pos.x + brick.n, MAX_BOARD_SIZE); i++) {
-        for (int j = pos.y; j < std::min(pos.y + brick.m, MAX_BOARD_SIZE); j++) {
+    for (int i = pos.x; i < std::min(pos.x + brick.n, _rows); i++) {
+        for (int j = pos.y; j < std::min(pos.y + brick.m, _columns); j++) {
             int r = i - pos.x, c = j - pos.y;
             if (brick.get(r, c)) {
                 setTile(i, j, type, id);
             }
         }
     }
+}
+
+void Board::placeBit(std::bitset<128> bitset) {
+    assert((bitset & S) == 0);
+    S |= bitset;
+}
+
+void Board::unplaceBit(std::bitset<128> bitset) {
+    assert((S & bitset) == bitset);
+    S ^= bitset;
 }
 
 static int dr[4] = { 1, -1, 0, 0 };
@@ -173,8 +181,8 @@ int Board::unplace(glm::ivec2 pos) {
         for (int i = 0; i < 4; i++) {
             int nr = p.x + dr[i];
             int nc = p.y + dc[i];
-            if (nr < 0 || nc < 0 || nr >= MAX_BOARD_SIZE || nc >= MAX_BOARD_SIZE
-                || tiles[nr][nc].type != TileType::BRICK || tiles[nr][nc].color != color)
+            if (nr < 0 || nc < 0 || nr >= _rows || nc >= _columns
+                || getTile(nr, nc).type != TileType::BRICK || getTile(nr, nc).color != color)
                 continue;
             Q.push(glm::ivec2(nr, nc));
         }
@@ -183,20 +191,19 @@ int Board::unplace(glm::ivec2 pos) {
 }
 
 void Board::placeShadow(const Brick& brick, glm::ivec2 pos, int color) {
-    for (int i = pos.x; i < std::min(pos.x + brick.n, MAX_BOARD_SIZE); i++) {
-        for (int j = pos.y; j < std::min(pos.y + brick.m, MAX_BOARD_SIZE); j++) {
+    for (int i = pos.x; i < std::min(pos.x + brick.n, _rows); i++) {
+        for (int j = pos.y; j < std::min(pos.y + brick.m, _columns); j++) {
             int r = i - pos.x, c = j - pos.y;
             if (brick.get(r, c)) {
-                shadow[i][j] = color;
+                shadow[i * _columns + j] = color;
             }
         }
     }
 }
 
 
-bool Board::canPlace(const Brick& brick, glm::ivec2 pos) {
-    if (pos.x + brick.n > MAX_BOARD_SIZE || pos.y + brick.m > MAX_BOARD_SIZE) return false;
-    return (S & (brick.G << (pos.x * MAX_BOARD_SIZE + pos.y))) == 0;
+bool Board::canPlace(std::bitset<128> bitset, glm::ivec2 pos) {
+    return (S & bitset) == 0;
     /*for (int i = pos.x; i < std::min(pos.x + brick.n, MAX_BOARD_SIZE); i++) {
         for (int j = pos.y; j < std::min(pos.y + brick.m, MAX_BOARD_SIZE); j++) {
             int r = i - pos.x, c = j - pos.y;
@@ -212,8 +219,8 @@ glm::ivec2 Board::getIndexFromMousePos(const Brick& brick, glm::vec2 pos) const 
 
     pos -= _topLeft;// glm::vec2(_topLeft.x + halfSize.x, _topLeft.y + halfSize.y);
 
-    int r = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.y / BLOCK_SIZE)));
-    int c = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.x / BLOCK_SIZE)));
+    int r = std::max(0, std::min(_rows - 1, (int)(pos.y / BLOCK_SIZE)));
+    int c = std::max(0, std::min(_columns - 1, (int)(pos.x / BLOCK_SIZE)));
     return glm::ivec2(r, c);
 }
 
@@ -221,16 +228,16 @@ glm::ivec2 Board::getShadowIndexFromMousePos(const Brick& brick, glm::vec2 pos) 
     auto halfSize = glm::ivec2(brick.m, brick.n) * 16;
     pos -= glm::vec2(_topLeft.x + halfSize.x, _topLeft.y + halfSize.y);
 
-    int r = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.y / BLOCK_SIZE)));
-    r = std::min(r, MAX_BOARD_SIZE - brick.n);
-    int c = std::max(0, std::min(MAX_BOARD_SIZE - 1, (int)(pos.x / BLOCK_SIZE)));
-    c = std::min(c, MAX_BOARD_SIZE - brick.m);
+    int r = std::max(0, std::min(_rows - 1, (int)(pos.y / BLOCK_SIZE)));
+    r = std::min(r, _rows - brick.n);
+    int c = std::max(0, std::min(_columns - 1, (int)(pos.x / BLOCK_SIZE)));
+    c = std::min(c, _columns - brick.m);
     return glm::ivec2(r, c);
 }
 
 bool Board::mouseInside(glm::vec2 mousePos) const {
-    return mousePos.x >= _topLeft.x && mousePos.x <= _topLeft.x + MAX_BOARD_SIZE * BLOCK_SIZE
-        && mousePos.y >= _topLeft.y && mousePos.y <= _topLeft.y + MAX_BOARD_SIZE * BLOCK_SIZE;
+    return mousePos.x >= _topLeft.x && mousePos.x <= _topLeft.x + _columns * BLOCK_SIZE
+        && mousePos.y >= _topLeft.y && mousePos.y <= _topLeft.y + _rows * BLOCK_SIZE;
 }
 
 
@@ -238,13 +245,13 @@ bool Board::mouseInside(glm::vec2 mousePos) const {
 //static int dr[4] = { 1, -1, 0, 0 };
 //static int dc[4] = { 0, 0, 1, -1 };
 // 0 代表空格子，1代表当前没被切割的格子，2代表当前被切割的格子
-static int vis[Board::MAX_BOARD_SIZE][Board::MAX_BOARD_SIZE];
+static int vis[100][100];
 bool Board::testCanPlace(const Brick& brick) const {
     memset(vis, 0, sizeof(vis));
 
-    for (int i = 0; i < MAX_BOARD_SIZE; i++) {
-        for (int j = 0; j < MAX_BOARD_SIZE; j++) {
-            if (tiles[i][j].type == TileType::BRICK || vis[i][j]) continue;
+    for (int i = 0; i < _rows; i++) {
+        for (int j = 0; j < _columns; j++) {
+            if (getTile(i, j).type == TileType::BRICK || vis[i][j]) continue;
             int minnR = i, minnC = j;
             int maxxR = i, maxxC = j;
             std::queue<glm::ivec2> Q;
@@ -261,8 +268,8 @@ bool Board::testCanPlace(const Brick& brick) const {
                 for (int i = 0; i < 4; i++) {
                     int nr = p.x + dr[i];
                     int nc = p.y + dc[i];
-                    if (nr < 0 || nc < 0 || nr >= MAX_BOARD_SIZE || nc >= MAX_BOARD_SIZE
-                        || tiles[nr][nc].type == TileType::BRICK || vis[nr][nc])
+                    if (nr < 0 || nc < 0 || nr >= _rows || nc >= _columns
+                        || getTile(nr, nc).type == TileType::BRICK || vis[nr][nc])
                         continue;
                     Q.push(glm::ivec2(nr, nc));
                 }
@@ -276,11 +283,11 @@ bool Board::testCanPlace(const Brick& brick) const {
 }
 
 int Board::checkID(glm::ivec2 pos) {
-    return tiles[pos.x][pos.y].type == TileType::EMPTY ? -1 : tiles[pos.x][pos.y].color;
+    return getTile(pos.x, pos.y).type == TileType::EMPTY ? -1 : getTile(pos.x, pos.y).color;
 }
 
 void Board::clearShadow() {
-    memset(shadow, 0, sizeof(shadow));
+    memset(shadow, 0, sizeof(int) * _rows * _columns);
 }
 
 void Board::update() {
@@ -292,10 +299,10 @@ void Board::draw() {
     auto& game = Game::GetInstance();
     game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f));
 
-    auto pos = glm::vec2(_topLeft.x, _topLeft.y + BLOCK_SIZE * MAX_BOARD_SIZE);
+    auto pos = glm::vec2(_topLeft.x, _topLeft.y + BLOCK_SIZE * _rows);
     auto height = game.getHeight();
     pos.y = height - pos.y;
-    game.getGraphics()->drawQuad(pos, glm::vec2(BLOCK_SIZE * MAX_BOARD_SIZE), glm::vec3(1, 1, 1));
+    game.getGraphics()->drawQuad(pos, glm::vec2(BLOCK_SIZE * _columns, BLOCK_SIZE * _rows), glm::vec3(1, 1, 1));
 
     std::vector<glm::vec2> lines;
     for (int i = 0; i <= _rows; i++) {
@@ -330,10 +337,11 @@ void Board::draw() {
     //game.getGraphics()->drawLines(edges, glm::vec3(0, 0, 0), 1);
     for (int i = 0; i < _rows; i++) {
         for (int j = 0; j < _columns; j++) {
-            if (shadow[i][j]) {
+            int s = getShadow(i, j);
+            if (s) {
                 glm::vec2 bl = glm::vec2(_topLeft.x + j * BLOCK_SIZE, _topLeft.y + (i + 1) * BLOCK_SIZE);
                 bl.y = height - bl.y;
-                auto color = (shadow[i][j] == 1) ? glm::vec3(0.5, 1, 0.5) : glm::vec3(1, 0.5, 0.5);
+                auto color = (s == 1) ? glm::vec3(0.5, 1, 0.5) : glm::vec3(1, 0.5, 0.5);
                 game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), color);
             }
         }
@@ -342,8 +350,8 @@ void Board::draw() {
 }
 
 void Board::remove(const Brick& brick, glm::ivec2 pos) {
-    for (int i = pos.x; i < std::min(pos.x + brick.n, MAX_BOARD_SIZE); i++) {
-        for (int j = pos.y; j < std::min(pos.y + brick.m, MAX_BOARD_SIZE); j++) {
+    for (int i = pos.x; i < std::min(pos.x + brick.n, _columns); i++) {
+        for (int j = pos.y; j < std::min(pos.y + brick.m, _rows); j++) {
             int r = i - pos.x, c = j - pos.y;
             if (brick.get(r, c)) {
                 setTile(i, j, TileType::EMPTY, -1);
@@ -353,8 +361,8 @@ void Board::remove(const Brick& brick, glm::ivec2 pos) {
 }
 
 void Board::clear() {
-    for (int i = 0; i < MAX_BOARD_SIZE; i++) {
-        for (int j = 0; j < MAX_BOARD_SIZE; j++) {
+    for (int i = 0; i < _rows; i++) {
+        for (int j = 0; j < _columns; j++) {
             setTile(i, j, TileType::EMPTY, -1);
         }
     }
@@ -369,48 +377,61 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vecto
     // 下，上，右，左
     static int dr[4] = { 1, -1, 0, 0 };
     static int dc[4] = { 0, 0, 1, -1 };
-    bool filled = tiles[r][c].type == TileType::BRICK;
+    auto& tile = getTile(r, c);
+    bool filled = tile.type == TileType::BRICK;
     if (filled) {
-
-        if (!shadow[r][c] && tiles[r][c].type == TileType::BRICK) {
-            game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), colors[tiles[r][c].color % 10]);
+        if (!getShadow(r, c) && tile.type == TileType::BRICK) {
+            game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), colors[tile.color % 10]);
         }
 
-        auto curTL = _topLeft + glm::vec2(c * BLOCK_SIZE, r * BLOCK_SIZE);
-        for (int i = 0; i < 4; i++) {
-            int nr = r + dr[i];
-            int nc = c + dc[i];
-            if (nr < 0 || nr >= _rows || nc < 0 || nc >= _columns || tiles[nr][nc].type != TileType::BRICK
-                /*|| (tiles[nr][nc].type == TileType::BRICK && tiles[nr][nc].color != tiles[r][c].color)*/) {
-                glm::vec2 start = curTL, end = curTL;
-                if (i == 0) {
-                    start = glm::vec2(curTL.x, curTL.y + BLOCK_SIZE);
-                    end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y + BLOCK_SIZE);
-                }
-                else if (i == 1) {
-                    start = glm::vec2(curTL.x, curTL.y);
-                    end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y);
-                }
-                else if (i == 2) {
-                    start = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y);
-                    end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y + BLOCK_SIZE);
-                }
-                else {
-                    start = glm::vec2(curTL.x, curTL.y);
-                    end = glm::vec2(curTL.x, curTL.y + BLOCK_SIZE);
-                }
-                start.y = height - start.y;
-                end.y = height - end.y;
-                edges.push_back(start);
-                edges.push_back(end);
-            }
-        }
+        //auto curTL = _topLeft + glm::vec2(c * BLOCK_SIZE, r * BLOCK_SIZE);
+        //for (int i = 0; i < 4; i++) {
+        //    int nr = r + dr[i];
+        //    int nc = c + dc[i];
+
+        //    if (nr < 0 || nr >= _rows || nc < 0 || nc >= _columns || tiles[nr][nc].type != TileType::BRICK
+        //        /*|| (tiles[nr][nc].type == TileType::BRICK && tiles[nr][nc].color != tiles[r][c].color)*/) {
+        //        glm::vec2 start = curTL, end = curTL;
+        //        if (i == 0) {
+        //            start = glm::vec2(curTL.x, curTL.y + BLOCK_SIZE);
+        //            end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y + BLOCK_SIZE);
+        //        }
+        //        else if (i == 1) {
+        //            start = glm::vec2(curTL.x, curTL.y);
+        //            end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y);
+        //        }
+        //        else if (i == 2) {
+        //            start = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y);
+        //            end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y + BLOCK_SIZE);
+        //        }
+        //        else {
+        //            start = glm::vec2(curTL.x, curTL.y);
+        //            end = glm::vec2(curTL.x, curTL.y + BLOCK_SIZE);
+        //        }
+        //        start.y = height - start.y;
+        //        end.y = height - end.y;
+        //        edges.push_back(start);
+        //        edges.push_back(end);
+        //    }
+        //}
     }
 
 }
 
 void Board::setTile(int r, int c, TileType type, int color) {
-    tiles[r][c].type = type;
-    tiles[r][c].color = color;
-    S.set(r * MAX_BOARD_SIZE + c, (type == TileType::BRICK) ? true : false);
+    auto& tile = getTile(r, c);
+    tile.type = type;
+    tile.color = color;
+    int id = r * _columns + c;
+    S.set(id, (type == TileType::BRICK) ? true : false);
+}
+
+Tile& Board::getTile(int r, int c) const {
+    int id = r * _columns + c;
+    return tiles[id];
+}
+
+int Board::getShadow(int r, int c) const {
+    int id = r * _columns + c;
+    return shadow[id];
 }

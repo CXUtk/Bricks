@@ -12,7 +12,6 @@ enum class TileType {
 struct Brick {
     int n, m;
     std::bitset<128> S;
-    std::bitset<128> G;
 
     Brick() = default;
     Brick(int n, int m);
@@ -39,7 +38,7 @@ struct Brick {
     // Generator
     Brick flip() const;
     Brick rotateClockwise() const;
-    void gBit();
+    std::bitset<128> gBit(int colNum) const;
 
     std::shared_ptr<Texture2D> generateTexture(glm::vec3 color) const;
 };
@@ -53,17 +52,18 @@ struct Tile {
 
 class Board {
 public:
-    static constexpr int MAX_BOARD_SIZE = 10;
     static constexpr int BLOCK_SIZE = 32;
     static constexpr int BLOCK_EDGE = 1;
 
     Board(int rows, int columns, glm::vec2 center);
     void place(const Brick& brick, glm::ivec2 pos, int id, TileType type);
+    void placeBit(std::bitset<128> bitset);
+    void unplaceBit(std::bitset<128> bitset);
 
     // 拿走这个位置所代表的砖块，返回砖块的颜色
     int unplace(glm::ivec2 pos);
     void placeShadow(const Brick& brick, glm::ivec2 pos, int color);
-    bool canPlace(const Brick& brick, glm::ivec2 pos);
+    bool canPlace(std::bitset<128> bitset, glm::ivec2 pos);
     glm::ivec2 getIndexFromMousePos(const Brick& brick, glm::vec2 pos) const;
     glm::ivec2 getShadowIndexFromMousePos(const Brick& brick, glm::vec2 pos) const;
     bool mouseInside(glm::vec2 mousePos) const;
@@ -82,8 +82,8 @@ public:
 
 private:
 
-    Tile tiles[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
-    int shadow[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
+    Tile* tiles;
+    int* shadow;
     std::bitset<128> S;
 
     int _rows, _columns;
@@ -95,4 +95,7 @@ private:
     int checkID(glm::ivec2 pos);
     void drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vector<glm::vec2>& edges);
     void setTile(int r, int c, TileType type, int color);
+
+    Tile& getTile(int r, int c) const;
+    int getShadow(int r, int c)const;
 };

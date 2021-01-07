@@ -14,9 +14,10 @@
 
 
 DLXSolver* solver;
+std::vector<Brick> poses[100];
 
 DefaultScene::DefaultScene() {
-    _board = std::make_shared<Board>(Board::MAX_BOARD_SIZE, Board::MAX_BOARD_SIZE, glm::vec2(250, 250));
+    _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
 
     FILE* file = fopen("Resources/Bricks/test.in", "r");
     int n;
@@ -33,6 +34,23 @@ DefaultScene::DefaultScene() {
         }
         Brick brick(r, c, S);
         _bricks.push_back(brick);
+    }
+
+    for (int i = 0; i < n; i++) {
+        Brick bk = _bricks[i];
+        std::set<Brick> bks;
+        for (int j = 0; j < 2; j++) {
+            for (int k = 0; k < 4; k++) {
+                if (bks.count(bk)) {
+                    bk = bk.rotateClockwise();
+                    continue;
+                }
+                poses[i].push_back(bk);
+                bks.insert(bk);
+                bk = bk.rotateClockwise();
+            }
+            bk = bk.flip();
+        }
     }
 
     //Brick fill(1, 1, "O");
@@ -107,8 +125,10 @@ DefaultScene::DefaultScene() {
 
 
     generateBrickTextures();
-    //dfs(0, _bricks);
-    solve();
+    auto time = glfwGetTime();
+    dfs(0, _bricks);
+    printf("%lf seconds\n", glfwGetTime() - time);
+    //solve();
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
 
     Brick test(4, 4,
@@ -137,7 +157,7 @@ void DefaultScene::update() {
 
     auto pos = _board->getIndexFromMousePos(_handBrick, mousePos);
     auto shadowPos = _board->getShadowIndexFromMousePos(_handBrick, mousePos);
-    bool canplace = (_handBrickID != -1 && _board->canPlace(_handBrick, shadowPos) && _cnt[_handBrickID]);
+    bool canplace = (_handBrickID != -1 && _board->canPlace(_handBrick.gBit(_board->getCols()), shadowPos) && _cnt[_handBrickID]);
     if (_handBrickID != -1)
         _board->placeShadow(_handBrick, shadowPos, canplace ? 1 : 2);
 
@@ -171,10 +191,10 @@ void DefaultScene::draw() {
     auto input = game.getInputManager();
 
 
-    if (!solver->isFinished() || (!_oldFinished && solver->isFinished())) {
-        _oldFinished = solver->isFinished();
-        applySolverToBoard();
-    }
+    //if (!solver->isFinished() || (!_oldFinished && solver->isFinished())) {
+    //    _oldFinished = solver->isFinished();
+    //    applySolverToBoard();
+    //}
 
 
     _board->draw();
@@ -240,42 +260,41 @@ struct Node {
 static int dr[4] = { 1, -1, 0, 0 };
 static int dc[4] = { 0, 0, 1, -1 };
 // 0 代表空格子，1代表当前没被切割的格子，2代表当前被切割的格子
-static int vis[Board::MAX_BOARD_SIZE][Board::MAX_BOARD_SIZE];
+static int vis[100][100];
 static std::mt19937 mt;
 
 
 bool found = false;
+
 void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
     if (x == bricks.size()) {
         found = true;
         return;
     }
     int r = _board->getRows(), c = _board->getCols();
-    Brick b = bricks[x];
-    b.gBit();
+    // Brick b = bricks[x];
+
 
     // 剪枝1：如果剩余空间的未放置方块最大大小小于这个块的大小，剪掉
     //if (!_board->testCanPlace(b)) return;
 
-    std::set<Brick> bks;
-    for (int s = 0; s < 2; s++) {
-        for (int i = 0; i < 4; i++) {
-            if (bks.count(b))continue;
-            bks.insert(b);
-            for (int j = 0; j <= r - b.n; j++) {
-                for (int k = 0; k <= c - b.m; k++) {
-                    auto coord = glm::ivec2(j, k);
-                    if (_board->canPlace(b, coord)) {
-                        _board->place(b, coord, x, TileType::BRICK);
-                        dfs(x + 1, bricks);
-                        if (found)return;
-                        _board->remove(b, coord);
-                    }
+
+    for (auto& b : poses[x]) {
+        auto gbit = b.gBit(_board->getCols());
+        for (int j = 0; j <= r - b.n; j++) {
+            for (int k = 0; k <= c - b.m; k++) {
+                auto coord = glm::ivec2(j, k);
+                auto judgeBit = gbit << (j * c + k);
+                if (_board->canPlace(judgeBit, coord)) {
+                    _board->placeBit(judgeBit);
+                    //  _board->place(b, coord, x, TileType::BRICK);
+                    dfs(x + 1, bricks);
+                    if (found)return;
+                    _board->unplaceBit(judgeBit);
+                    //_board->remove(b, coord);
                 }
             }
-            b = b.rotateClockwise();
         }
-        b = b.flip();
     }
 }
 
@@ -283,71 +302,74 @@ void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
 
 void DefaultScene::solve() {
 
-    int n = _bricks.size();
-    printf("Number of bricks: %d\n", n);
+    //int n = _bricks.size();
+    //printf("Number of bricks: %d\n", n);
 
-    int curSum = 0;
-    for (int i = 0; i < _bricks.size(); i++) {
-        curSum += _bricks[i].S.count();
-    }
+    //int curSum = 0;
+    //for (int i = 0; i < _bricks.size(); i++) {
+    //    curSum += _bricks[i].S.count();
+    //}
 
-    int totSize = Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE;
+    //int totSize = Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE;
+    ////for (int i = 0; i < totSize - curSum; i++) {
+    ////    _bricks.insert(_bricks.begin(), Brick(1, 1, "O"));
+    ////}
 
-    // 列号 1 ~ n 是砖块的ID，n + 1 ~ n + 100 是格子ID约束
-    solver = new DLXSolver(n * 8 * totSize, n + totSize, totSize - curSum);
-    // 储存格式：0-7位存砖块ID，8-11位存，12-32存坐标
+    //// 列号 1 ~ n 是砖块的ID，n + 1 ~ n + 100 是格子ID约束
+    //solver = new DLXSolver(n * 8 * totSize, n + totSize, totSize - curSum);
+    //// 储存格式：0-7位存砖块ID，8-11位存，12-32存坐标
 
-    int tot = 0;
+    //int tot = 0;
 
-    for (int i = 0; i < _bricks.size(); i++) {
-        int col = 1 + i;
-        Brick b = _bricks[i];
-        b.gBit();
+    //for (int i = 0; i < _bricks.size(); i++) {
+    //    int col = 1 + i;
+    //    Brick b = _bricks[i];
+    //    b.gBit();
 
-        std::set<Brick> bricks;
-        for (int j = 0; j < 2; j++) {
-            for (int k = 0; k < 4; k++) {
-                if (bricks.count(b))continue;
-                bricks.insert(b);
-                for (int r = 0; r <= Board::MAX_BOARD_SIZE - b.n; r++) {
-                    for (int c = 0; c <= Board::MAX_BOARD_SIZE - b.m; c++) {
-                        int id = r * Board::MAX_BOARD_SIZE + c;
-                        int info = i;
-                        info <<= 3;
-                        info |= ((j << 2) | k);
-                        info <<= 20;
-                        info |= id;
-                        _idMap[++tot] = info;
+    //    std::set<Brick> bricks;
+    //    for (int j = 0; j < 2; j++) {
+    //        for (int k = 0; k < 4; k++) {
+    //            if (bricks.count(b))continue;
+    //            bricks.insert(b);
+    //            for (int r = 0; r <= Board::MAX_BOARD_SIZE - b.n; r++) {
+    //                for (int c = 0; c <= Board::MAX_BOARD_SIZE - b.m; c++) {
+    //                    int id = r * Board::MAX_BOARD_SIZE + c;
+    //                    int info = i;
+    //                    info <<= 3;
+    //                    info |= ((j << 2) | k);
+    //                    info <<= 20;
+    //                    info |= id;
+    //                    _idMap[++tot] = info;
 
-                        auto res = b.G << id;
-                        solver->link(tot, 1 + i);
-                        for (int l = 0; l < Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE; l++) {
-                            if (res.test(l)) {
-                                solver->link(tot, l + n + 1);
-                            }
-                        }
-                    }
-                }
-                b = b.rotateClockwise();
-            }
-            b = b.flip();
-        }
-    }
-    //solver->solve();
-    _solverThread = new std::thread([]() {
-        auto time = glfwGetTime();
-        solver->solve();
-        printf("%lf seconds\n", glfwGetTime() - time);
-        });
-    // 传入idMap为了追踪砖块信息
+    //                    auto res = b.G << id;
+    //                    solver->link(tot, 1 + i);
+    //                    for (int l = 0; l < Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE; l++) {
+    //                        if (res.test(l)) {
+    //                            solver->link(tot, l + n + 1);
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //            b = b.rotateClockwise();
+    //        }
+    //        b = b.flip();
+    //    }
+    //}
+    ////solver->solve();
+    //_solverThread = new std::thread([]() {
+    //    auto time = glfwGetTime();
+    //    solver->solve();
+    //    printf("%lf seconds\n", glfwGetTime() - time);
+    //    });
+    //// 传入idMap为了追踪砖块信息
 }
 
 
 
 void DefaultScene::randomGenerate() {
     mt.seed(19284321);
-    for (int i = 0; i < Board::MAX_BOARD_SIZE; i++) {
-        for (int j = 0; j < Board::MAX_BOARD_SIZE; j++) {
+    for (int i = 0; i < _board->getRows(); i++) {
+        for (int j = 0; j < _board->getCols(); j++) {
             vis[i][j] = 1;
         }
     }
@@ -365,8 +387,8 @@ void DefaultScene::cutBoard() {
     for (int i = 0; i < 4; i++) {
         int r, c;
         do {
-            r = mt() % Board::MAX_BOARD_SIZE;
-            c = mt() % Board::MAX_BOARD_SIZE;
+            r = mt() % _board->getRows();
+            c = mt() % _board->getCols();
 
         } while (vis[r][c] != 1);
         dfsCut(r, c);
@@ -379,8 +401,8 @@ void DefaultScene::cutBoard() {
 void DefaultScene::genBrick() {
     int minnR = std::numeric_limits<int>::max(), minnC = std::numeric_limits<int>::max();
     int maxxR = std::numeric_limits<int>::min(), maxxC = std::numeric_limits<int>::min();
-    for (int i = 0; i < Board::MAX_BOARD_SIZE; i++) {
-        for (int j = 0; j < Board::MAX_BOARD_SIZE; j++) {
+    for (int i = 0; i < _board->getRows(); i++) {
+        for (int j = 0; j < _board->getCols(); j++) {
             if (vis[i][j] == 2) {
                 minnR = std::min(minnR, i);
                 minnC = std::min(minnC, j);
@@ -403,7 +425,6 @@ void DefaultScene::genBrick() {
             }
         }
     }
-    brick.gBit();
     for (int i = 0; i < 8; i++) {
         int r = mt() % 8;
         if (r >> 2 & 1) {
@@ -417,8 +438,8 @@ void DefaultScene::genBrick() {
 }
 
 bool DefaultScene::checkRemain() {
-    for (int i = 0; i < Board::MAX_BOARD_SIZE; i++) {
-        for (int j = 0; j < Board::MAX_BOARD_SIZE; j++) {
+    for (int i = 0; i < _board->getRows(); i++) {
+        for (int j = 0; j < _board->getCols(); j++) {
             if (vis[i][j] == 1) {
                 dfsCut(i, j);
                 genBrick();
@@ -445,7 +466,7 @@ void DefaultScene::dfsCut(int r, int c) {
         for (int i = 0; i < 4; i++) {
             int nr = node.r + dr[i];
             int nc = node.c + dc[i];
-            if (nr < 0 || nc < 0 || nr >= Board::MAX_BOARD_SIZE || nc >= Board::MAX_BOARD_SIZE ||
+            if (nr < 0 || nc < 0 || nr >= _board->getRows() || nc >= _board->getCols() ||
                 vis[nr][nc] != 1) continue;
             Q.push(Node(nr, nc, mt() % 10000 + cnt * 1000));
         }
@@ -458,8 +479,8 @@ void DefaultScene::applySolverToBoard() {
     for (auto a : res) {
         int info = _idMap[a];
         int id = info & ((1 << 20) - 1);
-        int r = id / Board::MAX_BOARD_SIZE;
-        int c = id % Board::MAX_BOARD_SIZE;
+        int r = id / _board->getCols();
+        int c = id % _board->getCols();
         info >>= 20;
         int state = info & 7;
         info >>= 3;
