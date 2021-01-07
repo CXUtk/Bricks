@@ -48,6 +48,6 @@ private:
         return tot;
     }
 
-    void _dfs(int numHold);
+    void _dfs();
 
 };

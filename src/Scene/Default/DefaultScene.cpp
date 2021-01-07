@@ -17,49 +17,66 @@ DLXSolver* solver;
 
 DefaultScene::DefaultScene() {
     _board = std::make_shared<Board>(Board::MAX_BOARD_SIZE, Board::MAX_BOARD_SIZE, glm::vec2(250, 250));
-    Brick fill(1, 1, "O");
-    Brick o1(3, 3,
-        ".O."
-        "OOO"
-        "O.O");
-    Brick orz(2, 5,
-        ".OOO."
-        "OO.OO");
-    Brick full(5, 5,
-        "OOOOO"
-        "OOOOO"
-        "OOOOO"
-        "OOO.O"
-        "OO...");
-    Brick o2(3, 3,
-        ".O."
-        "OOO"
-        ".O.");
-    Brick o3(5, 6,
-        "O....."
-        "O....."
-        "OO...."
-        ".OOOOO"
-        "....O.");
-    Brick o4(4, 5,
-        "...O."
-        "..OOO"
-        ".OOO."
-        "OO...");
-    Brick o5(5, 5,
-        "OO..."
-        ".O..."
-        ".O..."
-        ".OO.."
-        "..OOO");
-    //randomGenerate();
-    for (int i = 0; i < 14; i++) {
-        _bricks.push_back(orz);
+
+    FILE* file = fopen("Resources/Bricks/test.in", "r");
+    int n;
+    fscanf(file, "%d", &n);
+
+    for (int i = 0; i < n; i++) {
+        int r, c;
+        char S[10005];
+        fscanf(file, "%d%d", &r, &c);
+        int id = 0;
+        for (int i = 0; i < r; i++) {
+            fscanf(file, "%s", S + id);
+            id += c;
+        }
+        Brick brick(r, c, S);
+        _bricks.push_back(brick);
     }
-    _bricks.push_back(o1);
+
+    //Brick fill(1, 1, "O");
+    //Brick o1(3, 5,
+    //    "...OO"
+    //    ".O.OO"
+    //    "OOOO.");
+    //Brick orz(2, 5,
+    //    ".OOO."
+    //    "OO.OO");
+    //Brick full(3, 3,
+    //    ".O."
+    //    "OOO"
+    //    "O.O");
+    //Brick o2(4, 4,
+    //    ".O.."
+    //    "OOO."
+    //    ".OOO"
+    //    "..O.");
+    //Brick o3(5, 6,
+    //    "O....."
+    //    "O....."
+    //    "OO...."
+    //    ".OOOOO"
+    //    "....O.");
+    //Brick o4(4, 5,
+    //    "...O."
+    //    "..OOO"
+    //    ".OOO."
+    //    "OO...");
+    //Brick o5(5, 5,
+    //    "OO..."
+    //    ".O..."
+    //    ".O..."
+    //    ".OO.."
+    //    "..OOO");
+    //randomGenerate();
+    //for (int i = 0; i < 14; i++) {
+    //    _bricks.push_back(orz);
+    //}
+    //_bricks.push_back(full);
 
     //_bricks.push_back(o2);
-    generateBrickTextures();
+    //generateBrickTextures();
 
     //_bricks.push_back(o1);
     //_bricks.push_back(o2);
@@ -70,7 +87,7 @@ DefaultScene::DefaultScene() {
     //_bricks.push_back(o5);
     //_bricks.push_back(o5);
     //_bricks.push_back(o5);
-    ////generateBrickTextures();
+    //generateBrickTextures();
     //Brick b;
     //b.m = 11;
     //b.n = 11;
@@ -88,11 +105,12 @@ DefaultScene::DefaultScene() {
         _cnt[i] = 1;
     }
 
-    auto time = glfwGetTime();
-    dfs(0, _bricks);
-    // solve();
+
+    generateBrickTextures();
+    //dfs(0, _bricks);
+    solve();
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
-    printf("%lf seconds\n", glfwGetTime() - time);
+
     Brick test(4, 4,
         ".OO."
         "OOOO"
@@ -335,7 +353,9 @@ void DefaultScene::solve() {
     }
     //solver->solve();
     _solverThread = new std::thread([]() {
+        auto time = glfwGetTime();
         solver->solve();
+        printf("%lf seconds\n", glfwGetTime() - time);
         });
     // 传入idMap为了追踪砖块信息
 }

@@ -53,7 +53,7 @@ struct Tile {
 
 class Board {
 public:
-    static constexpr int MAX_BOARD_SIZE = 11;
+    static constexpr int MAX_BOARD_SIZE = 10;
     static constexpr int BLOCK_SIZE = 32;
     static constexpr int BLOCK_EDGE = 1;
 

@@ -72,7 +72,7 @@ void DLXSolver::recover(int c) {
 std::vector<int> DLXSolver::solve() {
     top = 0;
     found = false;
-    _dfs(0);
+    _dfs();
     std::vector<int> res;
     for (int i = 0; i < top; i++) res.push_back(ans[i]);
     printf("Finished\n");
@@ -89,7 +89,7 @@ std::vector<int> DLXSolver::getIntermidiateResult() {
     return res;
 }
 
-void DLXSolver::_dfs(int numHold) {
+void DLXSolver::_dfs() {
     if (found) return;
     if (!nodes[0].R) {
         found = true;
@@ -98,32 +98,34 @@ void DLXSolver::_dfs(int numHold) {
     }
 
     int tar = nodes[0].R;
-    std::vector<int> removed;
+    int cnt = 0, tot = 0;
     for (int i = tar; i; i = nodes[i].R) {
         if (sz[i] == 0) {
-            remove(i);
-            removed.push_back(i);
-            continue;
+            cnt++;
         }
-        if (sz[i] < sz[tar]) {
+        else if (sz[i] < sz[tar]) {
             tar = i;
         }
+        tot++;
     }
-    numHold += removed.size();
-    if (numHold > hold) return;
+    if (tot == cnt && cnt == hold) {
+        found = true;
+        printf("Solution Found!\n");
+        return;
+    }
+    if (cnt > hold || !sz[tar]) return;
     //if (!sz[tar])return;
     remove(tar);
     // printf("%d\n", tar);
 
-    int lastColor = -1;
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(200));
         _mutexLock.lock();
         ans[top++] = nodes[i].row;
         _mutexLock.unlock();
 
         for (int j = nodes[i].R; j != i; j = nodes[j].R) remove(nodes[j].col);
-        _dfs(numHold);
+        _dfs();
         if (found) return;
 
         _mutexLock.lock();
@@ -133,7 +135,4 @@ void DLXSolver::_dfs(int numHold) {
         for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
     }
     recover(tar);
-    for (auto r : removed) {
-        recover(r);
-    }
 }
