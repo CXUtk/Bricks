@@ -14,7 +14,7 @@
 
 
 DLXSolver* solver;
-std::vector<Brick> poses[100];
+
 
 DefaultScene::DefaultScene() {
     _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
@@ -128,6 +128,23 @@ DefaultScene::DefaultScene() {
     auto time = glfwGetTime();
     dfs(0, _bricks);
     printf("%lf seconds\n", glfwGetTime() - time);
+
+    // Place results
+    _board->clear();
+    for (auto a : placeInfo) {
+        int info = a;
+        int id = info & ((1 << 20) - 1);
+        int r = id / _board->getCols();
+        int c = id % _board->getCols();
+        info >>= 20;
+        int state = info & 7;
+        info >>= 3;
+        int x = info & 0xff;
+        Brick b = poses[x][state];
+        _board->place(b, glm::ivec2(r, c), x, TileType::BRICK);
+    }
+
+
     //solve();
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
 
@@ -157,7 +174,9 @@ void DefaultScene::update() {
 
     auto pos = _board->getIndexFromMousePos(_handBrick, mousePos);
     auto shadowPos = _board->getShadowIndexFromMousePos(_handBrick, mousePos);
-    bool canplace = (_handBrickID != -1 && _board->canPlace(_handBrick.gBit(_board->getCols()), shadowPos) && _cnt[_handBrickID]);
+
+    auto shadowBit = _handBrick.gBit(_board->getCols()) << (shadowPos.x * _board->getCols() + shadowPos.y);
+    bool canplace = (_handBrickID != -1 && _board->canPlace(shadowBit, shadowPos) && _cnt[_handBrickID]);
     if (_handBrickID != -1)
         _board->placeShadow(_handBrick, shadowPos, canplace ? 1 : 2);
 
@@ -278,8 +297,9 @@ void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
 
     // 剪枝1：如果剩余空间的未放置方块最大大小小于这个块的大小，剪掉
     //if (!_board->testCanPlace(b)) return;
+    // 储存格式：0-7位存砖块ID，8-11位存，12-32存坐标
 
-
+    int i = 0;
     for (auto& b : poses[x]) {
         auto gbit = b.gBit(_board->getCols());
         for (int j = 0; j <= r - b.n; j++) {
@@ -288,14 +308,26 @@ void DefaultScene::dfs(int x, std::vector<Brick>& bricks) {
                 auto judgeBit = gbit << (j * c + k);
                 if (_board->canPlace(judgeBit, coord)) {
                     _board->placeBit(judgeBit);
+
+                    int id = j * c + k;
+                    int info = x;
+                    info <<= 3;
+                    info |= i;
+                    info <<= 20;
+                    info |= id;
+                    placeInfo.push_back(info);
+
                     //  _board->place(b, coord, x, TileType::BRICK);
                     dfs(x + 1, bricks);
                     if (found)return;
+
+                    placeInfo.pop_back();
                     _board->unplaceBit(judgeBit);
                     //_board->remove(b, coord);
                 }
             }
         }
+        i++;
     }
 }
 

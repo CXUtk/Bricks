@@ -44,6 +44,9 @@ Game::~Game() {
 
 void Game::init() {
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     _shaderManager = std::make_shared<ShaderManager>();
     _graphics = std::make_shared<Graphics>();
     _inputManager = std::make_shared<InputManager>(_window);

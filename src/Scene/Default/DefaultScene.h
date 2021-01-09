@@ -23,6 +23,8 @@ private:
     int _handBrickID;
     std::vector<Brick> _bricks;
     std::vector<std::shared_ptr<Texture2D>> _textures;
+    std::vector<Brick> poses[100];
+    std::vector<int> placeInfo;
     std::map<int, int> _idMap;
     int _cnt[MAX_BLOCKS];
     bool _oldFinished;
