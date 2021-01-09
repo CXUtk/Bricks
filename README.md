@@ -1,4 +1,6 @@
 # 拼图
+一个基于GLFW3和freetype字体库的拼图游戏框架
+
 ![sample](test233.gif)
 
 ## 计划
