@@ -69,6 +69,21 @@
     <ClCompile Include="src\Algorithm\DLXSolver.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\Fonts\FontLoaders\FontLoader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Fonts\FontLoaders\FTLoader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Fonts\Font.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Fonts\FontManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\Renderer\TextRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -119,6 +134,21 @@
     <ClInclude Include="src\Algorithm\DLXSolver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Render\Fonts\FontLoaders\FontLoader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\Fonts\FontLoaders\FTLoader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\Fonts\Font.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\Fonts\FontManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\Renderer\TextRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\color.vs" />
@@ -131,6 +161,7 @@
     <None Include="README.md" />
     <None Include="Resources\Bricks\test.in" />
     <None Include="Resources\Bricks\README.md" />
+    <None Include="Resources\Shaders\font.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="test233.gif">

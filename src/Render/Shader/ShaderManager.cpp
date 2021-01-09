@@ -5,6 +5,7 @@ static std::string defaultVert4Path = "Resources/Shaders/default.vs";
 static std::string defaultFragPath = "Resources/Shaders/color.frag";
 static std::string spriteFragPath = "Resources/Shaders/sprite.frag";
 static std::string spriteVertPath = "Resources/Shaders/sprite.vs";
+static std::string fontFragPath = "Resources/Shaders/font.frag";
 
 ShaderManager::ShaderManager() {
     auto default2Shader = std::make_shared<ShaderData>(ShaderData::loadShaderProgram(defaultVert2Path, defaultFragPath));
@@ -15,6 +16,9 @@ ShaderManager::ShaderManager() {
 
     auto defaultSpriteShader = std::make_shared<ShaderData>(ShaderData::loadShaderProgram(spriteVertPath, spriteFragPath));
     _shaders["sprite_draw"] = defaultSpriteShader;
+
+    auto defaultFontShader = std::make_shared<ShaderData>(ShaderData::loadShaderProgram(spriteVertPath, fontFragPath));
+    _shaders["font_draw"] = defaultFontShader;
 }
 
 ShaderManager::~ShaderManager() {

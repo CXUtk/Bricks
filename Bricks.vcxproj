@@ -98,11 +98,14 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>10485760</StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)freetype.dll $(TargetDir) /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -120,11 +123,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>10485760</StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)freetype.dll $(TargetDir) /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -161,11 +167,16 @@
     <ClCompile Include="src\ImUI\ImUI.cpp" />
     <ClCompile Include="src\Input\InputManager.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Render\Fonts\Font.cpp" />
+    <ClCompile Include="src\Render\Fonts\FontLoaders\FontLoader.cpp" />
+    <ClCompile Include="src\Render\Fonts\FontLoaders\FTLoader.cpp" />
+    <ClCompile Include="src\Render\Fonts\FontManager.cpp" />
     <ClCompile Include="src\Render\GLUtils.cpp" />
     <ClCompile Include="src\Render\Graphic.cpp" />
     <ClCompile Include="src\Render\Renderer\LineRenderer.cpp" />
     <ClCompile Include="src\Render\Renderer\QuadRenderer.cpp" />
     <ClCompile Include="src\Render\Renderer\SpriteRenderer.cpp" />
+    <ClCompile Include="src\Render\Renderer\TextRenderer.cpp" />
     <ClCompile Include="src\Render\Shader\ShaderData.cpp" />
     <ClCompile Include="src\Render\Shader\ShaderManager.cpp" />
     <ClCompile Include="src\Render\Texture2D.cpp" />
@@ -179,11 +190,16 @@
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\ImUI\ImUI.h" />
     <ClInclude Include="src\Input\InputManager.h" />
+    <ClInclude Include="src\Render\Fonts\Font.h" />
+    <ClInclude Include="src\Render\Fonts\FontLoaders\FontLoader.h" />
+    <ClInclude Include="src\Render\Fonts\FontLoaders\FTLoader.h" />
+    <ClInclude Include="src\Render\Fonts\FontManager.h" />
     <ClInclude Include="src\Render\GLUtils.h" />
     <ClInclude Include="src\Render\Graphic.h" />
     <ClInclude Include="src\Render\Renderer\LineRenderer.h" />
     <ClInclude Include="src\Render\Renderer\QuadRenderer.h" />
     <ClInclude Include="src\Render\Renderer\SpriteRenderer.h" />
+    <ClInclude Include="src\Render\Renderer\TextRenderer.h" />
     <ClInclude Include="src\Render\Shader\ShaderData.h" />
     <ClInclude Include="src\Render\Shader\ShaderManager.h" />
     <ClInclude Include="src\Render\Texture2D.h" />
@@ -201,6 +217,7 @@
     <None Include="Resources\Shaders\color.frag" />
     <None Include="Resources\Shaders\color.vs" />
     <None Include="Resources\Shaders\default.vs" />
+    <None Include="Resources\Shaders\font.frag" />
     <None Include="Resources\Shaders\sprite.frag" />
     <None Include="Resources\Shaders\sprite.vs" />
   </ItemGroup>

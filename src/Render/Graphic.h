@@ -6,6 +6,7 @@
 #include "Renderer/LineRenderer.h"
 #include "Renderer/QuadRenderer.h"
 #include "Renderer/SpriteRenderer.h"
+#include "Renderer/TextRenderer.h"
 #include <string>
 class Graphics {
 public:
@@ -18,6 +19,8 @@ public:
     // void drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 size, float scale, const glm::vec3& color);
     void drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 origin, float scale, float rotation, const glm::vec3& color);
 
+    void drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color);
+
     glm::ivec2 measureString(const std::string& font, const std::string& text, float scale) const;
 
     void setProjectionMatrix(const glm::mat4& mat) {
@@ -28,6 +31,7 @@ private:
     std::unique_ptr<LineRenderer> _lineRenderer;
     std::unique_ptr<QuadRenderer> _quadRenderer;
     std::unique_ptr<SpriteRenderer> _spriteRenderer;
+    std::unique_ptr<TextRenderer> _textRenderer;
 
     glm::mat4 _projMatrix;
 };

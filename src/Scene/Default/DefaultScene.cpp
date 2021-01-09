@@ -224,13 +224,14 @@ void DefaultScene::draw() {
     }
 
 
-    if (ImUI::GetInstance().pure_button(glm::vec2(32, 30), glm::vec2(120, 60), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0))) {
+    if (ImUI::GetInstance().pure_button(glm::vec2(32, 30), glm::vec2(120, 60), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
         _board->clear();
         for (int i = 0; i < _bricks.size(); i++) {
             _cnt[i] = 1;
         }
     }
-    if (ImUI::GetInstance().pure_button(glm::vec2(game.getWidth() - 120 - 32, 30), glm::vec2(120, 60), glm::vec3(1, 0.5, 0.5), glm::vec3(1, 0, 0))) {
+    if (ImUI::GetInstance().pure_button(glm::vec2(game.getWidth() - 120 - 32, 30), glm::vec2(120, 60), glm::vec3(1, 0.5, 0.5),
+        glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
 
     }
     //std::vector<glm::vec2> lines;

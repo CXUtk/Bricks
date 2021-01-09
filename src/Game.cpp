@@ -48,6 +48,7 @@ void Game::init() {
     _graphics = std::make_shared<Graphics>();
     _inputManager = std::make_shared<InputManager>(_window);
     _curScene = Scene::makeScene("DEFAULT");
+    _fontManager = std::make_shared<FontManager>();
 }
 
 

@@ -14,7 +14,7 @@ public:
     bool img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 size, float scale, const glm::vec3& color, const glm::vec3& borderColor);
 
     // 生成一个普通按钮，左下角为pos，响应区域大小为size
-    bool pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, const glm::vec3& borderColor);
+    bool pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, const glm::vec3& borderColor, const std::string& text, const glm::vec3& textColor);
 
 private:
     ImUI() = default;

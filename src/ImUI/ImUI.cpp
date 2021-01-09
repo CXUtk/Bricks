@@ -32,7 +32,7 @@ bool ImUI::img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::ve
     return clicked;
 }
 
-bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, const glm::vec3& borderColor) {
+bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, const glm::vec3& borderColor, const std::string& text, const glm::vec3& textColor) {
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
     bool clicked = false;
@@ -47,5 +47,8 @@ bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, co
 
     game.getGraphics()->drawQuad(pos, size, color);
     game.getGraphics()->drawLines(lines, borderColor, 1);
+
+    glm::vec2 fsize = game.getGraphics()->measureString("default", text, 1.f);
+    game.getGraphics()->drawText(pos + size * 0.5f - fsize * 0.5f, text, 1.f, textColor);
     return clicked;
 }

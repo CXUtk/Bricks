@@ -7,7 +7,7 @@ Graphics::Graphics() {
     _lineRenderer = std::unique_ptr<LineRenderer>(new LineRenderer(shaderManager->getShaderData("line_draw")));
     _quadRenderer = std::unique_ptr<QuadRenderer>(new QuadRenderer(shaderManager->getShaderData("quad_draw")));
     _spriteRenderer = std::unique_ptr<SpriteRenderer>(new SpriteRenderer(shaderManager->getShaderData("sprite_draw")));
-
+    _textRenderer = std::unique_ptr<TextRenderer>(new TextRenderer(shaderManager->getShaderData("font_draw")));
     auto& game = Game::GetInstance();
     _projMatrix = glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f);
 }
@@ -37,6 +37,10 @@ void Graphics::drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm
     _spriteRenderer->drawSprite(texture, pos, texture->getSize(), origin, scale, rotation, color);
 }
 
+void Graphics::drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color) {
+    _textRenderer->drawText(pos, text, scale, color);
+}
+
 glm::ivec2 Graphics::measureString(const std::string& font, const std::string& text, float scale) const {
-    return glm::ivec2();
+    return _textRenderer->measureString(font, text, scale);
 }
