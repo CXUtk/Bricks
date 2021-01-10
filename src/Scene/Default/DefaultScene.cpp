@@ -227,7 +227,7 @@ void DefaultScene::draw() {
         float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
         scale = std::min(scale, 1.0f);
         scale *= 0.9f;
-        if (ImUI::GetInstance().img_button(texture, glm::vec2(startX, startY),
+        if (ImUI::img_button(texture, glm::vec2(startX, startY),
             glm::vec2(64, 64), scale,
             _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
             _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
@@ -243,13 +243,13 @@ void DefaultScene::draw() {
     }
 
 
-    if (ImUI::GetInstance().pure_button(glm::vec2(32, 30), glm::vec2(120, 60), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
+    if (ImUI::pure_button(glm::vec2(32, 30), glm::vec2(120, 60), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
         _board->clear();
         for (int i = 0; i < _bricks.size(); i++) {
             _cnt[i] = 1;
         }
     }
-    if (ImUI::GetInstance().pure_button(glm::vec2(game.getWidth() - 120 - 32, 30), glm::vec2(120, 60), glm::vec3(1, 0.5, 0.5),
+    if (ImUI::pure_button(glm::vec2(game.getWidth() - 120 - 32, 30), glm::vec2(120, 60), glm::vec3(1, 0.5, 0.5),
         glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
 
     }

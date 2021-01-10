@@ -1,17 +1,18 @@
 ﻿#include "ImUI.h"
 #include "Game.h"
 
-ImUI& ImUI::GetInstance() {
-    static ImUI ui;
-    return ui;
-}
+static int activeItem;
+static int globalID;
 
-ImUI::~ImUI() {
-}
 
 bool inside(glm::vec2 mousePos, glm::vec2 pos, glm::vec2 size) {
     return mousePos.x >= pos.x && mousePos.x <= pos.x + size.x
         && mousePos.y >= pos.y && mousePos.y <= pos.y + size.y;
+}
+
+void ImUI::BeginGUI() {
+    activeItem = 0;
+    globalID = 0;
 }
 
 bool ImUI::img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 size, float scale, const glm::vec3& color, const glm::vec3& borderColor) {
