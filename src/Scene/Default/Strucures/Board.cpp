@@ -116,13 +116,15 @@ std::shared_ptr<Texture2D> Brick::generateTexture(glm::vec3 color) const {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     auto savedProj = game.getGraphics()->getProjectionMatrix();
-    game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, (float)m * BLOCK_SIZE_DRAW, 0.f, (float)n * BLOCK_SIZE_DRAW, -1.0f, 1.0f));
+
+
+    auto proj = glm::scale(glm::vec3(1, -1, 1)) * glm::ortho(0.f, (float)m * BLOCK_SIZE_DRAW, 0.f, (float)n * BLOCK_SIZE_DRAW, -1.0f, 1.0f);
+    game.getGraphics()->setProjectionMatrix(proj);
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < m; j++) {
             int id = i * m + j;
             if (S.test(id)) {
-                auto pos = glm::vec2(j * BLOCK_SIZE_DRAW, (i + 1) * BLOCK_SIZE_DRAW);
-                pos.y = n * BLOCK_SIZE_DRAW - pos.y;
+                auto pos = glm::vec2(j * BLOCK_SIZE_DRAW, i * BLOCK_SIZE_DRAW);
                 game.getGraphics()->drawQuad(pos, glm::vec2(BLOCK_SIZE_DRAW), color);
             }
         }
@@ -297,35 +299,26 @@ void Board::update() {
 
 void Board::draw() {
     auto& game = Game::GetInstance();
-    game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f));
 
-    auto pos = glm::vec2(_topLeft.x, _topLeft.y + BLOCK_SIZE * _rows);
-    auto height = game.getHeight();
-    pos.y = height - pos.y;
+    auto pos = glm::vec2(_topLeft.x, _topLeft.y);
     game.getGraphics()->drawQuad(pos, glm::vec2(BLOCK_SIZE * _columns, BLOCK_SIZE * _rows), glm::vec3(1, 1, 1));
 
-    std::vector<glm::vec2> lines;
+    std::vector<Segment> lines;
     for (int i = 0; i <= _rows; i++) {
         glm::vec2 start = glm::vec2(_topLeft.x, _topLeft.y + i * BLOCK_SIZE);
-        start.y = height - start.y;
         glm::vec2 end = glm::vec2(_topLeft.x + _columns * BLOCK_SIZE, _topLeft.y + i * BLOCK_SIZE);
-        end.y = height - end.y;
 
-        lines.push_back(start);
-        lines.push_back(end);
+        lines.push_back(Segment(start, end));
     }
 
     for (int i = 0; i <= _columns; i++) {
         glm::vec2 start = glm::vec2(_topLeft.x + i * BLOCK_SIZE, _topLeft.y);
-        start.y = height - start.y;
         glm::vec2 end = glm::vec2(_topLeft.x + i * BLOCK_SIZE, _topLeft.y + _rows * BLOCK_SIZE);
-        end.y = height - end.y;
 
-        lines.push_back(start);
-        lines.push_back(end);
+        lines.push_back(Segment(start, end));
     }
 
-    game.getGraphics()->drawLines(lines, glm::vec3(0, 0, 0), 1);
+    game.getGraphics()->drawLines(lines, glm::vec3(1, 0, 0), 1);
 
     std::vector<glm::vec2> edges;
     for (int i = 0; i < _rows; i++) {
@@ -339,8 +332,7 @@ void Board::draw() {
         for (int j = 0; j < _columns; j++) {
             int s = getShadow(i, j);
             if (s) {
-                glm::vec2 bl = glm::vec2(_topLeft.x + j * BLOCK_SIZE, _topLeft.y + (i + 1) * BLOCK_SIZE);
-                bl.y = height - bl.y;
+                glm::vec2 bl = glm::vec2(_topLeft.x + j * BLOCK_SIZE, _topLeft.y + i * BLOCK_SIZE);
                 auto color = (s == 1) ? glm::vec3(0.5, 1, 0.5) : glm::vec3(1, 0.5, 0.5);
                 game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), color);
             }
@@ -369,10 +361,9 @@ void Board::clear() {
 }
 
 void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vector<glm::vec2>& edges) {
-    glm::vec2 bl = glm::vec2(_topLeft.x + c * BLOCK_SIZE, _topLeft.y + (r + 1) * BLOCK_SIZE);
+    glm::vec2 bl = glm::vec2(_topLeft.x + c * BLOCK_SIZE, _topLeft.y + r * BLOCK_SIZE);
     auto& game = Game::GetInstance();
     auto height = game.getHeight();
-    bl.y = height - bl.y;
 
     // 下，上，右，左
     static int dr[4] = { 1, -1, 0, 0 };

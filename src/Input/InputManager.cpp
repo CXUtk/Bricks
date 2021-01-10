@@ -10,7 +10,7 @@ InputManager::InputManager(GLFWwindow* window) :_window(window) {
 glm::vec2 InputManager::getMousePosition() {
     double x, y;
     glfwGetCursorPos(_window, &x, &y);
-    return glm::vec2(x, Game::GetInstance().getHeight() - y);
+    return glm::vec2(x, y);
 }
 
 bool InputManager::isKeyDown(int key) {

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Render/Shader/ShaderData.h"
+#include "Render/GLUtils.h"
 
 // 线渲染器
 class LineRenderer {
@@ -11,8 +12,7 @@ public:
     LineRenderer(std::shared_ptr<ShaderData> shaderData);
     ~LineRenderer();
 
-    void drawLines(const std::vector<glm::vec2>& lines, const glm::vec3& color, float width);
-    void drawLines(const std::vector<std::pair<glm::vec2, glm::vec2>>& lines, const glm::vec3& color, float width);
+    void drawLines(const std::vector<Segment>& segments, const glm::vec3& color, float width);
 
 private:
 

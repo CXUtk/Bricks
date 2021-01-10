@@ -25,10 +25,12 @@ void TextRenderer::drawText(glm::vec2 pos, const std::string& text, float scale,
     auto fontManager = Game::GetInstance().getFontManager();
     auto defaultFont = fontManager->getFont("default");
 
+    auto size = measureString("default", text, scale);
+
     for (const auto c : text) {
         Character chr = (*defaultFont)[c];
         glm::vec2 bottomLeft = glm::vec2(pos.x + chr.Bearing.x * scale,
-            pos.y - (chr.Size.y - chr.Bearing.y) * scale);
+            pos.y + size.y - chr.Size.y * scale);
         glm::vec2 size = glm::vec2(chr.Size) * scale;
         draw_quad(chr.TextureID, bottomLeft, size);
         pos.x += chr.Advance / 64 * scale;
@@ -52,13 +54,13 @@ glm::ivec2 TextRenderer::measureString(const std::string& font, const std::strin
 void TextRenderer::draw_quad(GLuint textureId, glm::vec2 bottomLeft, glm::vec2 size) {
     glm::vec4 vertices[4] = {
         // 左下角
-        glm::vec4((int)bottomLeft.x, (int)bottomLeft.y, 0.f, 1.f),
+        glm::vec4((int)bottomLeft.x, (int)bottomLeft.y, 0.f, 0.f),
         // 右上角
-        glm::vec4((int)(bottomLeft.x + size.x), (int)(bottomLeft.y + size.y), 1.f, 0.f),
+        glm::vec4((int)(bottomLeft.x + size.x), (int)(bottomLeft.y + size.y), 1.f, 1.f),
         // 左上角
-        glm::vec4((int)bottomLeft.x, (int)(bottomLeft.y + size.y), 0.f, 0.f),
+        glm::vec4((int)bottomLeft.x, (int)(bottomLeft.y + size.y), 0.f, 1.f),
         // 右下角
-        glm::vec4((int)(bottomLeft.x + size.x), (int)bottomLeft.y, 1.f, 1.f),
+        glm::vec4((int)(bottomLeft.x + size.x), (int)bottomLeft.y, 1.f, 0.f),
     };
     // 使用贴图
     glBindTexture(GL_TEXTURE_2D, textureId);

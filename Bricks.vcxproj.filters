@@ -36,13 +36,7 @@
     <ClCompile Include="src\Scene\Scene.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Renderer\LineRenderer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="src\Render\Graphic.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Render\Renderer\QuadRenderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\GLUtils.cpp">
@@ -52,9 +46,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\Texture2D.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Render\Renderer\SpriteRenderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\ImUI\ImUI.cpp">
@@ -78,10 +69,19 @@
     <ClCompile Include="src\Render\Fonts\FontManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Renderer\TextRenderer.cpp">
+    <ClCompile Include="glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="glad.c">
+    <ClCompile Include="src\Render\PrimaryRenderer\LineRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\PrimaryRenderer\QuadRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\PrimaryRenderer\SpriteRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\PrimaryRenderer\TextRenderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,19 +107,10 @@
     <ClInclude Include="src\Render\Graphic.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\Renderer\LineRenderer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Render\Renderer\QuadRenderer.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="src\Render\GLUtils.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Input\InputManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Render\Renderer\SpriteRenderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Render\Texture2D.h">
@@ -146,7 +137,16 @@
     <ClInclude Include="src\Render\Fonts\FontManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\Renderer\TextRenderer.h">
+    <ClInclude Include="src\Render\PrimaryRenderer\LineRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\PrimaryRenderer\QuadRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\PrimaryRenderer\SpriteRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Render\PrimaryRenderer\TextRenderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -170,7 +170,6 @@ void DefaultScene::update() {
     auto& game = Game::GetInstance();
     auto input = game.getInputManager();
     auto mousePos = input->getMousePosition();
-    mousePos.y = game.getHeight() - mousePos.y;
 
     auto pos = _board->getIndexFromMousePos(_handBrick, mousePos);
     auto shadowPos = _board->getShadowIndexFromMousePos(_handBrick, mousePos);
@@ -221,7 +220,7 @@ void DefaultScene::draw() {
 
     // Gap: 64 + 10
     int startX = 32;
-    int startY = 200;
+    int startY = game.getHeight() - 200;
     for (int i = 0; i < _bricks.size(); i++) {
         auto texture = _textures[i];
         float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
@@ -238,18 +237,18 @@ void DefaultScene::draw() {
         startX += 74;
         if (startX + 64 > game.getWidth()) {
             startX = 32;
-            startY -= 74;
+            startY += 74;
         }
     }
 
 
-    if (ImUI::pure_button(glm::vec2(32, 30), glm::vec2(120, 60), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
+    if (ImUI::pure_button(glm::vec2(32, game.getHeight() - 100), glm::vec2(120, 60), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
         _board->clear();
         for (int i = 0; i < _bricks.size(); i++) {
             _cnt[i] = 1;
         }
     }
-    if (ImUI::pure_button(glm::vec2(game.getWidth() - 120 - 32, 30), glm::vec2(120, 60), glm::vec3(1, 0.5, 0.5),
+    if (ImUI::pure_button(glm::vec2(game.getWidth() - 120 - 32, game.getHeight() - 100), glm::vec2(120, 60), glm::vec3(1, 0.5, 0.5),
         glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
 
     }

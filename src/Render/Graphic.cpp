@@ -9,13 +9,13 @@ Graphics::Graphics() {
     _spriteRenderer = std::unique_ptr<SpriteRenderer>(new SpriteRenderer(shaderManager->getShaderData("sprite_draw")));
     _textRenderer = std::unique_ptr<TextRenderer>(new TextRenderer(shaderManager->getShaderData("font_draw")));
     auto& game = Game::GetInstance();
-    _projMatrix = glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f);
+    _projMatrix = glm::scale(glm::vec3(1, -1, 1)) * glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f);
 }
 
 Graphics::~Graphics() {
 }
 
-void Graphics::drawLines(const std::vector<glm::vec2>& lines, const glm::vec3& color, float width) {
+void Graphics::drawLines(const std::vector<Segment>& lines, const glm::vec3& color, float width) {
     _lineRenderer->drawLines(lines, color, width);
 }
 

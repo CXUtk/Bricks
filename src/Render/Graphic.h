@@ -3,17 +3,19 @@
 #include <vector>
 #include <memory>
 
-#include "Renderer/LineRenderer.h"
-#include "Renderer/QuadRenderer.h"
-#include "Renderer/SpriteRenderer.h"
-#include "Renderer/TextRenderer.h"
+#include "PrimaryRenderer/LineRenderer.h"
+#include "PrimaryRenderer/QuadRenderer.h"
+#include "PrimaryRenderer/SpriteRenderer.h"
+#include "PrimaryRenderer/TextRenderer.h"
 #include <string>
+#include <Render\GLUtils.h>
+
 class Graphics {
 public:
     Graphics();
     ~Graphics();
 
-    void drawLines(const std::vector<glm::vec2>& lines, const glm::vec3& color, float width);
+    void drawLines(const std::vector<Segment>& lines, const glm::vec3& color, float width);
     void drawQuad(glm::vec2 pos, glm::vec2 size, const glm::vec3& color);
     void drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, float scale, const glm::vec3& color);
     // void drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 size, float scale, const glm::vec3& color);
