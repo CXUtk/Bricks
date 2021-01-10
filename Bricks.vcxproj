@@ -104,7 +104,8 @@
       </StackCommitSize>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)freetype.dll $(TargetDir) /Y /D</Command>
+      <Command>xcopy $(ProjectDir)dlls\freetype.dll $(TargetDir) /Y /D
+xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,7 +130,8 @@
       </StackCommitSize>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)freetype.dll $(TargetDir) /Y /D</Command>
+      <Command>xcopy $(ProjectDir)dlls\freetype.dll $(TargetDir) /Y /D
+xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -211,6 +213,8 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include="dlls\freetype.dll" />
+    <None Include="dlls\glfw3.dll" />
     <None Include="README.md" />
     <None Include="Resources\Bricks\README.md" />
     <None Include="Resources\Bricks\test.in" />
@@ -220,6 +224,7 @@
     <None Include="Resources\Shaders\font.frag" />
     <None Include="Resources\Shaders\sprite.frag" />
     <None Include="Resources\Shaders\sprite.vs" />
+    <None Include="设计文档.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="test233.gif" />

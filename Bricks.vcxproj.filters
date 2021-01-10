@@ -162,6 +162,9 @@
     <None Include="Resources\Bricks\test.in" />
     <None Include="Resources\Bricks\README.md" />
     <None Include="Resources\Shaders\font.frag" />
+    <None Include="设计文档.md" />
+    <None Include="dlls\freetype.dll" />
+    <None Include="dlls\glfw3.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="test233.gif">
