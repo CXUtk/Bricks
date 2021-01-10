@@ -161,7 +161,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\PhysicsEngine\PhysicsEngine\src\glad.c" />
+    <ClCompile Include="glad.c" />
     <ClCompile Include="src\Algorithm\DLXSolver.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\ImUI\ImUI.cpp" />
