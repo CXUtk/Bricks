@@ -24,16 +24,30 @@ void drawLineRect(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {
 
 
 void ImUI::BeginGUI() {
-    activeItem = 0;
     globalID = 0;
 }
 
+void ImUI::EndGUI() {
+    Game& game = Game::GetInstance();
+    auto input = game.getInputManager();
+    if (input->getCurMouseDown()) {
+        if (activeItem == 0) {
+            activeItem = -1;
+        }
+    }
+    else {
+        activeItem = 0;
+    }
+}
+
 bool ImUI::img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 size, float scale, const glm::vec3& color, const glm::vec3& borderColor) {
+    int id = ++globalID;
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
     bool clicked = false;
-    if (!input->getOldMouseDown() && input->getCurMouseDown() && inside(input->getMousePosition(), pos, size)) {
+    if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0 && inside(input->getMousePosition(), pos, size)) {
         clicked = true;
+        activeItem = id;
     }
 
     drawLineRect(pos, size, borderColor);
@@ -42,17 +56,51 @@ bool ImUI::img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::ve
 }
 
 bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, const glm::vec3& borderColor, const std::string& text, const glm::vec3& textColor) {
+    int id = ++globalID;
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
     bool clicked = false;
-    if (!input->getOldMouseDown() && input->getCurMouseDown() && inside(input->getMousePosition(), pos, size)) {
+    if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0 && inside(input->getMousePosition(), pos, size)) {
         clicked = true;
+        activeItem = id;
     }
-
     game.getGraphics()->drawQuad(pos, size, color);
     drawLineRect(pos, size, borderColor);
 
     glm::vec2 fsize = game.getGraphics()->measureString("default", text, 1.f);
     game.getGraphics()->drawText(pos + size * 0.5f - fsize * 0.5f, text, 1.f, textColor);
     return clicked;
+}
+
+bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
+    int id = ++globalID;
+    Game& game = Game::GetInstance();
+    auto input = game.getInputManager();
+
+    int ypos = ((height - 16 - 16) * value) / max;
+    glm::vec3 buttonColor = glm::vec3(0.5f);
+    if (inside(input->getMousePosition(), glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16))) {
+        if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0) {
+            activeItem = id;
+        }
+        buttonColor = glm::vec3(0.9f);
+    }
+
+    bool valueChanged = false;
+    if (activeItem == id) {
+        buttonColor = glm::vec3(0.9f);
+        int mouseY = input->getMousePosition().y - (pos.y + 8);
+        if (mouseY < 0) mouseY = 0;
+        if (mouseY > height - 16) mouseY = height - 16;
+        int v = max * mouseY / (height - 16);
+        if (v != value) {
+            value = v;
+            valueChanged = true;
+        }
+    }
+
+    game.getGraphics()->drawQuad(pos, glm::vec2(32, height), glm::vec3(0.2f));
+    game.getGraphics()->drawQuad(glm::vec2(pos.x + 8, pos.y + 8 + ypos), glm::vec2(16, 16), buttonColor);
+    drawLineRect(glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16), glm::vec3(1, 0, 0));
+    return valueChanged;
 }

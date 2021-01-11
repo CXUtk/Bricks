@@ -20,6 +20,9 @@ void TextRenderer::drawText(glm::vec2 pos, const std::string& text, float scale,
     glUniform3f(glGetUniformLocation(_shaderData->getID(), "uColor"), color.r, color.g, color.b);
     glUniform1i(glGetUniformLocation(_shaderData->getID(), "uTexture"), 0);
 
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(_vao);
     auto fontManager = Game::GetInstance().getFontManager();
@@ -37,6 +40,8 @@ void TextRenderer::drawText(glm::vec2 pos, const std::string& text, float scale,
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    glDisable(GL_BLEND);
 }
 
 glm::ivec2 TextRenderer::measureString(const std::string& font, const std::string& text, float scale) const {

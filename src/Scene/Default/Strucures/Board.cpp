@@ -318,7 +318,7 @@ void Board::draw() {
         lines.push_back(Segment(start, end));
     }
 
-    game.getGraphics()->drawLines(lines, glm::vec3(1, 0, 0), 1);
+    game.getGraphics()->drawLines(lines, glm::vec3(0, 0, 0), 1);
 
     std::vector<glm::vec2> edges;
     for (int i = 0; i < _rows; i++) {
