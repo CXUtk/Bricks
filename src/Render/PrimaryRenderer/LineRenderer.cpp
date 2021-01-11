@@ -40,7 +40,7 @@ void LineRenderer::drawLines(const std::vector<Segment>& segments, const glm::ve
     for (int i = 0; i < sz; i += BUFFER_SIZE) {
         glBindBuffer(GL_ARRAY_BUFFER, _vboLine);
         int count = std::min(sz - i, i + BUFFER_SIZE) - i;
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Segment) * count, segments.data() + i);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Segment) * count, segments.data() + i / 2);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glDrawArrays(GL_LINES, 0, count);

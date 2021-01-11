@@ -5,6 +5,17 @@
 #include <memory>
 #include "Render/Texture2D.h"
 
+
+struct Rect {
+    glm::vec2 pos, size;
+    Rect() = default;
+    Rect(glm::vec2 pos, glm::vec2 size) : pos(pos), size(size) {}
+
+    glm::vec2 center() const {
+        return pos + size * 0.5f;
+    }
+};
+
 class ImUI {
 public:
     static void BeginGUI();
@@ -16,6 +27,11 @@ public:
     static bool pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, const glm::vec3& borderColor, const std::string& text, const glm::vec3& textColor);
 
     static bool slider(glm::vec2 pos, int height, int max, int& value);
+
+    static void BeginFrame(glm::vec2 pos, glm::vec2 size, const glm::vec3& color);
+    static void EndFrame();
+
+    static Rect getContainerRect();
 
 private:
 

@@ -5,6 +5,18 @@ static int activeItem;
 static int globalID;
 
 
+static Rect containerRect;
+static Rect containerStack[255];
+static int containerStackTop;
+
+void pushCurrentContainer() {
+    containerStack[++containerStackTop] = containerRect;
+}
+
+void popCurrentContainer() {
+    containerRect = containerStack[containerStackTop--];
+}
+
 bool inside(glm::vec2 mousePos, glm::vec2 pos, glm::vec2 size) {
     return mousePos.x >= pos.x && mousePos.x <= pos.x + size.x
         && mousePos.y >= pos.y && mousePos.y <= pos.y + size.y;
@@ -24,7 +36,9 @@ void drawLineRect(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {
 
 
 void ImUI::BeginGUI() {
+    Game& game = Game::GetInstance();
     globalID = 0;
+    containerRect = Rect(glm::vec2(0, 0), glm::vec2(game.getWidth(), game.getHeight()));
 }
 
 void ImUI::EndGUI() {
@@ -49,7 +63,7 @@ bool ImUI::img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::ve
         clicked = true;
         activeItem = id;
     }
-
+    pos += containerRect.pos;
     drawLineRect(pos, size, borderColor);
     game.getGraphics()->drawSprite(texture, pos + size * 0.5f, glm::vec2(0.5, 0.5), scale, 0.f, color);
     return clicked;
@@ -64,6 +78,7 @@ bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, co
         clicked = true;
         activeItem = id;
     }
+    pos += containerRect.pos;
     game.getGraphics()->drawQuad(pos, size, color);
     drawLineRect(pos, size, borderColor);
 
@@ -76,7 +91,7 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     int id = ++globalID;
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
-
+    pos += containerRect.pos;
     int ypos = ((height - 16 - 16) * value) / max;
     glm::vec3 buttonColor = glm::vec3(0.5f);
     if (inside(input->getMousePosition(), glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16))) {
@@ -103,4 +118,19 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     game.getGraphics()->drawQuad(glm::vec2(pos.x + 8, pos.y + 8 + ypos), glm::vec2(16, 16), buttonColor);
     drawLineRect(glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16), glm::vec3(1, 0, 0));
     return valueChanged;
+}
+
+void ImUI::BeginFrame(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {
+    pushCurrentContainer();
+    containerRect = Rect(containerRect.pos + pos, size);
+    int id = ++globalID;
+    drawLineRect(containerRect.pos, containerRect.size, color);
+}
+
+void ImUI::EndFrame() {
+    popCurrentContainer();
+}
+
+Rect ImUI::getContainerRect() {
+    return containerRect;
 }

@@ -17,7 +17,7 @@ DLXSolver* solver;
 
 
 DefaultScene::DefaultScene() {
-    _board = std::make_shared<Board>(10, 10, glm::vec2(250, 250));
+    _board = std::make_shared<Board>(10, 10, glm::vec2(200, 200));
 
     FILE* file = fopen("Resources/Bricks/test.in", "r");
     int n;
@@ -208,21 +208,19 @@ void DefaultScene::draw() {
     auto& game = Game::GetInstance();
     auto input = game.getInputManager();
 
-
-    //if (!solver->isFinished() || (!_oldFinished && solver->isFinished())) {
-    //    _oldFinished = solver->isFinished();
-    //    applySolverToBoard();
-    //}
-
-
-    _board->draw();
-    _board->clearShadow();
-
     ImUI::BeginGUI();
 
+    // 绘制砖块图的UI帧
+    ImUI::BeginFrame(glm::vec2(8, 8), glm::vec2(400 - 16, 400 - 16), glm::vec3(1));
+    _board->draw();
+    _board->clearShadow();
+    ImUI::EndFrame();
+
+    // 绘制下方可用砖块的帧
+    ImUI::BeginFrame(glm::vec2(8, 400 + 8), glm::vec2(400 - 16, game.getHeight() - 16 - 400), glm::vec3(1));
     // Gap: 64 + 10
-    int startX = 32;
-    int startY = 450;
+    int startX = 8;
+    int startY = 8;
     for (int i = 0; i < _bricks.size(); i++) {
         auto texture = _textures[i];
         float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
@@ -238,7 +236,7 @@ void DefaultScene::draw() {
         }
         startX += 74;
         if (startX + 64 > game.getWidth()) {
-            startX = 32;
+            startX = 8;
             startY += 74;
         }
     }
@@ -248,17 +246,30 @@ void DefaultScene::draw() {
         printf("%d\n", sliderValue);
     }
 
+    ImUI::EndFrame();
 
-    if (ImUI::pure_button(glm::vec2(32, 20), glm::vec2(120, 50), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
+
+
+    // 绘制右侧工具栏的帧
+    ImUI::BeginFrame(glm::vec2(400 + 8, 8), glm::vec2(game.getWidth() - 16 - 400, 700 - 16), glm::vec3(1));
+    auto rect = ImUI::getContainerRect();
+
+    if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 8), glm::vec2(120, 50), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
         _board->clear();
         for (int i = 0; i < _bricks.size(); i++) {
             _cnt[i] = 1;
         }
     }
-    if (ImUI::pure_button(glm::vec2(game.getWidth() - 120 - 32, 20), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
+    if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 50 + 16), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
         glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
 
     }
+    ImUI::EndFrame();
+    //if (!solver->isFinished() || (!_oldFinished && solver->isFinished())) {
+    //    _oldFinished = solver->isFinished();
+    //    applySolverToBoard();
+    //}
+
     //std::vector<glm::vec2> lines;
     //lines.push_back(glm::vec2(0, 0));
     //lines.push_back(glm::vec2(500, 500));
