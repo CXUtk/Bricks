@@ -179,6 +179,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClCompile Include="src\Render\PrimaryRenderer\QuadRenderer.cpp" />
     <ClCompile Include="src\Render\PrimaryRenderer\SpriteRenderer.cpp" />
     <ClCompile Include="src\Render\PrimaryRenderer\TextRenderer.cpp" />
+    <ClCompile Include="src\Render\PrimaryRenderer\TriangleRenderer.cpp" />
     <ClCompile Include="src\Render\Shader\ShaderData.cpp" />
     <ClCompile Include="src\Render\Shader\ShaderManager.cpp" />
     <ClCompile Include="src\Render\Texture2D.cpp" />
@@ -202,6 +203,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClInclude Include="src\Render\PrimaryRenderer\QuadRenderer.h" />
     <ClInclude Include="src\Render\PrimaryRenderer\SpriteRenderer.h" />
     <ClInclude Include="src\Render\PrimaryRenderer\TextRenderer.h" />
+    <ClInclude Include="src\Render\PrimaryRenderer\TriangleRenderer.h" />
     <ClInclude Include="src\Render\Shader\ShaderData.h" />
     <ClInclude Include="src\Render\Shader\ShaderManager.h" />
     <ClInclude Include="src\Render\Texture2D.h" />
@@ -222,6 +224,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <None Include="Resources\Shaders\color.vs" />
     <None Include="Resources\Shaders\default.vs" />
     <None Include="Resources\Shaders\font.frag" />
+    <None Include="Resources\Shaders\circle.frag" />
     <None Include="Resources\Shaders\sprite.frag" />
     <None Include="Resources\Shaders\sprite.vs" />
     <None Include="设计文档.md" />

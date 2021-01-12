@@ -15,4 +15,5 @@ struct Segment {
 class GLUtils {
 public:
     static void genQuad(GLuint& vao, GLuint& vbo, GLuint& ebo);
+    static float getRadians(glm::vec2 dir);
 };

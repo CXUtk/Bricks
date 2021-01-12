@@ -106,7 +106,6 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     }
 
     bool valueChanged = false;
-    printf("%d %d\n", activeItem, id);
     if (activeItem == id) {
 
         buttonColor = glm::vec3(0.9f);

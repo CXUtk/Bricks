@@ -8,11 +8,11 @@ QuadRenderer::QuadRenderer(std::shared_ptr<ShaderData> shaderData) :_shaderData(
         // 左下角
         glm::vec4(0, 0, 0, 1),
         // 右上角
-        glm::vec4(1, 1, 0, 1),
+        glm::vec4(1, 1, 1, 0),
         // 左上角
-        glm::vec4(0, 1, 0, 1),
+        glm::vec4(0, 1, 0, 0),
         // 右下角
-        glm::vec4(1, 0, 0, 1),
+        glm::vec4(1, 0, 1, 1),
     };
     glBindVertexArray(_vaoQuad);
     // 替换顶点数据到当前Quad

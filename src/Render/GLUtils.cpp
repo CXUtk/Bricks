@@ -32,3 +32,7 @@ void GLUtils::genQuad(GLuint& vao, GLuint& vbo, GLuint& ebo) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
+
+float GLUtils::getRadians(glm::vec2 dir) {
+    return std::atan2(dir.y, dir.x);
+}
