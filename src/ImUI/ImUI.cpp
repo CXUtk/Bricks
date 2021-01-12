@@ -45,6 +45,7 @@ void ImUI::EndGUI() {
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
     if (input->getCurMouseDown()) {
+        // printf("%d\n", activeItem);
         if (activeItem == 0) {
             activeItem = -1;
         }
@@ -59,11 +60,12 @@ bool ImUI::img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::ve
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
     bool clicked = false;
+    pos += containerRect.pos;
     if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0 && inside(input->getMousePosition(), pos, size)) {
         clicked = true;
         activeItem = id;
     }
-    pos += containerRect.pos;
+
     drawLineRect(pos, size, borderColor);
     game.getGraphics()->drawSprite(texture, pos + size * 0.5f, glm::vec2(0.5, 0.5), scale, 0.f, color);
     return clicked;
@@ -74,11 +76,11 @@ bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, co
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
     bool clicked = false;
+    pos += containerRect.pos;
     if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0 && inside(input->getMousePosition(), pos, size)) {
         clicked = true;
         activeItem = id;
     }
-    pos += containerRect.pos;
     game.getGraphics()->drawQuad(pos, size, color);
     drawLineRect(pos, size, borderColor);
 
@@ -102,7 +104,9 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     }
 
     bool valueChanged = false;
+    printf("%d %d\n", activeItem, id);
     if (activeItem == id) {
+
         buttonColor = glm::vec3(0.9f);
         int mouseY = input->getMousePosition().y - (pos.y + 8);
         if (mouseY < 0) mouseY = 0;
@@ -116,7 +120,7 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
 
     game.getGraphics()->drawQuad(pos, glm::vec2(32, height), glm::vec3(0.2f));
     game.getGraphics()->drawQuad(glm::vec2(pos.x + 8, pos.y + 8 + ypos), glm::vec2(16, 16), buttonColor);
-    drawLineRect(glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16), glm::vec3(1, 0, 0));
+    //drawLineRect(glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16), glm::vec3(1, 0, 0));
     return valueChanged;
 }
 

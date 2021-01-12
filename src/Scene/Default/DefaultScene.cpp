@@ -217,36 +217,43 @@ void DefaultScene::draw() {
     ImUI::EndFrame();
 
     // 绘制下方可用砖块的帧
-    ImUI::BeginFrame(glm::vec2(8, 400 + 8), glm::vec2(400 - 16, game.getHeight() - 16 - 400), glm::vec3(1));
-    // Gap: 64 + 10
-    int startX = 8;
-    int startY = 8;
-    for (int i = 0; i < _bricks.size(); i++) {
-        auto texture = _textures[i];
-        float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
-        scale = std::min(scale, 1.0f);
-        scale *= 0.9f;
-        if (ImUI::img_button(texture, glm::vec2(startX, startY),
-            glm::vec2(64, 64), scale,
-            _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
-            _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
-            printf("%d is Clicked!\n", i);
-            _handBrick = _bricks[i];
-            _handBrickID = i;
-        }
-        startX += 74;
-        if (startX + 64 > game.getWidth()) {
-            startX = 8;
-            startY += 74;
-        }
-    }
+    {
+        ImUI::BeginFrame(glm::vec2(8, 400 + 8), glm::vec2(400 - 16, game.getHeight() - 16 - 400), glm::vec3(1));
+        auto rect = ImUI::getContainerRect();
 
-    static int sliderValue = 0;
-    if (ImUI::slider(glm::vec2(game.getWidth() - 75, 450), 200, 100, sliderValue)) {
-        printf("%d\n", sliderValue);
-    }
+        static int sliderValue = 0;
+        ImUI::BeginFrame(glm::vec2(16, 16), glm::vec2(rect.size.x - 32, rect.size.y - 32), glm::vec3(0));
+        // Gap: 64 + 10
+        int startX = 8;
+        int startY = 8;
+        for (int i = sliderValue; i < _bricks.size(); i++) {
+            auto texture = _textures[i];
+            float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
+            scale = std::min(scale, 1.0f);
+            scale *= 0.9f;
+            if (ImUI::img_button(texture, glm::vec2(startX, startY),
+                glm::vec2(64, 64), scale,
+                _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
+                _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
+                printf("%d is Clicked!\n", i);
+                _handBrick = _bricks[i];
+                _handBrickID = i;
+            }
+            startX += 74;
+            if (startX + 64 > rect.size.x - 32) {
+                startX = 8;
+                startY += 74;
+            }
+        }
+        ImUI::EndFrame();
 
-    ImUI::EndFrame();
+
+        if (ImUI::slider(glm::vec2(rect.size.x - 32 - 8, 8), rect.size.y - 16, _bricks.size(), sliderValue)) {
+            printf("%d\n", sliderValue);
+        }
+
+        ImUI::EndFrame();
+    }
 
 
 
