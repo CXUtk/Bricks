@@ -84,6 +84,9 @@
     <ClCompile Include="src\Render\PrimaryRenderer\TextRenderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Render\PrimaryRenderer\TriangleRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -149,6 +152,9 @@
     <ClInclude Include="src\Render\PrimaryRenderer\TextRenderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Render\PrimaryRenderer\TriangleRenderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\color.vs" />
@@ -165,6 +171,7 @@
     <None Include="设计文档.md" />
     <None Include="dlls\freetype.dll" />
     <None Include="dlls\glfw3.dll" />
+    <None Include="Resources\Shaders\circle.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="test233.gif">

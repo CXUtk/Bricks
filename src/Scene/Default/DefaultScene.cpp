@@ -53,6 +53,8 @@ DefaultScene::DefaultScene() {
         }
     }
 
+    fclose(file);
+
     //Brick fill(1, 1, "O");
     //Brick o1(3, 5,
     //    "...OO"
@@ -282,8 +284,8 @@ void DefaultScene::draw() {
     //lines.push_back(glm::vec2(500, 500));
     //Game::GetInstance().getGraphics()->drawLines(lines, glm::vec3(1, 1, 1), 2);
 
-
-     // Input end
+    game.getGraphics()->drawDirectedArrow(glm::vec2(0, 0), glm::vec2(500, 500), glm::vec3(1, 0, 0), 1);
+    // Input end
     input->endInput();
     ImUI::EndGUI();
 }
