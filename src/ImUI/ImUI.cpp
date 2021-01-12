@@ -1,5 +1,6 @@
 ﻿#include "ImUI.h"
 #include "Game.h"
+#include <algorithm>
 
 static int activeItem;
 static int globalID;
@@ -8,6 +9,7 @@ static int globalID;
 static Rect containerRect;
 static Rect containerStack[255];
 static int containerStackTop;
+static int currentClippingLayer;
 
 
 
@@ -39,6 +41,7 @@ void drawLineRect(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {
 
 void ImUI::BeginGUI() {
     Game& game = Game::GetInstance();
+    currentClippingLayer = 0;
     globalID = 0;
     containerRect = Rect(glm::vec2(0, 0), glm::vec2(game.getWidth(), game.getHeight()));
 }
@@ -96,6 +99,8 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
     pos += containerRect.pos;
+
+    value = std::max(0, std::min(value, max));
     int ypos = ((height - 16 - 16) * value) / max;
     glm::vec3 buttonColor = glm::vec3(0.5f);
     if (inside(input->getMousePosition(), glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16))) {
@@ -125,18 +130,53 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     return valueChanged;
 }
 
-void ImUI::BeginScrollableArea(glm::vec2 pos, glm::vec2 size) {
+void ImUI::BeginScrollableArea(glm::vec2 pos, glm::vec2 size, int& scrollValue) {
     int id = ++globalID;
+    pushCurrentContainer();
+    pos += containerRect.pos;
+    containerRect = Rect(pos, size);
+
     Game& game = Game::GetInstance();
     auto input = game.getInputManager();
-    pos += containerRect.pos;
 
-    drawLineRect(pos, size, glm::vec3(1, 0, 0));
+    int scroll = input->getScrollValue();
+    if (inside(input->getMousePosition(), pos, size)) {
+        scrollValue -= scroll * 2;
+    }
+    if (currentClippingLayer++ == 0) {
+        glEnable(GL_STENCIL_TEST);
+    }
+
+    // 关掉颜色绘制
+    glColorMask(0, 0, 0, 0);
+    glStencilFunc(GL_ALWAYS, currentClippingLayer, currentClippingLayer);
+    glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+    // 矩形区域增加Stencil Buffer
+    game.getGraphics()->drawQuad(containerRect.pos, containerRect.size, glm::vec3(0.f));
+
+    glColorMask(1, 1, 1, 1);
+    glStencilFunc(GL_EQUAL, currentClippingLayer, currentClippingLayer);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+    // drawLineRect(pos, size, glm::vec3(1, 0, 0));
 }
 
 void ImUI::EndScrollableArea() {
-}
+    Game& game = Game::GetInstance();
 
+    glColorMask(0, 0, 0, 0);
+    glStencilFunc(GL_ALWAYS, currentClippingLayer, currentClippingLayer);
+    glStencilOp(GL_DECR, GL_DECR, GL_DECR);
+    // 清除掉这一层的Stencil Buffer
+    game.getGraphics()->drawQuad(containerRect.pos, containerRect.size, glm::vec3(0.f));
+
+    glColorMask(1, 1, 1, 1);
+
+    popCurrentContainer();
+    if (--currentClippingLayer == 0) {
+        glDisable(GL_STENCIL_TEST);
+    }
+}
 void ImUI::BeginFrame(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {
     pushCurrentContainer();
     containerRect = Rect(containerRect.pos + pos, size);

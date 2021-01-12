@@ -14,6 +14,7 @@ public:
     bool getCurMouseRightDown() const { return _isMouseRightDown; }
     bool getWasKeyDown(int key) const { return _oldKeysDown.test(key); }
     bool getIsKeyDown(int key)const { return _curKeysDown.test(key); }
+    int getScrollValue() const;
     glm::vec2 getMousePosition();
 
 private:
@@ -22,6 +23,7 @@ private:
 
     bool _wasMouseRightDown;
     bool _isMouseRightDown;
+
 
     std::bitset<256> _curKeysDown;
     std::bitset<256> _oldKeysDown;
@@ -34,6 +36,7 @@ private:
     bool isMouseRightDown() {
         return glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
     }
+
 
     bool isKeyDown(int key);
 };

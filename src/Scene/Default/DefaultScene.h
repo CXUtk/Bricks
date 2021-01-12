@@ -16,14 +16,14 @@ public:
 
 
 private:
-    static constexpr int MAX_BLOCKS = 100;
+    static constexpr int MAX_BLOCKS = 1024;
     std::shared_ptr<Board> _board;
 
     Brick _handBrick;
     int _handBrickID;
     std::vector<Brick> _bricks;
     std::vector<std::shared_ptr<Texture2D>> _textures;
-    std::vector<Brick> poses[100];
+    std::vector<Brick> poses[MAX_BLOCKS];
     std::vector<int> placeInfo;
     std::map<int, int> _idMap;
     int _cnt[MAX_BLOCKS];

@@ -1,10 +1,23 @@
 ﻿#include "InputManager.h"
 
+
+int scrollValue;
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    scrollValue = (int)yoffset;
+}
+
 InputManager::InputManager(GLFWwindow* window) :_window(window) {
     _curKeysDown = 0;
     _oldKeysDown = 0;
     _isMouseDown = false;
     _wasMouseDown = false;
+
+    glfwSetScrollCallback(window, scroll_callback);
+}
+
+int InputManager::getScrollValue() const {
+    return scrollValue;
 }
 
 glm::vec2 InputManager::getMousePosition() {
@@ -30,4 +43,5 @@ void InputManager::endInput() {
     _wasMouseDown = _isMouseDown;
     _wasMouseRightDown = _isMouseRightDown;
     _oldKeysDown = _curKeysDown;
+    scrollValue = 0;
 }

@@ -119,7 +119,13 @@ DefaultScene::DefaultScene() {
     //generateBrickTextures();
     /*  randomGenerate();*/
 
-
+    Brick test(4, 4,
+        ".OO."
+        "OOOO"
+        "O..O"
+        "O..O");
+    for (int i = 0; i < 100; i++)
+        _bricks.push_back(test);
 
     for (int i = 0; i < _bricks.size(); i++) {
         _cnt[i] = 1;
@@ -128,7 +134,7 @@ DefaultScene::DefaultScene() {
 
     generateBrickTextures();
     auto time = glfwGetTime();
-    dfs(0, _bricks);
+    // dfs(0, _bricks);
     printf("%lf seconds\n", glfwGetTime() - time);
 
     // Place results
@@ -150,11 +156,7 @@ DefaultScene::DefaultScene() {
     //solve();
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
 
-    Brick test(4, 4,
-        ".OO."
-        "OOOO"
-        "O..O"
-        "O..O");
+
 
     _handBrick = test;
     _handBrickID = -1;
@@ -219,59 +221,65 @@ void DefaultScene::draw() {
     ImUI::EndFrame();
 
     // 绘制下方可用砖块的帧
+    ImUI::BeginFrame(glm::vec2(8, 400 + 8), glm::vec2(400 - 16, game.getHeight() - 16 - 400), glm::vec3(1));
     {
-        ImUI::BeginFrame(glm::vec2(8, 400 + 8), glm::vec2(400 - 16, game.getHeight() - 16 - 400), glm::vec3(1));
         auto rect = ImUI::getContainerRect();
 
         static int sliderValue = 0;
         ImUI::BeginFrame(glm::vec2(16, 16), glm::vec2(rect.size.x - 32, rect.size.y - 32), glm::vec3(0));
-        // Gap: 64 + 10
-        int startX = 8;
-        int startY = 8;
-        for (int i = sliderValue; i < _bricks.size(); i++) {
-            auto texture = _textures[i];
-            float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
-            scale = std::min(scale, 1.0f);
-            scale *= 0.9f;
-            if (ImUI::img_button(texture, glm::vec2(startX, startY),
-                glm::vec2(64, 64), scale,
-                _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
-                _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
-                printf("%d is Clicked!\n", i);
-                _handBrick = _bricks[i];
-                _handBrickID = i;
+        {
+            auto rect2 = ImUI::getContainerRect();
+            ImUI::BeginScrollableArea(glm::vec2(0), glm::vec2(rect2.size.x - 32, rect2.size.y), sliderValue);
+            {
+                // Gap: 64 + 10
+                int startX = 8;
+                int startY = 8 - sliderValue / 4 * 74;
+                for (int i = 0; i < _bricks.size(); i++) {
+                    auto texture = _textures[i];
+                    float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
+                    scale = std::min(scale, 1.0f);
+                    scale *= 0.9f;
+                    if (ImUI::img_button(texture, glm::vec2(startX, startY),
+                        glm::vec2(64, 64), scale,
+                        _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
+                        _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
+                        printf("%d is Clicked!\n", i);
+                        _handBrick = _bricks[i];
+                        _handBrickID = i;
+                    }
+                    startX += 74;
+                    if (startX + 64 > rect2.size.x) {
+                        startX = 8;
+                        startY += 74;
+                    }
+                }
             }
-            startX += 74;
-            if (startX + 64 > rect.size.x - 32) {
-                startX = 8;
-                startY += 74;
-            }
+            ImUI::EndScrollableArea();
         }
         ImUI::EndFrame();
-
-
         if (ImUI::slider(glm::vec2(rect.size.x - 32 - 8, 8), rect.size.y - 16, _bricks.size(), sliderValue)) {
             printf("%d\n", sliderValue);
         }
-
-        ImUI::EndFrame();
     }
+    ImUI::EndFrame();
 
 
 
     // 绘制右侧工具栏的帧
     ImUI::BeginFrame(glm::vec2(400 + 8, 8), glm::vec2(game.getWidth() - 16 - 400, 700 - 16), glm::vec3(1));
-    auto rect = ImUI::getContainerRect();
+    {
+        auto rect = ImUI::getContainerRect();
 
-    if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 8), glm::vec2(120, 50), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
-        _board->clear();
-        for (int i = 0; i < _bricks.size(); i++) {
-            _cnt[i] = 1;
+        if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 8), glm::vec2(120, 50), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
+            _board->clear();
+            for (int i = 0; i < _bricks.size(); i++) {
+                _cnt[i] = 1;
+            }
         }
-    }
-    if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 50 + 16), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
-        glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
+        if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 50 + 16), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
+            glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
 
+        }
     }
     ImUI::EndFrame();
     //if (!solver->isFinished() || (!_oldFinished && solver->isFinished())) {
@@ -284,7 +292,7 @@ void DefaultScene::draw() {
     //lines.push_back(glm::vec2(500, 500));
     //Game::GetInstance().getGraphics()->drawLines(lines, glm::vec3(1, 1, 1), 2);
 
-    game.getGraphics()->drawDirectedArrow(glm::vec2(0, 0), glm::vec2(500, 500), glm::vec3(1, 0, 0), 1);
+    // game.getGraphics()->drawDirectedArrow(glm::vec2(0, 0), glm::vec2(500, 500), glm::vec3(1, 0, 0), 1);
     // Input end
     input->endInput();
     ImUI::EndGUI();
