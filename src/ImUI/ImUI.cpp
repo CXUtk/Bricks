@@ -9,6 +9,8 @@ static Rect containerRect;
 static Rect containerStack[255];
 static int containerStackTop;
 
+
+
 void pushCurrentContainer() {
     containerStack[++containerStackTop] = containerRect;
 }
@@ -122,6 +124,18 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     game.getGraphics()->drawQuad(glm::vec2(pos.x + 8, pos.y + 8 + ypos), glm::vec2(16, 16), buttonColor);
     //drawLineRect(glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16), glm::vec3(1, 0, 0));
     return valueChanged;
+}
+
+void ImUI::BeginScrollableArea(glm::vec2 pos, glm::vec2 size) {
+    int id = ++globalID;
+    Game& game = Game::GetInstance();
+    auto input = game.getInputManager();
+    pos += containerRect.pos;
+
+    drawLineRect(pos, size, glm::vec3(1, 0, 0));
+}
+
+void ImUI::EndScrollableArea() {
 }
 
 void ImUI::BeginFrame(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {

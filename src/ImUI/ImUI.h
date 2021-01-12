@@ -28,6 +28,9 @@ public:
 
     static bool slider(glm::vec2 pos, int height, int max, int& value);
 
+    static void BeginScrollableArea(glm::vec2 pos, glm::vec2 size);
+    static void EndScrollableArea();
+
     static void BeginFrame(glm::vec2 pos, glm::vec2 size, const glm::vec3& color);
     static void EndFrame();
 
