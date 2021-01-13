@@ -41,17 +41,32 @@ typedef struct vec3_t {
 } node3_t;
 
 bool inCircumcircle(Vertex* a, Vertex* b, Vertex* c, Vertex* d) {
-    vec3_t A = vec3_t(a->pos.x, a->pos.y, Vector2::dot(a->pos, a->pos));
-    vec3_t B = vec3_t(b->pos.x, b->pos.y, Vector2::dot(b->pos, b->pos));
-    vec3_t C = vec3_t(c->pos.x, c->pos.y, Vector2::dot(c->pos, c->pos));
-    vec3_t D = vec3_t(d->pos.x, d->pos.y, Vector2::dot(d->pos, d->pos));
-    if (Vector2::cross(b->pos - a->pos, c->pos - a->pos) < 0) std::swap(B, C);
-
-    node3_t normal = cross(B - A, C - A);
-    if (dot(normal, D - A) > EPS)
+    //vec3_t A = vec3_t(a->pos.x, a->pos.y, Vector2::dot(a->pos, a->pos));
+    //vec3_t B = vec3_t(b->pos.x, b->pos.y, Vector2::dot(b->pos, b->pos));
+    //vec3_t C = vec3_t(c->pos.x, c->pos.y, Vector2::dot(c->pos, c->pos));
+    //vec3_t D = vec3_t(d->pos.x, d->pos.y, Vector2::dot(d->pos, d->pos));
+    glm::dvec2 A = (a->pos - d->pos).to_dvec2();
+    glm::dvec2 B = (b->pos - d->pos).to_dvec2();
+    glm::dvec2 C = (c->pos - d->pos).to_dvec2();
+    //if (Vector2::cross(b->pos - a->pos, c->pos - a->pos) < 0) {
+    //    std::swap(B, C);
+    //}
+    if (Vector2::cross(b->pos - a->pos, c->pos - a->pos) < 0) {
         return false;
-    else
-        return true;
+    }
+
+    glm::dmat3 mat(glm::dvec3(A.x, B.x, C.x), glm::dvec3(A.y, B.y, C.y), glm::dvec3(glm::dot(A, A), glm::dot(B, B), glm::dot(C, C)));
+    auto judge = glm::determinant(mat);
+    return judge > 0;
+
+
+
+    //node3_t normal = cross(B - A, C - A);
+    //auto res = dot(normal, D - A);
+    //if (res > EPS)
+    //    return false;
+    //else
+    //    return true;
 }
 
 
@@ -76,6 +91,7 @@ void constructNewFace(Face* face, Vertex* a, Vertex* b, Vertex* c) {
     edges[2] = newEdge(c, a);
 
     for (int i = 0; i < 3; i++) {
+        face->vs[i] = edges[i]->from->pos;
         edges[i]->next = edges[(i + 1) % 3];
         edges[(i + 1) % 3]->prev = edges[i];
         edges[i]->face = face;
@@ -90,6 +106,7 @@ void constructFace(Face* face, Edge* a, Edge* b, Edge* c) {
     edges[1] = b;
     edges[2] = c;
     for (int i = 0; i < 3; i++) {
+        face->vs[i] = edges[i]->from->pos;
         edges[i]->next = edges[(i + 1) % 3];
         edges[(i + 1) % 3]->prev = edges[i];
         edges[i]->face = face;
@@ -112,10 +129,19 @@ DelaunayScene::DelaunayScene() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     auto& game = Game::GetInstance();
     game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, 600.f, 0.f, 600.f, -1.0f, 1.0f));
-    for (int i = 1; i <= MAX_VERTICES; i++) {
-        vPool[++totV] = Vertex(i, 30 + mt() % 500, 30 + mt() % 500);
+    for (int i = 0; i < MAX_VERTICES; i++) {
+        int r = (i / 25);
+        int c = i % 25;
+        vPool[++totV] = Vertex(i + 1, 30 + mt() % 500, 30 + mt() % 500);
         vPool[totV].shake();
     }
+
+    //vPool[++totV] = Vertex(1, 30, 30);
+    //vPool[totV].shake();
+    //vPool[++totV] = Vertex(2, 31, 31);
+    //vPool[totV].shake();
+    //vPool[++totV] = Vertex(3, 32, 32);
+    //vPool[totV].shake();
 
     auto a = newVertex(1e6, 1e6);
     auto b = newVertex(-1e6, 1e6);
@@ -137,12 +163,15 @@ DelaunayScene::DelaunayScene() {
         v.testInTriangle(f2);
     }
 
+
+    //printf("%d\n", Vector2::cross(vPool[2].pos - vPool[1].pos, vPool[3].pos - vPool[1].pos) >= 0);
+
     //clock_t startTime, endTime;
     //startTime = clock();
     // insert(394);
-    //for (int i = 1; i <= MAX_VERTICES; i++) {
-    //    insert(i);
-    //}
+    for (int i = 1; i <= MAX_VERTICES; i++) {
+        insert(i);
+    }
     ////endTime = clock();  //计时结束
     ////printf("The running time is: %.4fs\n",
     ////    (double)(endTime - startTime) / CLOCKS_PER_SEC);
@@ -164,15 +193,15 @@ int t = 0;
 int t2 = 0;
 
 void DelaunayScene::update() {
-    if (t2 == 0) {
-        if (t < MAX_VERTICES)
-            insert(++t);
+    //if (t2 == 0) {
+    //    if (t < MAX_VERTICES)
+    //        insert(++t);
 
-    }
-    ++t2;
-    if (t2 == 5) {
-        t2 = 0;
-    }
+    //}
+    //++t2;
+    //if (t2 == 1) {
+    //    t2 = 0;
+    //}
 }
 
 void DelaunayScene::draw() {
@@ -231,7 +260,7 @@ void DelaunayScene::insert(int x) {
     }
 
     for (auto vs : children) {
-        //if (vs->id <= x) continue;
+        if (vs == v) continue;
         for (int i = 0; i < 3; i++) {
             if (vs->testInTriangle(nFaces[i]))break;
         }
@@ -256,6 +285,7 @@ void DelaunayScene::insert(int x) {
         if (!twin) continue;
 
         auto targetV = twin->next->to;
+        //assert(targetV != v);
         if (targetV == v) continue;
 
         if (inCircumcircle(curEdge->from, curEdge->to, v, targetV)) {
@@ -294,7 +324,7 @@ void DelaunayScene::insert(int x) {
             constructFace(otherFace, twin, lastPrev, nxt1);
 
             for (auto vs : children) {
-                //if (vs->id <= x) continue;
+                if (vs == v) continue;
                 if (vs->testInTriangle(selfFace)) continue;
                 vs->testInTriangle(otherFace);
             }

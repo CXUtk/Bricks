@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 constexpr int MAXN = 100005;
-constexpr int MAX_VERTICES = 400;
+constexpr int MAX_VERTICES = 10000;
 constexpr double EPS = 1e-9;
 
 static std::mt19937 mt;
@@ -23,6 +23,9 @@ struct Vector2 {
 
     glm::vec2 to_vec2() const {
         return glm::vec2(x, y);
+    }
+    glm::dvec2 to_dvec2() const {
+        return glm::dvec2(x, y);
     }
 
     static double dot(const Vector2& a, const Vector2& b) {
@@ -128,7 +131,10 @@ struct Edge {
 struct Face {
     int id;
     Edge* edge;
+    Vector2 vs[3];
     std::vector<Vertex*> owned;
+
+
     Face() : id(0), edge(nullptr) {
     }
     Face(int id, Edge* edge) : id(id), edge(edge) {
@@ -144,8 +150,8 @@ struct Vertex {
     Vertex(int id, double x, double y) : id(id), belong(nullptr), pos(x, y) {}
 
     void shake() {
-        pos.x += (mt.max() / 2 - mt()) / (double)mt.max() * 2 * EPS;
-        pos.y += (mt.max() / 2 - mt()) / (double)mt.max() * 2 * EPS;
+        pos.x += (mt.max() / 2.0 - mt()) / (double)mt.max() * 2 * EPS;
+        pos.y += (mt.max() / 2.0 - mt()) / (double)mt.max() * 2 * EPS;
     }
 
     bool testInTriangle(Face* face) {
@@ -153,7 +159,7 @@ struct Vertex {
         for (int i = 0; i < 3; i++) {
             auto dir = e->to->pos - e->from->pos;
             auto p = pos - e->from->pos;
-            if (Vector2::cross(dir, p) <= 0) return false;
+            if (Vector2::cross(dir, p) < 0) return false;
             e = e->next;
         }
         belong = face;
