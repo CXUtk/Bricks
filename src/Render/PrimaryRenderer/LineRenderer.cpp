@@ -39,7 +39,7 @@ void LineRenderer::drawLines(const std::vector<Segment>& segments, const glm::ve
     // 以 BUFFER_SIZE 个点为单位，分批绘制线段
     for (int i = 0; i < sz; i += BUFFER_SIZE) {
         glBindBuffer(GL_ARRAY_BUFFER, _vboLine);
-        int count = std::min(sz - i, i + BUFFER_SIZE) - i;
+        int count = std::min(sz, i + BUFFER_SIZE) - i;
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Segment) * count, segments.data() + i);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 

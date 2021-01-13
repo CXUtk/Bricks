@@ -117,10 +117,10 @@ DelaunayScene::DelaunayScene() {
         vPool[totV].shake();
     }
 
-    auto a = newVertex(550, 550);
-    auto b = newVertex(25, 550);
-    auto c = newVertex(25, 25);
-    auto d = newVertex(550, 25);
+    auto a = newVertex(1e6, 1e6);
+    auto b = newVertex(-1e6, 1e6);
+    auto c = newVertex(-1e6, -1e6);
+    auto d = newVertex(1e6, -1e6);
 
 
     auto f1 = newFace();
@@ -170,7 +170,7 @@ void DelaunayScene::update() {
 
     }
     ++t2;
-    if (t2 == 2) {
+    if (t2 == 5) {
         t2 = 0;
     }
 }
