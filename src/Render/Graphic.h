@@ -17,7 +17,7 @@ public:
     ~Graphics();
 
     void drawLines(const std::vector<Segment>& lines, const glm::vec3& color, float width);
-    void drawDirectedArrow(glm::vec2 start, glm::vec2 end, const glm::vec3& color, float width);
+    void drawDirectedArrow(glm::vec2 start, glm::vec2 end, const glm::vec3& color, float width, std::vector<Segment>& lines);
 
     void drawQuad(glm::vec2 pos, glm::vec2 size, const glm::vec3& color);
     void drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, float scale, const glm::vec3& color);

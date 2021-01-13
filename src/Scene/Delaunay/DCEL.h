@@ -5,8 +5,7 @@
 #include <glm/glm.hpp>
 
 constexpr int MAXN = 100005;
-constexpr int MAXF = 200000;
-constexpr int MAX_VERTICES = 1;
+constexpr int MAX_VERTICES = 10;
 constexpr double EPS = 1e-9;
 
 static std::mt19937 mt;
@@ -131,7 +130,6 @@ struct Face {
     Edge* edge;
     std::vector<Vertex*> owned;
     Face() :edge(nullptr) {
-
     }
     Face(int id, Edge* edge) : id(id), edge(edge) {
     }
@@ -146,8 +144,8 @@ struct Vertex {
     Vertex(int id, double x, double y) : id(id), belong(nullptr), pos(x, y) {}
 
     void shake() {
-        pos.x += (mt() - mt.max() / 2) / (double)mt.max() * 2 * EPS;
-        pos.y += (mt() - mt.max() / 2) / (double)mt.max() * 2 * EPS;
+        pos.x += (mt.max() / 2 - mt()) / (double)mt.max() * 2 * EPS;
+        pos.y += (mt.max() / 2 - mt()) / (double)mt.max() * 2 * EPS;
     }
 
     bool testInTriangle(Face* face) {
@@ -155,7 +153,7 @@ struct Vertex {
         for (int i = 0; i < 3; i++) {
             auto dir = e->to->pos - e->from->pos;
             auto p = pos - e->from->pos;
-            if (Vector2::cross(dir, p) <= 0) return false;
+            if (Vector2::cross(dir, p) < EPS) return false;
             e = e->next;
         }
         belong = face;

@@ -10,7 +10,7 @@ int totV;
 Face fPool[MAXF];
 int totF;
 
-Edge ePool[MAXF * 2];
+Edge ePool[MAXN * 6];
 int totE;
 
 
@@ -20,6 +20,7 @@ bool inCircumcircle(Vertex* a, Vertex* b, Vertex* c, Vertex* d) {
     glm::vec3 B = glm::vec3(b->pos.x, b->pos.y, Vector2::dot(b->pos, b->pos));
     glm::vec3 C = glm::vec3(c->pos.x, c->pos.y, Vector2::dot(c->pos, c->pos));
     glm::vec3 D = glm::vec3(d->pos.x, d->pos.y, Vector2::dot(d->pos, d->pos));
+    if (Vector2::cross(b->pos - a->pos, c->pos - a->pos) < 0) std::swap(B, C);
 
     glm::vec3 normal = glm::cross(B - A, C - A);
     return !(glm::dot(normal, D - A) > EPS);
@@ -83,7 +84,7 @@ DelaunayScene::DelaunayScene() {
     auto& game = Game::GetInstance();
     game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f));
     for (int i = 1; i <= MAX_VERTICES; i++) {
-        vPool[++totV] = Vertex(i, 26 + mt() % 523, 26 + mt() % 523);
+        vPool[++totV] = Vertex(i, 25, 25);
         vPool[totV].shake();
     }
     auto a = newVertex(550, 550);
@@ -105,10 +106,13 @@ DelaunayScene::DelaunayScene() {
         v.testInTriangle(f2);
     }
 
-    //insert(1);
-    for (int i = 1; i <= MAX_VERTICES; i++) {
-        insert(i);
-    }
+
+    // insert(394);
+    //for (int i = 1; i <= MAX_VERTICES; i++) {
+    //    insert(i);
+    //}
+
+    printf("%d\n", vPool[394].belong);
 }
 
 DelaunayScene::~DelaunayScene() {
@@ -118,15 +122,15 @@ int t = 0;
 int t2 = 0;
 
 void DelaunayScene::update() {
-    //if (t2 == 0) {
-    //    if (t < MAX_VERTICES)
-    //        insert(++t);
+    if (t2 == 0) {
+        if (t < MAX_VERTICES)
+            insert(++t);
 
-    //}
-    //++t2;
-    //if (t2 == 120) {
-    //    t2 = 0;
-    //}
+    }
+    ++t2;
+    if (t2 == 120) {
+        t2 = 0;
+    }
 }
 
 void DelaunayScene::draw() {
@@ -134,17 +138,18 @@ void DelaunayScene::draw() {
         Vertex& v = vPool[i];
         Game::GetInstance().getGraphics()->drawCircle(glm::vec2(v.pos.x - 3, v.pos.y - 3), glm::vec2(6), glm::vec3(1, 0, 0));
     }
-
+    std::vector<Segment> segments;
     for (int i = 1; i <= totF; i++) {
         Face& f = fPool[i];
         auto& e = f.edge;
         for (int j = 0; j < 3; j++) {
             auto v = e->to->pos - e->from->pos;
             v = v.unit();
-            Game::GetInstance().getGraphics()->drawDirectedArrow((e->from->pos + v * 5).to_vec2(), (e->to->pos - v * 5).to_vec2(), glm::vec3(1), 1);
+            Game::GetInstance().getGraphics()->drawDirectedArrow((e->from->pos + v * 5).to_vec2(), (e->to->pos - v * 5).to_vec2(), glm::vec3(1), 1, segments);
             e = e->next;
         }
     }
+    Game::GetInstance().getGraphics()->drawLines(segments, glm::vec3(1), 1);
 }
 
 void DelaunayScene::insert(int x) {
@@ -170,8 +175,9 @@ void DelaunayScene::insert(int x) {
         oEdges[i] = fEdge;
         fEdge = fEdge->next;
     }
+
     for (int i = 0; i < 3; i++) {
-        constructFace(nFaces[i], nEdges[i], fEdge, cEdges[i]);
+        constructFace(nFaces[i], nEdges[i], oEdges[i], cEdges[i]);
         nEdges[i]->twin = cEdges[(i + 2) % 3];
         cEdges[(i + 2) % 3]->twin = nEdges[i];
     }
@@ -207,6 +213,8 @@ void DelaunayScene::insert(int x) {
         if (!twin) continue;
 
         auto targetV = twin->next->to;
+        if (!targetV) continue;
+
         if (inCircumcircle(curEdge->from, curEdge->to, v, targetV)) {
             auto nxt1 = twin->next;
             // Add suspectiable edge
