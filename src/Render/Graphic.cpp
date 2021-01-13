@@ -25,7 +25,7 @@ void Graphics::drawLines(const std::vector<Segment>& lines, const glm::vec3& col
 void Graphics::drawDirectedArrow(glm::vec2 start, glm::vec2 end, const glm::vec3& color, float width, std::vector<Segment>& lines) {
     float triangleSize = std::max(20.f, width * 5);
     auto unit = glm::normalize(end - start);
-    lines.push_back(Segment(start, end - unit * 0.5f * triangleSize));
+    lines.push_back(Segment(start, end /*- unit * 0.5f * triangleSize*/));
     float rad = GLUtils::getRadians(unit);
 
 
@@ -34,7 +34,7 @@ void Graphics::drawDirectedArrow(glm::vec2 start, glm::vec2 end, const glm::vec3
         glm::vec2(-0.5, 0.2),
         glm::vec2(-0.5, -0.2),
     };
-    _triangleRenderer->drawTriangle(triangle[0], triangle[1], triangle[2], end, glm::vec2(0, 0), triangleSize, rad, color);
+    //_triangleRenderer->drawTriangle(triangle[0], triangle[1], triangle[2], end, glm::vec2(0, 0), triangleSize, rad, color);
 }
 
 void Graphics::drawQuad(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {

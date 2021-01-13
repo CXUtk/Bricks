@@ -3,11 +3,13 @@
 #include "DCEL.h"
 
 #include <queue>
+#include <set>
+#include <ctime>
 
 Vertex vPool[MAXN];
 int totV;
 
-Face fPool[MAXF];
+Face fPool[MAXN * 2];
 int totF;
 
 Edge ePool[MAXN * 6];
@@ -15,16 +17,43 @@ int totE;
 
 
 
+typedef struct vec3_t {
+    double x, y, z;
+    vec3_t(double _x = 0, double _y = 0, double _z = 0) {
+        x = _x, y = _y, z = _z;
+    }
+    inline friend vec3_t operator+(const vec3_t& a, const vec3_t& b) {
+        return vec3_t(a.x + b.x, a.y + b.y, a.z + b.z);
+    }
+    inline friend vec3_t operator-(const vec3_t& a, const vec3_t& b) {
+        return vec3_t(a.x - b.x, a.y - b.y, a.z - b.z);
+    }
+    inline friend vec3_t operator*(const vec3_t& a, double k) {
+        return vec3_t(a.x * k, a.y * k, a.z * k);
+    }
+    inline friend vec3_t cross(const vec3_t& a, const vec3_t& b) {
+        return vec3_t(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x);
+    }
+    inline friend double dot(const vec3_t& a, const vec3_t& b) {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
+    }
+} node3_t;
+
 bool inCircumcircle(Vertex* a, Vertex* b, Vertex* c, Vertex* d) {
-    glm::vec3 A = glm::vec3(a->pos.x, a->pos.y, Vector2::dot(a->pos, a->pos));
-    glm::vec3 B = glm::vec3(b->pos.x, b->pos.y, Vector2::dot(b->pos, b->pos));
-    glm::vec3 C = glm::vec3(c->pos.x, c->pos.y, Vector2::dot(c->pos, c->pos));
-    glm::vec3 D = glm::vec3(d->pos.x, d->pos.y, Vector2::dot(d->pos, d->pos));
+    vec3_t A = vec3_t(a->pos.x, a->pos.y, Vector2::dot(a->pos, a->pos));
+    vec3_t B = vec3_t(b->pos.x, b->pos.y, Vector2::dot(b->pos, b->pos));
+    vec3_t C = vec3_t(c->pos.x, c->pos.y, Vector2::dot(c->pos, c->pos));
+    vec3_t D = vec3_t(d->pos.x, d->pos.y, Vector2::dot(d->pos, d->pos));
     if (Vector2::cross(b->pos - a->pos, c->pos - a->pos) < 0) std::swap(B, C);
 
-    glm::vec3 normal = glm::cross(B - A, C - A);
-    return !(glm::dot(normal, D - A) > EPS);
+    node3_t normal = cross(B - A, C - A);
+    if (dot(normal, D - A) > EPS)
+        return false;
+    else
+        return true;
 }
+
 
 Vertex* newVertex(double x, double y) {
     ++totV;
@@ -82,15 +111,17 @@ DelaunayScene::DelaunayScene() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     auto& game = Game::GetInstance();
-    game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, (float)game.getWidth(), 0.f, (float)game.getHeight(), -1.0f, 1.0f));
+    game.getGraphics()->setProjectionMatrix(glm::ortho(0.f, 600.f, 0.f, 600.f, -1.0f, 1.0f));
     for (int i = 1; i <= MAX_VERTICES; i++) {
-        vPool[++totV] = Vertex(i, 25, 25);
+        vPool[++totV] = Vertex(i, 30 + mt() % 500, 30 + mt() % 500);
         vPool[totV].shake();
     }
+
     auto a = newVertex(550, 550);
     auto b = newVertex(25, 550);
     auto c = newVertex(25, 25);
     auto d = newVertex(550, 25);
+
 
     auto f1 = newFace();
     auto f2 = newFace();
@@ -106,13 +137,24 @@ DelaunayScene::DelaunayScene() {
         v.testInTriangle(f2);
     }
 
-
+    //clock_t startTime, endTime;
+    //startTime = clock();
     // insert(394);
     //for (int i = 1; i <= MAX_VERTICES; i++) {
     //    insert(i);
     //}
-
-    printf("%d\n", vPool[394].belong);
+    ////endTime = clock();  //计时结束
+    ////printf("The running time is: %.4fs\n",
+    ////    (double)(endTime - startTime) / CLOCKS_PER_SEC);
+    //for (int i = 1; i <= totF; i++) {
+    //    auto e = fPool[i].edge;
+    //    for (int j = 0; j < 3; j++) {
+    //        int u = e->from->id, v = e->to->id;
+    //        printf("%d %d\n", u, v);
+    //        e = e->next;
+    //    }
+    //    printf("\n");
+    //}
 }
 
 DelaunayScene::~DelaunayScene() {
@@ -128,12 +170,13 @@ void DelaunayScene::update() {
 
     }
     ++t2;
-    if (t2 == 120) {
+    if (t2 == 2) {
         t2 = 0;
     }
 }
 
 void DelaunayScene::draw() {
+
     for (int i = 1; i <= totV; i++) {
         Vertex& v = vPool[i];
         Game::GetInstance().getGraphics()->drawCircle(glm::vec2(v.pos.x - 3, v.pos.y - 3), glm::vec2(6), glm::vec3(1, 0, 0));
@@ -145,7 +188,7 @@ void DelaunayScene::draw() {
         for (int j = 0; j < 3; j++) {
             auto v = e->to->pos - e->from->pos;
             v = v.unit();
-            Game::GetInstance().getGraphics()->drawDirectedArrow((e->from->pos + v * 5).to_vec2(), (e->to->pos - v * 5).to_vec2(), glm::vec3(1), 1, segments);
+            Game::GetInstance().getGraphics()->drawDirectedArrow((e->from->pos).to_vec2(), (e->to->pos).to_vec2(), glm::vec3(1), 1, segments);
             e = e->next;
         }
     }
@@ -188,7 +231,7 @@ void DelaunayScene::insert(int x) {
     }
 
     for (auto vs : children) {
-        if (vs->id <= x) continue;
+        //if (vs->id <= x) continue;
         for (int i = 0; i < 3; i++) {
             if (vs->testInTriangle(nFaces[i]))break;
         }
@@ -213,15 +256,13 @@ void DelaunayScene::insert(int x) {
         if (!twin) continue;
 
         auto targetV = twin->next->to;
-        if (!targetV) continue;
+        if (targetV == v) continue;
 
         if (inCircumcircle(curEdge->from, curEdge->to, v, targetV)) {
             auto nxt1 = twin->next;
             // Add suspectiable edge
             Q.push(nxt1);
             Q.push(nxt1->next);
-
-
 
             auto selfFace = curEdge->face;
             auto otherFace = twin->face;
@@ -253,7 +294,7 @@ void DelaunayScene::insert(int x) {
             constructFace(otherFace, twin, lastPrev, nxt1);
 
             for (auto vs : children) {
-                if (vs->id <= x) continue;
+                //if (vs->id <= x) continue;
                 if (vs->testInTriangle(selfFace)) continue;
                 vs->testInTriangle(otherFace);
             }

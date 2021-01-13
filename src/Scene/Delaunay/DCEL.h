@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 constexpr int MAXN = 100005;
-constexpr int MAX_VERTICES = 10;
+constexpr int MAX_VERTICES = 400;
 constexpr double EPS = 1e-9;
 
 static std::mt19937 mt;
@@ -121,15 +121,15 @@ struct Edge {
 
     int id;
 
-    Edge() : from(nullptr), to(nullptr), twin(nullptr), face(nullptr), prev(nullptr), next(nullptr) {}
-    Edge(Vertex* fr, Vertex* to) :from(fr), to(to), twin(nullptr), face(nullptr), prev(nullptr), next(nullptr) {}
+    Edge() : id(0), from(nullptr), to(nullptr), twin(nullptr), face(nullptr), prev(nullptr), next(nullptr) {}
+    Edge(Vertex* fr, Vertex* to) : id(0), from(fr), to(to), twin(nullptr), face(nullptr), prev(nullptr), next(nullptr) {}
 };
 
 struct Face {
     int id;
     Edge* edge;
     std::vector<Vertex*> owned;
-    Face() :edge(nullptr) {
+    Face() : id(0), edge(nullptr) {
     }
     Face(int id, Edge* edge) : id(id), edge(edge) {
     }
@@ -153,7 +153,7 @@ struct Vertex {
         for (int i = 0; i < 3; i++) {
             auto dir = e->to->pos - e->from->pos;
             auto p = pos - e->from->pos;
-            if (Vector2::cross(dir, p) < EPS) return false;
+            if (Vector2::cross(dir, p) <= 0) return false;
             e = e->next;
         }
         belong = face;
