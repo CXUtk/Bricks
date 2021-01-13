@@ -29,11 +29,12 @@ Game::Game(int width, int height) : _width(width), _height(height) {
     }
     glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
     glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
 }
 
 Game& Game::GetInstance() {
-    static Game game(600, 700);
+    static Game game(600, 600);
     return game;
 }
 
@@ -47,7 +48,7 @@ void Game::init() {
     _shaderManager = std::make_shared<ShaderManager>();
     _graphics = std::make_shared<Graphics>();
     _inputManager = std::make_shared<InputManager>(_window);
-    _curScene = Scene::makeScene("DEFAULT");
+    _curScene = Scene::makeScene("delauny");
     _fontManager = std::make_shared<FontManager>();
 }
 

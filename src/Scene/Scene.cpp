@@ -1,6 +1,13 @@
 ﻿#include "Scene.h"
 #include "Scene/Default/DefaultScene.h"
+#include "Scene/Delaunay/DelaunayScene.h"
 
 std::shared_ptr<Scene> Scene::makeScene(const std::string& name) {
-    return std::shared_ptr<DefaultScene>(new DefaultScene());
+    if (name == "default") {
+        return std::shared_ptr<DefaultScene>(new DefaultScene());
+    }
+    else if (name == "delauny") {
+        return std::shared_ptr<DelaunayScene>(new DelaunayScene());
+    }
+    return nullptr;
 }
