@@ -28,6 +28,8 @@ public:
 
     void drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color);
 
+    void drawTriangles(const std::vector<Triangle>& triangles, const glm::mat4& transform, const glm::vec3& color);
+
     glm::ivec2 measureString(const std::string& font, const std::string& text, float scale) const;
 
     void setProjectionMatrix(const glm::mat4& mat) {

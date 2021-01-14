@@ -12,6 +12,14 @@ struct Segment {
     Segment(glm::vec2 start, glm::vec2 end) :start(start), end(end) {}
 };
 
+struct Triangle {
+    glm::vec4 v[3];
+    Triangle() {}
+    Triangle(const glm::vec4& A, const glm::vec4& B, const glm::vec4& C) {
+        v[0] = A, v[1] = B, v[2] = C;
+    }
+};
+
 class GLUtils {
 public:
     static void genQuad(GLuint& vao, GLuint& vbo, GLuint& ebo);

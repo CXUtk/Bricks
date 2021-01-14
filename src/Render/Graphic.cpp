@@ -63,6 +63,10 @@ void Graphics::drawText(glm::vec2 pos, const std::string& text, float scale, con
     _textRenderer->drawText(pos, text, scale, color);
 }
 
+void Graphics::drawTriangles(const std::vector<Triangle>& triangles, const glm::mat4& transform, const glm::vec3& color) {
+    _triangleRenderer->drawTriangles(triangles, transform, color);
+}
+
 glm::ivec2 Graphics::measureString(const std::string& font, const std::string& text, float scale) const {
     return _textRenderer->measureString(font, text, scale);
 }

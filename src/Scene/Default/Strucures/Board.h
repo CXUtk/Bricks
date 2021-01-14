@@ -83,7 +83,7 @@ private:
     glm::ivec2 _topLeft;
 
 
-    void drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vector<glm::vec2>& edges);
+    void drawCell(int r, int c, std::shared_ptr<Graphics> graphic);
     void setTile(int r, int c, int color);
 
     int getTileColor(int r, int c) const;

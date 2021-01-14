@@ -93,6 +93,9 @@
     <ClCompile Include="src\Scene\Delaunay\DCEL.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene\Default\Strucures\PolyominoRenderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -168,6 +171,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Default\Strucures\Puzzle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Scene\Default\Strucures\PolyominoRenderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -280,11 +280,14 @@ void Board::draw() {
 
     game.getGraphics()->drawLines(lines, glm::vec3(0, 0, 0), 1);
 
-    std::vector<glm::vec2> edges;
+    std::vector<Triangle> triangles;
     for (int i = 0; i < _rows; i++) {
         for (int j = 0; j < _columns; j++) {
-            if (getTileColor(i, j) != -1) {
-                drawCell(i, j, game.getGraphics(), edges);
+            int color = getTileColor(i, j);
+            if (color != -1) {
+                //glm::vec2 bl = glm::vec2(_topLeft.x + j * BLOCK_SIZE, _topLeft.y + i * BLOCK_SIZE);
+                //game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), colors[color % 10]);
+                drawCell(i, j, game.getGraphics());
             }
         }
     }
@@ -326,7 +329,7 @@ glm::ivec2 Board::getSize() const {
     return glm::ivec2(_columns, _rows) * BLOCK_SIZE;
 }
 
-void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vector<glm::vec2>& edges) {
+void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic) {
     glm::vec2 bl = glm::vec2(_topLeft.x + c * BLOCK_SIZE, _topLeft.y + r * BLOCK_SIZE);
     auto& game = Game::GetInstance();
     auto height = game.getHeight();
@@ -336,8 +339,123 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic, std::vecto
     static int dc[4] = { 0, 0, 1, -1 };
 
     int color = getTileColor(r, c);
-    if (!getShadow(r, c)) {
-        game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), colors[color % 10]);
+
+    std::vector<Triangle> drakTri;
+    std::vector<Triangle> lightTri;
+
+    auto judge = [=](int i, int j) {
+        return i >= 0 && j >= 0 && i < _rows&& j < _columns&& getTileColor(i, j) == color;
+    };
+
+    // 上方，左边是否有联通块
+    int t = judge(r - 1, c);
+    t |= judge(r, c - 1) << 1;
+    t |= judge(r - 1, c - 1) << 2;
+
+    int t2 = judge(r + 1, c);
+    t2 |= judge(r, c + 1) << 1;
+    glm::vec3 drawColor = colors[color % 10];
+    for (int i = 0; i < 4; i++) {
+        int nr = r + dr[i];
+        int nc = c + dc[i];
+        if (!judge(nr, nc)) {
+            if (i == 0) {
+                drakTri.push_back(Triangle(
+                    glm::vec4(bl.x, bl.y + BLOCK_SIZE, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + BLOCK_SIZE - 4, 0, 0),
+                    glm::vec4((t & 2) ? bl.x - 4 : bl.x + 4, bl.y + BLOCK_SIZE - 4, 0, 0)
+                ));
+                drakTri.push_back(Triangle(
+                    glm::vec4(bl.x, bl.y + BLOCK_SIZE, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE, bl.y + BLOCK_SIZE, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + BLOCK_SIZE - 4, 0, 0)
+                ));
+                if (t2 & 2) {
+                    drakTri.push_back(Triangle(
+                        glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + BLOCK_SIZE - 4, 0, 0),
+                        glm::vec4(bl.x + BLOCK_SIZE, bl.y + BLOCK_SIZE, 0, 0),
+                        glm::vec4(bl.x + BLOCK_SIZE + 4, bl.y + BLOCK_SIZE - 4, 0, 0)
+                    ));
+                }
+            }
+            else if (i == 1) {
+                lightTri.push_back(Triangle(
+                    glm::vec4(bl.x, bl.y, 0, 0),
+                    glm::vec4((t & 2) ? bl.x - 4 : bl.x + 4, bl.y + 4, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + 4, 0, 0)
+                ));
+                lightTri.push_back(Triangle(
+                    glm::vec4(bl.x, bl.y, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + 4, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE, bl.y, 0, 0)
+                ));
+                if (t2 & 2) {
+                    lightTri.push_back(Triangle(
+                        glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + 4, 0, 0),
+                        glm::vec4(bl.x + BLOCK_SIZE + 4, bl.y + 4, 0, 0),
+                        glm::vec4(bl.x + BLOCK_SIZE, bl.y, 0, 0)
+                    ));
+                }
+            }
+            else if (i == 2) {
+                drakTri.push_back(Triangle(
+                    glm::vec4(bl.x + BLOCK_SIZE, bl.y, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE - 4, (t & 1) ? bl.y - 4 : bl.y + 4, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + BLOCK_SIZE - 4, 0, 0)
+                ));
+                drakTri.push_back(Triangle(
+                    glm::vec4(bl.x + BLOCK_SIZE, bl.y, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + BLOCK_SIZE - 4, 0, 0),
+                    glm::vec4(bl.x + BLOCK_SIZE, bl.y + BLOCK_SIZE, 0, 0)
+                ));
+                if (t2 & 1) {
+                    drakTri.push_back(Triangle(
+                        glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + BLOCK_SIZE - 4, 0, 0),
+                        glm::vec4(bl.x + BLOCK_SIZE - 4, bl.y + BLOCK_SIZE + 4, 0, 0),
+                        glm::vec4(bl.x + BLOCK_SIZE, bl.y + BLOCK_SIZE, 0, 0)
+                    ));
+                }
+            }
+            else if (i == 3) {
+                lightTri.push_back(Triangle(
+                    glm::vec4(bl.x, bl.y, 0, 0),
+                    glm::vec4(bl.x + 4, bl.y + BLOCK_SIZE - 4, 0, 0),
+                    glm::vec4(bl.x + 4, (t & 1) ? bl.y - 4 : bl.y + 4, 0, 0)
+                ));
+                lightTri.push_back(Triangle(
+                    glm::vec4(bl.x, bl.y, 0, 0),
+                    glm::vec4(bl.x, bl.y + BLOCK_SIZE, 0, 0),
+                    glm::vec4(bl.x + 4, bl.y + BLOCK_SIZE - 4, 0, 0)
+                ));
+                if (t2 & 1) {
+                    lightTri.push_back(Triangle(
+                        glm::vec4(bl.x + 4, bl.y + BLOCK_SIZE - 4, 0, 0),
+                        glm::vec4(bl.x, bl.y + BLOCK_SIZE, 0, 0),
+                        glm::vec4(bl.x + 4, bl.y + BLOCK_SIZE + 4, 0, 0)
+                    ));
+                }
+
+            }
+
+        }
+
+        game.getGraphics()->drawTriangles(lightTri, glm::identity<glm::mat4>(), drawColor + glm::vec3(0.5));
+        game.getGraphics()->drawTriangles(drakTri, glm::identity<glm::mat4>(), drawColor * 0.4f);
+    }
+    // 三个方向全都有块
+    if (t == 7) {
+        game.getGraphics()->drawQuad(glm::vec2(bl.x - BLOCK_SIZE + 4, bl.y - BLOCK_SIZE + 4), glm::vec2(BLOCK_SIZE * 2 - 8), drawColor);
+    }
+    else {
+        // 有上方物块
+        if (t & 1) {
+            game.getGraphics()->drawQuad(glm::vec2(bl.x + 4, bl.y - 4), glm::vec2(BLOCK_SIZE - 8, BLOCK_SIZE), drawColor);
+        }
+        // 有左边物块
+        if (t & 2) {
+            game.getGraphics()->drawQuad(glm::vec2(bl.x - 4, bl.y + 4), glm::vec2(BLOCK_SIZE, BLOCK_SIZE - 8), drawColor);
+        }
+        game.getGraphics()->drawQuad(glm::vec2(bl.x + 4, bl.y + 4), glm::vec2(BLOCK_SIZE - 8), drawColor);
     }
 }
 

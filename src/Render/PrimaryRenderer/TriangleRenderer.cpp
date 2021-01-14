@@ -1,6 +1,7 @@
 ﻿#include "TriangleRenderer.h"
 #include "Render/GLUtils.h"
 #include "Game.h"
+#include <algorithm>
 
 TriangleRenderer::TriangleRenderer(std::shared_ptr<ShaderData> shaderData) :_shaderData(shaderData) {
     glGenVertexArrays(1, &_vao);
@@ -11,10 +12,8 @@ TriangleRenderer::TriangleRenderer(std::shared_ptr<ShaderData> shaderData) :_sha
 
     // 绑定VAO到三个顶点
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 3, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 3 * BUFFER_SIZE, nullptr, GL_DYNAMIC_DRAW);
 
-
-    // 替换顶点数据到当前Quad
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -59,4 +58,28 @@ void TriangleRenderer::drawTriangle(glm::vec2 A, glm::vec2 B, glm::vec2 C, glm::
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+}
+
+void TriangleRenderer::drawTriangles(const std::vector<Triangle>& triangles, const glm::mat4& transform, const glm::vec3& color) {
+    auto& game = Game::GetInstance();
+    _shaderData->apply();
+
+    glUniformMatrix4fv(glGetUniformLocation(_shaderData->getID(), "model"), 1, false, glm::value_ptr(transform));
+    glUniformMatrix4fv(glGetUniformLocation(_shaderData->getID(), "projection"), 1, false, glm::value_ptr(game.getGraphics()->getProjectionMatrix()));
+    glUniform3f(glGetUniformLocation(_shaderData->getID(), "uColor"), color.r, color.g, color.b);
+
+    glBindVertexArray(_vao);
+
+    // 替换顶点数据到当前三角形
+    int sz = triangles.size();
+    for (int i = 0; i < sz; i += BUFFER_SIZE) {
+        int count = std::min(sz, i + BUFFER_SIZE) - i;
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Triangle) * count, triangles.data() + i);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        // 绘制三角形
+        glDrawArrays(GL_TRIANGLES, 0, count * 3);
+    }
+
+    glBindVertexArray(0);
 }
