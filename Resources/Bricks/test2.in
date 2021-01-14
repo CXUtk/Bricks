@@ -1,58 +1,95 @@
-8
+    //Brick fill(1, 1, "O");
+    //Brick o1(3, 5,
+    //    "...OO"
+    //    ".O.OO"
+    //    "OOOO.");
+    //Brick orz(2, 5,
+    //    ".OOO."
+    //    "OO.OO");
+    //Brick full(3, 3,
+    //    ".O."
+    //    "OOO"
+    //    "O.O");
+    //Brick o2(4, 4,
+    //    ".O.."
+    //    "OOO."
+    //    ".OOO"
+    //    "..O.");
+    //Brick o3(5, 6,
+    //    "O....."
+    //    "O....."
+    //    "OO...."
+    //    ".OOOOO"
+    //    "....O.");
+    //Brick o4(4, 5,
+    //    "...O."
+    //    "..OOO"
+    //    ".OOO."
+    //    "OO...");
+    //Brick o5(5, 5,
+    //    "OO..."
+    //    ".O..."
+    //    ".O..."
+    //    ".OO.."
+    //    "..OOO");
+    //randomGenerate();
+    //for (int i = 0; i < 14; i++) {
+    //    _bricks.push_back(orz);
+    //}
+    //_bricks.push_back(full);
 
-3 5
-...OO
-.O.OO
-OOOO.
+    //_bricks.push_back(o2);
+    //generateBrickTextures();
 
-4 4
-.O..
-OOO.
-.OOO
-..O.
+    //_bricks.push_back(o1);
+    //_bricks.push_back(o2);
+    //_bricks.push_back(o3);
+    //_bricks.push_back(o4);
+    //_bricks.push_back(o4);
+    //_bricks.push_back(o4);
+    //_bricks.push_back(o5);
+    //_bricks.push_back(o5);
+    //_bricks.push_back(o5);
+    //generateBrickTextures();
+    //Brick b;
+    //b.m = 11;
+    //b.n = 11;
+    //b.S = 0;
+    //for (int i = 0; i < 121; i++)
+    //    b.S.set(i);
+    //_bricks.push_back(b);
+    //// _bricks.push_back(b);
+    //generateBrickTextures();
+    /*  randomGenerate();*/
 
-5 6
-O.....
-O.....
-OO....
-.OOOOO
-....O.
 
-4 5
-...O.
-..OOO
-.OOO.
-OO...
+        //auto curTL = _topLeft + glm::vec2(c * BLOCK_SIZE, r * BLOCK_SIZE);
+    //for (int i = 0; i < 4; i++) {
+    //    int nr = r + dr[i];
+    //    int nc = c + dc[i];
 
-4 5
-...O.
-..OOO
-.OOO.
-OO...
-
-4 5
-...O.
-..OOO
-.OOO.
-OO...
-
-5 5
-OO...
-.O...
-.O...
-.OO..
-..OOO
-
-5 5
-OO...
-.O...
-.O...
-.OO..
-..OOO
-
-5 5
-OO...
-.O...
-.O...
-.OO..
-..OOO
+    //    if (nr < 0 || nr >= _rows || nc < 0 || nc >= _columns || tiles[nr][nc].type != TileType::BRICK
+    //        /*|| (tiles[nr][nc].type == TileType::BRICK && tiles[nr][nc].color != tiles[r][c].color)*/) {
+    //        glm::vec2 start = curTL, end = curTL;
+    //        if (i == 0) {
+    //            start = glm::vec2(curTL.x, curTL.y + BLOCK_SIZE);
+    //            end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y + BLOCK_SIZE);
+    //        }
+    //        else if (i == 1) {
+    //            start = glm::vec2(curTL.x, curTL.y);
+    //            end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y);
+    //        }
+    //        else if (i == 2) {
+    //            start = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y);
+    //            end = glm::vec2(curTL.x + BLOCK_SIZE, curTL.y + BLOCK_SIZE);
+    //        }
+    //        else {
+    //            start = glm::vec2(curTL.x, curTL.y);
+    //            end = glm::vec2(curTL.x, curTL.y + BLOCK_SIZE);
+    //        }
+    //        start.y = height - start.y;
+    //        end.y = height - end.y;
+    //        edges.push_back(start);
+    //        edges.push_back(end);
+    //    }
+    //}

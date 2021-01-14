@@ -23,6 +23,8 @@ public:
         return _inputManager;
     }
 
+    void changeWindowSize(int width, int height);
+
 private:
     // 构造函数private声明，确保单例
     Game(int width, int height);

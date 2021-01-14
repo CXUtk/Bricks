@@ -24,12 +24,9 @@ private:
     std::vector<Brick> _bricks;
     std::vector<std::shared_ptr<Texture2D>> _textures;
     std::vector<Brick> poses[MAX_BLOCKS];
-    std::vector<int> placeInfo;
-    std::map<int, int> _idMap;
     int _cnt[MAX_BLOCKS];
-    bool _oldFinished;
 
-    std::thread* _solverThread;
+    glm::ivec2 _puzzleBoardSize;
 
     void randomGenerate();
     void generateBrickTextures();
@@ -42,4 +39,7 @@ private:
 
     void dfs(int x, std::vector<Brick>& bricks);
     void solve();
+
+    glm::ivec2 calculateBricksList(int maxWidth);
+
 };

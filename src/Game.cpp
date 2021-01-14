@@ -1,11 +1,18 @@
 ﻿#include "Game.h"
 #include <iostream>
-
+#include <glm/gtx/transform.hpp>
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+
+void Game::changeWindowSize(int width, int height) {
+    _width = width;
+    _height = height;
+    glfwSetWindowSize(_window, width, height);
+    _graphics->setProjectionMatrix(glm::scale(glm::vec3(1, -1, 1)) * glm::ortho(0.f, (float)_width, 0.f, (float)_height, -1.0f, 1.0f));
+}
 
 Game::Game(int width, int height) : _width(width), _height(height) {
     glfwInit();
@@ -48,8 +55,8 @@ void Game::init() {
     _shaderManager = std::make_shared<ShaderManager>();
     _graphics = std::make_shared<Graphics>();
     _inputManager = std::make_shared<InputManager>(_window);
-    _curScene = Scene::makeScene("delauny");
     _fontManager = std::make_shared<FontManager>();
+    _curScene = Scene::makeScene("default");
 }
 
 

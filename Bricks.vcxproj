@@ -211,6 +211,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClInclude Include="src\Render\Texture2D.h" />
     <ClInclude Include="src\Scene\Default\DefaultScene.h" />
     <ClInclude Include="src\Scene\Default\Strucures\Board.h" />
+    <ClInclude Include="src\Scene\Default\Strucures\Puzzle.h" />
     <ClInclude Include="src\Scene\Delaunay\DCEL.h" />
     <ClInclude Include="src\Scene\Delaunay\DelaunayScene.h" />
     <ClInclude Include="src\Scene\Scene.h" />

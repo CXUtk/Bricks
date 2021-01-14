@@ -167,6 +167,9 @@
     <ClInclude Include="src\Scene\Delaunay\DCEL.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene\Default\Strucures\Puzzle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\color.vs" />
