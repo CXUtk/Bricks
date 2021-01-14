@@ -185,6 +185,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClCompile Include="src\Render\Texture2D.cpp" />
     <ClCompile Include="src\Scene\Default\DefaultScene.cpp" />
     <ClCompile Include="src\Scene\Default\Strucures\Board.cpp" />
+    <ClCompile Include="src\Scene\Delaunay\DCEL.cpp" />
     <ClCompile Include="src\Scene\Delaunay\DelaunayScene.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Utils.cpp" />

@@ -169,9 +169,9 @@ DelaunayScene::DelaunayScene() {
     //clock_t startTime, endTime;
     //startTime = clock();
     // insert(394);
-    for (int i = 1; i <= MAX_VERTICES; i++) {
-        insert(i);
-    }
+    //for (int i = 1; i <= MAX_VERTICES; i++) {
+    //    insert(i);
+    //}
     ////endTime = clock();  //计时结束
     ////printf("The running time is: %.4fs\n",
     ////    (double)(endTime - startTime) / CLOCKS_PER_SEC);
@@ -191,37 +191,88 @@ DelaunayScene::~DelaunayScene() {
 
 int t = 0;
 int t2 = 0;
+bool start = false;
 
 void DelaunayScene::update() {
-    //if (t2 == 0) {
-    //    if (t < MAX_VERTICES)
-    //        insert(++t);
+    auto input = Game::GetInstance().getInputManager();
+    input->beginInput();
+    if (input->getIsKeyDown('Z')) {
+        start = true;
+    }
+    input->endInput();
+    if (start) {
+        if (t2 == 0) {
+            if (t < MAX_VERTICES)
+                insert(++t);
 
-    //}
-    //++t2;
-    //if (t2 == 1) {
-    //    t2 = 0;
-    //}
+        }
+        ++t2;
+        if (t2 == 1) {
+            t2 = 0;
+        }
+    }
+
 }
+
+
+bool vis[MAXN * 2];
 
 void DelaunayScene::draw() {
 
-    for (int i = 1; i <= totV; i++) {
-        Vertex& v = vPool[i];
-        Game::GetInstance().getGraphics()->drawCircle(glm::vec2(v.pos.x - 3, v.pos.y - 3), glm::vec2(6), glm::vec3(1, 0, 0));
-    }
     std::vector<Segment> segments;
+    if (t < MAX_VERTICES) {
+        for (int i = 1; i <= totV; i++) {
+            Vertex& v = vPool[i];
+            Game::GetInstance().getGraphics()->drawCircle(glm::vec2(v.pos.x - 3, v.pos.y - 3), glm::vec2(6), glm::vec3(1, 0, 0));
+        }
+
+        for (int i = 1; i <= totF; i++) {
+            Face& f = fPool[i];
+            auto& e = f.edge;
+            for (int j = 0; j < 3; j++) {
+                auto v = e->to->pos - e->from->pos;
+                v = v.unit();
+                Game::GetInstance().getGraphics()->drawDirectedArrow((e->from->pos).to_vec2(), (e->to->pos).to_vec2(), glm::vec3(1), 1, segments);
+                e = e->next;
+            }
+        }
+
+
+        Game::GetInstance().getGraphics()->drawLines(segments, glm::vec3(1), 1);
+    }
+    segments.clear();
+
     for (int i = 1; i <= totF; i++) {
-        Face& f = fPool[i];
-        auto& e = f.edge;
-        for (int j = 0; j < 3; j++) {
-            auto v = e->to->pos - e->from->pos;
-            v = v.unit();
-            Game::GetInstance().getGraphics()->drawDirectedArrow((e->from->pos).to_vec2(), (e->to->pos).to_vec2(), glm::vec3(1), 1, segments);
+        vis[i] = false;
+    }
+
+    std::queue<int> Q;
+    Q.push(1);
+    while (!Q.empty()) {
+        auto f = Q.front();
+        Q.pop();
+        Face& face = fPool[f];
+
+        if (vis[face.id]) continue;
+        vis[face.id] = true;
+
+        Edge* e = face.edge;
+        Vector2 center = face.getCircumcentre();
+        for (int i = 0; i < 3; i++) {
+            auto twin = e->twin;
+            if (twin) {
+                Face* nextFace = twin->face;
+                if (!vis[nextFace->id]) {
+                    Vector2 c2 = nextFace->getCircumcentre();
+                    segments.push_back(Segment(center.to_vec2(), c2.to_vec2()));
+                    Q.push(nextFace->id);
+                }
+            }
             e = e->next;
         }
     }
-    Game::GetInstance().getGraphics()->drawLines(segments, glm::vec3(1), 1);
+
+    Game::GetInstance().getGraphics()->drawLines(segments, glm::vec3(1, 1, 0), 1);
 }
 
 void DelaunayScene::insert(int x) {

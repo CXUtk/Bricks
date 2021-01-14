@@ -90,6 +90,9 @@
     <ClCompile Include="src\Scene\Delaunay\DelaunayScene.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene\Delaunay\DCEL.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">

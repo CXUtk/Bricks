@@ -5,15 +5,12 @@
 #include <glm/glm.hpp>
 
 constexpr int MAXN = 100005;
-constexpr int MAX_VERTICES = 10000;
+constexpr int MAX_VERTICES = 1000;
 constexpr double EPS = 1e-9;
 
 static std::mt19937 mt;
 
-int dcmp(double x) {
-    if (fabs(x) < EPS) return 0;
-    return x > 0 ? 1 : -1;
-}
+int dcmp(double x);
 
 struct Vector2 {
     double x, y;
@@ -128,6 +125,26 @@ struct Edge {
     Edge(Vertex* fr, Vertex* to) : id(0), from(fr), to(to), twin(nullptr), face(nullptr), prev(nullptr), next(nullptr) {}
 };
 
+struct Line {
+    Vector2 p, dir;
+    Line() {}
+    Line(const Vector2& p, const Vector2& dir) : p(p), dir(dir) {}
+    static Vector2 lineIntersection(const Line& l1, const Line& l2) {
+        double t = Vector2::cross(l2.dir, l1.p - l2.p) /
+            Vector2::cross(l1.dir, l2.dir);
+        return l1.p + l1.dir * t;
+    }
+    static double distanceToLine(const Vector2& p, const Line& line) {
+        return fabs(Vector2::cross(line.dir, p - line.p)) / line.dir.length();
+    }
+
+    static Vector2 lineProjection(const Vector2& p, const Line& l) {
+        return l.p + l.dir * Vector2::dot(l.dir, p - l.p) /
+            Vector2::dot(l.dir, l.dir);
+    }
+};
+
+
 struct Face {
     int id;
     Edge* edge;
@@ -139,6 +156,8 @@ struct Face {
     }
     Face(int id, Edge* edge) : id(id), edge(edge) {
     }
+
+    Vector2 getCircumcentre() const;
 };
 
 struct Vertex {
