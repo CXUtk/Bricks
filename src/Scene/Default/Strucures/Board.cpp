@@ -207,7 +207,7 @@ bool Board::canPlace(const Brick& brick, glm::ivec2 pos) {
     for (int i = pos.x; i < std::min(pos.x + brick.n, _columns); i++) {
         for (int j = pos.y; j < std::min(pos.y + brick.m, _rows); j++) {
             int r = i - pos.x, c = j - pos.y;
-            if (brick.get(r, c) && getTileColor(r, c) != -1) {
+            if (brick.get(r, c) && getTileColor(i, j) != -1) {
                 return false;
             }
         }
