@@ -8,6 +8,8 @@
 
 Puzzle::Puzzle() {
     _rows = 0, _cols = 0;
+    _solveThread = nullptr;
+    _solver = nullptr;
 }
 
 Puzzle::~Puzzle() {
@@ -29,19 +31,20 @@ void Puzzle::build() {
 }
 
 void Puzzle::solve() {
-    _solveThread = std::make_shared<std::thread>([&]() {
-        _solver->solve();
-        //std::vector<int> tmp = _solver->getIntermidiateResult();
+    if (!_solveThread) {
+        _solveThread = std::make_shared<std::thread>([&]() {
+            _solver->solve();
+            //std::vector<int> tmp = _solver->getIntermidiateResult();
 
-        //for (int i = 0; i < tmp.size(); i++) {
-        //    auto& info = _shapeInfo[tmp[i]];
-        //    // 把填补的1x1物块从结果中删去
-        //    if (info.id != _shapes.size() + 1) {
-        //        _results.push_back(info);
-        //    }
-        //}
-        });
-
+            //for (int i = 0; i < tmp.size(); i++) {
+            //    auto& info = _shapeInfo[tmp[i]];
+            //    // 把填补的1x1物块从结果中删去
+            //    if (info.id != _shapes.size() + 1) {
+            //        _results.push_back(info);
+            //    }
+            //}
+            });
+    }
 }
 
 std::vector<Shape_Info> Puzzle::getResultIM() {
@@ -135,6 +138,7 @@ void Puzzle::init_dlx() {
         _solver->setColDuplicates(i + 1, _shapeDups[i]);
 
 
+        // 判重+编号加入DLX
         std::set<Shape> dup;
         for (int a = 0; a < 2; a++) {
             for (int b = 0; b < 4; b++) {

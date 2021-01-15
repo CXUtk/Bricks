@@ -16,7 +16,9 @@ struct Shape {
     Shape(int rows, int cols) :rows(rows), cols(cols), bits(0) {}
     Shape(int rows, int cols, const char* shape);
 
+    // 获取顺时针旋转90度的物块
     Shape rotateClockwise() const;
+    // 获取翻转后的物块
     Shape flip() const;
 
     bool get(int i, int j) const { return bits.test(i * cols + j); }
@@ -33,6 +35,8 @@ struct Shape {
         return p1 == p2 && bits == shape.bits;
     }
 
+    // 计算有多少个实心块
     int count() const;
+
     std::shared_ptr<Texture2D> generateTexture(glm::vec3 color) const;
 };

@@ -25,7 +25,9 @@ public:
     void build();
     void solve();
 
+    // 获取结果，未使用
     std::vector<Shape_Info> getResult() const { return _results; }
+    // 获取DLX当前求解的局面，确保线程安全
     std::vector<Shape_Info> getResultIM();
     std::vector<Shape> getShapeList() const { return _shapes; }
 
