@@ -2,7 +2,6 @@
 #include "Game.h"
 #include "ImUI/ImUI.h"
 #include "Utils.h"
-#include "Algorithm/DLXSolver.h"
 #include <glm/gtx/transform.hpp>
 
 #include <random>
@@ -11,10 +10,7 @@
 #include <vector>
 #include <algorithm>
 #include <set>
-#include "Strucures/Puzzle.h"
 
-
-DLXSolver* solver;
 
 
 DefaultScene::DefaultScene() {
@@ -29,6 +25,8 @@ DefaultScene::DefaultScene() {
         return;
     }
     _board = std::make_shared<Board>(rows, cols);
+    _puzzle = std::make_shared<Puzzle>();
+    _puzzle->setFrameSize(rows, cols);
 
 
     fscanf(file, "%d", &n);
@@ -42,25 +40,8 @@ DefaultScene::DefaultScene() {
             fscanf(file, "%s", S + id);
             id += c;
         }
-        Brick brick(r, c, S);
-        _bricks.push_back(brick);
-    }
-
-    for (int i = 0; i < n; i++) {
-        Brick bk = _bricks[i];
-        std::set<Brick> bks;
-        for (int j = 0; j < 2; j++) {
-            for (int k = 0; k < 4; k++) {
-                if (bks.count(bk)) {
-                    bk = bk.rotateClockwise();
-                    continue;
-                }
-                poses[i].push_back(bk);
-                bks.insert(bk);
-                bk = bk.rotateClockwise();
-            }
-            bk = bk.flip();
-        }
+        Shape shape(r, c, S);
+        _puzzle->add(shape);
     }
 
     fclose(file);
@@ -72,36 +53,39 @@ DefaultScene::DefaultScene() {
     Game::GetInstance().changeWindowSize(width, height);
 
 
-    Brick test(4, 4,
-        ".OO."
-        "OOOO"
-        "O..O"
-        "O..O");
-    for (int i = 0; i < 100; i++)
-        _bricks.push_back(test);
+    //Brick test(4, 4,
+    //    ".OO."
+    //    "OOOO"
+    //    "O..O"
+    //    "O..O");
+    //for (int i = 0; i < 100; i++)
+    //    _bricks.push_back(test);
 
-    for (int i = 0; i < _bricks.size(); i++) {
+    _puzzle->build();
+
+    for (int i = 0; i < _shapes.size(); i++) {
         _cnt[i] = 1;
     }
 
-
+    _shapes = _puzzle->getShapeList();
     generateBrickTextures();
+
     auto time = glfwGetTime();
+
     // dfs(0, _bricks);
+    _puzzle->solve();
     printf("%lf seconds\n", glfwGetTime() - time);
 
     // Place results
-    _board->clear();
 
     //solve();
     // _board->place(o1, glm::ivec2(0, 0), 1, TileType::BRICK);
 
-    _handBrick = test;
+    _handBrick = Shape(0, 0);
     _handBrickID = -1;
 }
 
 DefaultScene::~DefaultScene() {
-    delete solver;
 }
 
 void DefaultScene::update() {
@@ -153,6 +137,22 @@ void DefaultScene::draw() {
     // 绘制砖块图的UI帧
     ImUI::BeginFrame(glm::vec2(8, 8), _puzzleBoardSize, glm::vec3(1));
     {
+        _board->clear();
+
+        int cur = 0;
+
+        auto result = _puzzle->getResultIM();
+        for (auto& a : result) {
+            bool extra;
+            Shape b = _puzzle->getShape(a, extra);
+            if (a.s & 4) b = b.flip();
+            for (int i = 0; i < (a.s & 3); i++) {
+                b = b.rotateClockwise();
+            }
+            _board->place(b, glm::ivec2(a.r, a.c), extra ? -2 : cur);
+            cur++;
+        }
+
         auto rect = ImUI::getContainerRect();
         auto size = _board->getSize();
         _board->update(glm::ivec2((int)(rect.pos.x + rect.size.x / 2.f - size.x / 2.f), (int)(rect.pos.y + rect.size.y / 2.f - size.y / 2.f)));
@@ -177,7 +177,7 @@ void DefaultScene::draw() {
                 // Gap: 64 + 10
                 int startX = 8;
                 int startY = 8 - sliderValue / size.x * 74;
-                for (int i = 0; i < _bricks.size(); i++) {
+                for (int i = 0; i < _shapes.size(); i++) {
                     auto texture = _textures[i];
                     float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
                     scale = std::min(scale, 1.0f);
@@ -187,7 +187,7 @@ void DefaultScene::draw() {
                         _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
                         _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
                         printf("%d is Clicked!\n", i);
-                        _handBrick = _bricks[i];
+                        _handBrick = _shapes[i];
                         _handBrickID = i;
                     }
                     startX += 74;
@@ -200,7 +200,7 @@ void DefaultScene::draw() {
             ImUI::EndScrollableArea();
         }
         ImUI::EndFrame();
-        if (ImUI::slider(glm::vec2(rect.size.x - 32 - 8, 8), rect.size.y - 16, _bricks.size(), sliderValue)) {
+        if (ImUI::slider(glm::vec2(rect.size.x - 32 - 8, 8), rect.size.y - 16, _shapes.size(), sliderValue)) {
             // printf("%d\n", sliderValue);
         }
     }
@@ -215,7 +215,7 @@ void DefaultScene::draw() {
 
         if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 8), glm::vec2(120, 50), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
             _board->clear();
-            for (int i = 0; i < _bricks.size(); i++) {
+            for (int i = 0; i < _shapes.size(); i++) {
                 _cnt[i] = 1;
             }
         }
@@ -244,7 +244,7 @@ void DefaultScene::draw() {
 
 
 void DefaultScene::generateBrickTextures() {
-    for (auto& b : _bricks) {
+    for (auto& b : _shapes) {
         _textures.push_back(b.generateTexture(glm::vec3(1, 1, 1)));
     }
 }
@@ -387,7 +387,7 @@ glm::ivec2 DefaultScene::calculateBricksList(int maxWidth) {
     glm::ivec2 output(0);
     int x = 0;
     int y = 0;
-    for (int i = 0; i < _bricks.size(); i++) {
+    for (int i = 0; i < _shapes.size(); i++) {
         x += 64;
         if (x > maxWidth) {
             if (output.x == 0)

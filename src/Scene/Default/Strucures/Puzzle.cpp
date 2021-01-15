@@ -2,81 +2,66 @@
 #include <set>
 #include <algorithm>
 
-Shape Shape::rotateClockwise() const {
-    Shape out(cols, rows);
-    out.bits = 0;
-    for (int i = rows - 1; i >= 0; i--) {
-        for (int j = 0; j < cols; j++) {
-            int id = i * cols + j;
-            if (bits.test(id)) {
-                int id2 = j * rows + (rows - i - 1);
-                out.bits.set(id2);
-            }
-        }
-    }
-    return out;
-}
-
-Shape Shape::flip() const {
-    Shape out(rows, cols);
-    out.bits = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            int id = i * cols + j;
-            if (bits.test(id)) {
-                int id2 = i * cols + (cols - j - 1);
-                out.bits.set(id2);
-            }
-        }
-    }
-    return out;
-}
-
-int Shape::count() const {
-    int cnt = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            int id = i * cols + j;
-            if (bits.test(id)) {
-                cnt++;
-            }
-        }
-    }
-    return cnt;
-}
 
 
 
 
-
-
-
-Puzzel::Puzzel() {
+Puzzle::Puzzle() {
     _rows = 0, _cols = 0;
 }
 
-Puzzel::~Puzzel() {
+Puzzle::~Puzzle() {
     delete _solver;
 }
 
 
-void Puzzel::setFrameSize(int r, int c) {
+void Puzzle::setFrameSize(int r, int c) {
     _rows = r, _cols = c;
 }
 
-void Puzzel::add(const Shape& shape) {
+void Puzzle::add(const Shape& shape) {
     _shapes.push_back(shape);
 }
 
-void Puzzel::build() {
+void Puzzle::build() {
     remove_dupStrongI();
     init_dlx();
 }
 
-void Puzzel::solve() {
+void Puzzle::solve() {
+    _solveThread = std::make_shared<std::thread>([&]() {
+        _solver->solve();
+        //std::vector<int> tmp = _solver->getIntermidiateResult();
+
+        //for (int i = 0; i < tmp.size(); i++) {
+        //    auto& info = _shapeInfo[tmp[i]];
+        //    // 把填补的1x1物块从结果中删去
+        //    if (info.id != _shapes.size() + 1) {
+        //        _results.push_back(info);
+        //    }
+        //}
+        });
+
 }
 
-void Puzzel::remove_dupI() {
+std::vector<Shape_Info> Puzzle::getResultIM() {
+    _results.clear();
+    std::vector<int> tmp = _solver->getIntermidiateResult();
+    for (int i = 0; i < tmp.size(); i++) {
+        auto& info = _shapeInfo[tmp[i]];
+        _results.push_back(info);
+    }
+    return _results;
+}
+
+Shape Puzzle::getShape(Shape_Info info, bool& extra) const {
+    extra = info.id >= _shapes.size();
+    if (extra) return Shape(1, 1, "O");
+    return _shapes[info.id];
+}
+
+
+void Puzzle::remove_dupI() {
     std::sort(_shapes.begin(), _shapes.end());
 
     int sz = _shapes.size();
@@ -94,7 +79,7 @@ void Puzzel::remove_dupI() {
     _shapes = shapes;
 }
 
-void Puzzel::remove_dupStrongI() {
+void Puzzle::remove_dupStrongI() {
     std::vector<Shape> shapes;
     int sz = _shapes.size();
 
@@ -111,9 +96,9 @@ void Puzzel::remove_dupStrongI() {
                         goto BAD_JUDGE;
                     }
                 }
-                shape.rotateClockwise();
+                shape = shape.rotateClockwise();
             }
-            shape.flip();
+            shape = shape.flip();
         }
 
     BAD_JUDGE:
@@ -128,7 +113,7 @@ void Puzzel::remove_dupStrongI() {
     _shapes = shapes;
 }
 
-void Puzzel::init_dlx() {
+void Puzzle::init_dlx() {
     int shapeCount = _shapes.size();
     int numBlocks = _rows * _cols;
 
@@ -138,14 +123,14 @@ void Puzzel::init_dlx() {
     int activeBlocks = 0;
     for (int i = 0; i < shapeCount; i++) activeBlocks += _shapes[i].count() * _shapeDups[i];
 
-    if (activeBlocks > 0) {
+    if (numBlocks - activeBlocks > 0) {
         shapeCount++;
     }
     int dlxCols = shapeCount + numBlocks;
 
     _solver = new DLXSolver(5000, dlxCols);
 
-    for (int i = 0; i < shapeCount; i++) {
+    for (int i = 0; i < _shapes.size(); i++) {
         Shape shape = _shapes[i];
         _solver->setColDuplicates(i + 1, _shapeDups[i]);
 
@@ -156,8 +141,8 @@ void Puzzel::init_dlx() {
                 if (!dup.count(shape)) {
                     dup.insert(shape);
 
-                    for (int r = 0; r <= _rows - shape.rows + 1; r++) {
-                        for (int c = 0; c <= _cols - shape.cols + 1; c++) {
+                    for (int r = 0; r < _rows - shape.rows + 1; r++) {
+                        for (int c = 0; c < _cols - shape.cols + 1; c++) {
                             int id = _shapeInfo.size();
                             _shapeInfo.push_back(Shape_Info(i, r, c, a << 2 | b));
                             _solver->link(id, i + 1);
@@ -173,20 +158,23 @@ void Puzzel::init_dlx() {
                         }
                     }
                 }
-                shape.rotateClockwise();
+                shape = shape.rotateClockwise();
             }
-            shape.flip();
+            shape = shape.flip();
         }
     }
 
-    if (activeBlocks > 0) {
+    if (numBlocks - activeBlocks > 0) {
+
         for (int i = 0; i < _rows; i++) {
             for (int j = 0; j < _cols; j++) {
                 int id = _shapeInfo.size();
                 _shapeInfo.push_back(Shape_Info(shapeCount, i, j, 0));
+                _solver->link(id, shapeCount);
                 _solver->link(id, shapeCount + 1 + getID(i, j));
             }
         }
+        _solver->setColDuplicates(shapeCount, numBlocks - activeBlocks);
     }
 
     printf("%d\n", _shapeInfo.size());

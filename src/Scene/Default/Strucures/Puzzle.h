@@ -5,34 +5,7 @@
 #include <memory>
 #include <vector>
 #include "Algorithm/DLXSolver.h"
-
-// 每个拼图块的最大占据格子数量
-static constexpr int MAX_SHAPE_SIZE = 256;
-
-struct Shape {
-    int rows, cols;
-    std::bitset<MAX_SHAPE_SIZE> bits;
-
-    Shape() :rows(0), cols(0) {}
-    Shape(int rows, int cols) :rows(rows), cols(cols), bits(0) {}
-
-    Shape rotateClockwise() const;
-    Shape flip() const;
-
-    bool operator<(const Shape& shape) const {
-        auto p1 = std::make_pair(rows, cols);
-        auto p2 = std::make_pair(shape.rows, shape.cols);
-        return p1 < p2 || (p1 == p2 && bits.to_string() < shape.bits.to_string());
-    }
-
-    bool operator==(const Shape& shape) const {
-        auto p1 = std::make_pair(rows, cols);
-        auto p2 = std::make_pair(shape.rows, shape.cols);
-        return p1 == p2 && bits == shape.bits;
-    }
-
-    int count() const;
-};
+#include "Shape.h"
 
 
 struct Shape_Info {
@@ -42,15 +15,21 @@ struct Shape_Info {
     Shape_Info(int id, int r, int c, int s) : id(id), r(r), c(c), s(s) {}
 };
 
-class Puzzel {
+class Puzzle {
 public:
-    Puzzel();
-    ~Puzzel();
+    Puzzle();
+    ~Puzzle();
 
     void setFrameSize(int r, int c);
     void add(const Shape& shape);
     void build();
     void solve();
+
+    std::vector<Shape_Info> getResult() const { return _results; }
+    std::vector<Shape_Info> getResultIM();
+    std::vector<Shape> getShapeList() const { return _shapes; }
+
+    Shape getShape(Shape_Info info, bool& extra) const;
 
 private:
 
@@ -61,6 +40,10 @@ private:
     std::vector<Shape_Info> _shapeInfo;
     // Shape _mainFrame;
     DLXSolver* _solver;
+
+    std::vector<Shape_Info> _results;
+
+    std::shared_ptr<std::thread> _solveThread;
 
 
     // 判重，移除相同块，有下面那个还要这个干嘛？？

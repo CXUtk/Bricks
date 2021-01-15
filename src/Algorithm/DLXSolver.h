@@ -19,7 +19,7 @@ public:
     std::vector<int> getIntermidiateResult();
 
 private:
-    static constexpr int MAX_ROW = 100 * 8 * 105;
+    static constexpr int MAX_ROW = 5005;
     static constexpr int MAX_COL = 512;
 
     // 双向十字链表

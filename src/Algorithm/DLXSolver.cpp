@@ -10,6 +10,7 @@ DLXSolver::DLXSolver(int r, int c) :rows(r), cols(c) {
     for (int i = 0; i <= c; i++) {
         nodes[i].R = i + 1, nodes[i].L = i - 1;
         nodes[i].U = nodes[i].D = i;
+        colLink[i].dup = 1;
     }
     nodes[0].L = c;
     nodes[c].R = 0;
@@ -49,6 +50,8 @@ void DLXSolver::link(int r, int c) {
 }
 
 void DLXSolver::remove(int c) {
+    colLink[c].dup--;
+    if (colLink[c].dup != 0) return;
     // 列链表的头部移除
     nodes[nodes[c].L].R = nodes[c].R;
     nodes[nodes[c].R].L = nodes[c].L;
@@ -64,6 +67,8 @@ void DLXSolver::remove(int c) {
 }
 
 void DLXSolver::recover(int c) {
+    ++colLink[c].dup;
+    if (colLink[c].dup != 1) return;
     // 把占有这一列的所有行恢复
     for (int i = nodes[c].U; i != c; i = nodes[i].U) {
         for (int j = nodes[i].L; j != i; j = nodes[j].L) {
@@ -84,9 +89,9 @@ void DLXSolver::solve() {
     _dfs();
     _intermidiateResult.clear();
     for (int i = 0; i < top; i++) _intermidiateResult.push_back(ans[i]);
-    _mutexLock.lock();
-    finished = true;
-    _mutexLock.unlock();
+    //_mutexLock.lock();
+    //finished = true;
+    //_mutexLock.unlock();
     printf("Finished\n");
 }
 
@@ -115,16 +120,22 @@ void DLXSolver::_dfs() {
             tar = i;
         }
     }
-
+    if (colLink[tar].sz == 0)return;
     remove(tar);
-
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
-        //std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        _mutexLock.lock();
         ans[top++] = nodes[i].row;
+        _mutexLock.unlock();
+
         for (int j = nodes[i].R; j != i; j = nodes[j].R) remove(nodes[j].col);
         _dfs();
         if (found) return;
+
+        _mutexLock.lock();
         top--;
+        _mutexLock.unlock();
+
         for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
     }
     recover(tar);

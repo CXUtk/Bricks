@@ -101,7 +101,10 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     pos += containerRect.pos;
 
     value = std::max(0, std::min(value, max));
-    int ypos = ((height - 16 - 16) * value) / max;
+
+    int ypos = 0;
+    if (max)
+        ypos = ((height - 16 - 16) * value) / max;
     glm::vec3 buttonColor = glm::vec3(0.5f);
     if (inside(input->getMousePosition(), glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16))) {
         if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0) {
