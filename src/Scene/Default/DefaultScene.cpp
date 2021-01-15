@@ -41,8 +41,22 @@ DefaultScene::DefaultScene() {
             id += c;
         }
         Shape shape(r, c, S);
-        _puzzle->add(shape);
+        //_puzzle->add(shape);
     }
+
+    Shape orz(3, 5,
+        "..OOO"
+        "OOO.O"
+        "....O");
+    Shape orz2(3, 3,
+        ".O."
+        "OOO"
+        ".O."
+    );
+    for (int i = 0; i < 10; i++) {
+        _puzzle->add(orz);
+    }
+    _puzzle->add(orz2);
 
     fclose(file);
 

@@ -86,7 +86,9 @@ void DLXSolver::solve() {
     top = 0;
     found = false;
     finished = false;
+    auto time = glfwGetTime();
     _dfs();
+    printf("%lf seconds\n", glfwGetTime() - time);
     _intermidiateResult.clear();
     for (int i = 0; i < top; i++) _intermidiateResult.push_back(ans[i]);
     //_mutexLock.lock();

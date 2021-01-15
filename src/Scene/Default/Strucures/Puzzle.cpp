@@ -131,7 +131,19 @@ void Puzzle::init_dlx() {
     }
     int dlxCols = shapeCount + numBlocks;
 
-    _solver = new DLXSolver(5000, dlxCols);
+    _solver = new DLXSolver(3000, dlxCols);
+    if (numBlocks - activeBlocks > 0) {
+
+        for (int i = 0; i < _rows; i++) {
+            for (int j = 0; j < _cols; j++) {
+                int id = _shapeInfo.size();
+                _shapeInfo.push_back(Shape_Info(shapeCount, i, j, 0));
+                _solver->link(id, shapeCount);
+                _solver->link(id, shapeCount + 1 + getID(i, j));
+            }
+        }
+        _solver->setColDuplicates(shapeCount, numBlocks - activeBlocks);
+    }
 
     for (int i = 0; i < _shapes.size(); i++) {
         Shape shape = _shapes[i];
@@ -168,18 +180,7 @@ void Puzzle::init_dlx() {
         }
     }
 
-    if (numBlocks - activeBlocks > 0) {
 
-        for (int i = 0; i < _rows; i++) {
-            for (int j = 0; j < _cols; j++) {
-                int id = _shapeInfo.size();
-                _shapeInfo.push_back(Shape_Info(shapeCount, i, j, 0));
-                _solver->link(id, shapeCount);
-                _solver->link(id, shapeCount + 1 + getID(i, j));
-            }
-        }
-        _solver->setColDuplicates(shapeCount, numBlocks - activeBlocks);
-    }
 
     printf("%d\n", _shapeInfo.size());
 }

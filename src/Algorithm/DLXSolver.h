@@ -33,9 +33,13 @@ private:
     struct RowLink {
         int head;
     };
+
+
     int rows, cols, tot;
     DLXNode nodes[MAX_ROW * MAX_COL];
     ColLink colLink[MAX_COL];
+
+
     int head[MAX_ROW];
     int ans[MAX_ROW], top;
     bool found, finished;
