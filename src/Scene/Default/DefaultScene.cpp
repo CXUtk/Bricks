@@ -11,6 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <set>
+#include "Strucures/Puzzle.h"
 
 
 DLXSolver* solver;
@@ -20,6 +21,13 @@ DefaultScene::DefaultScene() {
     FILE* file = fopen("Resources/Bricks/test.in", "r");
     int n, rows, cols;
     fscanf(file, "%d%d", &rows, &cols);
+
+    if (rows * cols > MAX_SHAPE_SIZE) {
+        printf("Error: rows * columns exceed the maximum limit (%d).", MAX_SHAPE_SIZE);
+        fclose(file);
+        throw;
+        return;
+    }
     _board = std::make_shared<Board>(rows, cols);
 
 

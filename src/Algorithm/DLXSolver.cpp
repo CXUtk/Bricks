@@ -3,8 +3,8 @@
 
 std::mutex _mutexLock;
 
-DLXSolver::DLXSolver(int r, int c, int hold) :rows(r), cols(c), hold(hold) {
-    memset(sz, 0, sizeof(ColLink) * (c + 1));
+DLXSolver::DLXSolver(int r, int c) :rows(r), cols(c) {
+    memset(colLink, 0, sizeof(ColLink) * (c + 1));
     memset(head, 0, sizeof(RowLink) * (r + 1));
     memset(nodes, 0, sizeof(DLXNode) * (r * c + 5));
     for (int i = 0; i <= c; i++) {
@@ -29,7 +29,7 @@ bool DLXSolver::isFinished() const {
 
 void DLXSolver::link(int r, int c) {
     int p = newNode(r, c), down = nodes[c].D;
-    sz[c]++;
+    colLink[c].sz++;
 
     nodes[p].U = c, nodes[p].D = down;
     // 把p链接在列链表的头部
@@ -58,7 +58,7 @@ void DLXSolver::remove(int c) {
             // 删除其垂直链表，但是水平链表不动
             nodes[nodes[j].U].D = nodes[j].D;
             nodes[nodes[j].D].U = nodes[j].U;
-            sz[nodes[j].col]--;
+            colLink[nodes[j].col].sz--;
         }
     }
 }
@@ -70,25 +70,24 @@ void DLXSolver::recover(int c) {
             // 恢复垂直链表
             nodes[nodes[j].U].D = j;
             nodes[nodes[j].D].U = j;
-            sz[nodes[j].col]++;
+            colLink[nodes[j].col].sz++;
         }
     }
     nodes[nodes[c].L].R = c;
     nodes[nodes[c].R].L = c;
 }
 
-std::vector<int> DLXSolver::solve() {
+void DLXSolver::solve() {
     top = 0;
     found = false;
     finished = false;
     _dfs();
-    std::vector<int> res;
-    for (int i = 0; i < top; i++) res.push_back(ans[i]);
+    _intermidiateResult.clear();
+    for (int i = 0; i < top; i++) _intermidiateResult.push_back(ans[i]);
     _mutexLock.lock();
     finished = true;
     _mutexLock.unlock();
     printf("Finished\n");
-    return res;
 }
 
 std::vector<int> DLXSolver::getIntermidiateResult() {
@@ -110,40 +109,22 @@ void DLXSolver::_dfs() {
     }
 
     int tar = nodes[0].R;
-    int cnt = 0, tot = 0;
+    int cnt = 0;
     for (int i = tar; i; i = nodes[i].R) {
-        if (sz[i] == 0) {
-            cnt++;
-        }
-        else if (sz[i] < sz[tar]) {
+        if (colLink[i].sz < colLink[tar].sz) {
             tar = i;
         }
-        tot++;
     }
-    if (tot == cnt && cnt == hold) {
-        found = true;
-        printf("Solution Found!\n");
-        return;
-    }
-    if (cnt > hold || !sz[tar]) return;
-    //if (!sz[tar])return;
+
     remove(tar);
-    // printf("%d\n", tar);
 
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
         //std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        _mutexLock.lock();
         ans[top++] = nodes[i].row;
-        _mutexLock.unlock();
-
         for (int j = nodes[i].R; j != i; j = nodes[j].R) remove(nodes[j].col);
         _dfs();
         if (found) return;
-
-        _mutexLock.lock();
         top--;
-        _mutexLock.unlock();
-
         for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
     }
     recover(tar);

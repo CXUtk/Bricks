@@ -6,18 +6,21 @@
 #include <mutex>
 struct DLXSolver {
 public:
-    DLXSolver(int r, int c, int hold);
+    DLXSolver(int r, int c);
 
     bool isFinished() const;
     void link(int r, int c);
     void remove(int c);
     void recover(int c);
-    std::vector<int>  solve();
+
+    void setColDuplicates(int c, int d) { colLink[c].dup = d; }
+
+    void solve();
     std::vector<int> getIntermidiateResult();
 
 private:
     static constexpr int MAX_ROW = 100 * 8 * 105;
-    static constexpr int MAX_COL = 250;
+    static constexpr int MAX_COL = 512;
 
     // 双向十字链表
     struct DLXNode {
@@ -25,22 +28,20 @@ private:
         int row, col;
     };
     struct ColLink {
-        int sz;
+        int sz, dup;
     };
     struct RowLink {
         int head;
     };
     int rows, cols, tot;
     DLXNode nodes[MAX_ROW * MAX_COL];
-    int sz[MAX_COL];
+    ColLink colLink[MAX_COL];
     int head[MAX_ROW];
     int ans[MAX_ROW], top;
     bool found, finished;
 
 
-    // 如果使用完所有的砖块也可以结束
-    int hold;
-
+    std::vector<int> _intermidiateResult;
 
 
     int newNode(int r, int c) {

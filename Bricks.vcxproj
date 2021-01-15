@@ -185,7 +185,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClCompile Include="src\Render\Texture2D.cpp" />
     <ClCompile Include="src\Scene\Default\DefaultScene.cpp" />
     <ClCompile Include="src\Scene\Default\Strucures\Board.cpp" />
-    <ClCompile Include="src\Scene\Default\Strucures\PolyominoRenderer.cpp" />
+    <ClCompile Include="src\Scene\Default\Strucures\Puzzle.cpp" />
     <ClCompile Include="src\Scene\Delaunay\DCEL.cpp" />
     <ClCompile Include="src\Scene\Delaunay\DelaunayScene.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
@@ -212,7 +212,6 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClInclude Include="src\Render\Texture2D.h" />
     <ClInclude Include="src\Scene\Default\DefaultScene.h" />
     <ClInclude Include="src\Scene\Default\Strucures\Board.h" />
-    <ClInclude Include="src\Scene\Default\Strucures\PolyominoRenderer.h" />
     <ClInclude Include="src\Scene\Default\Strucures\Puzzle.h" />
     <ClInclude Include="src\Scene\Delaunay\DCEL.h" />
     <ClInclude Include="src\Scene\Delaunay\DelaunayScene.h" />
