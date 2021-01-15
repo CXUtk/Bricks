@@ -238,7 +238,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <None Include="设计文档.md" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="test233.gif" />
+    <Image Include="brick235.gif" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

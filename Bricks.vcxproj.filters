@@ -198,7 +198,7 @@
     <None Include="Resources\Shaders\circle.frag" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="test233.gif">
+    <Image Include="brick235.gif">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
