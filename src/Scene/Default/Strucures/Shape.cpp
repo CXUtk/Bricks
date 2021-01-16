@@ -112,3 +112,26 @@ std::shared_ptr<Texture2D> Shape::generateTexture(glm::vec3 color) const {
 
     return std::shared_ptr<Texture2D>(new Texture2D(texID, glm::ivec2(cols * BLOCK_SIZE_DRAW, rows * BLOCK_SIZE_DRAW)));
 }
+
+int Shape::getTopLeftFittingXOffset() const {
+    std::vector<int> xoffs;
+    for (int i = 0; i < cols; i++) {
+        if (bits.test(i)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+std::bitset<MAX_SHAPE_SIZE> Shape::gBit(int frameCols) const {
+    std::bitset<MAX_SHAPE_SIZE> gbit = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            int id = i * cols + j;
+            if (bits.test(id)) {
+                gbit.set(i * frameCols + j);
+            }
+        }
+    }
+    return gbit;
+}

@@ -1,59 +1,59 @@
-10 10
-1
+8 8
+13
 
-3 5
-.OOOO
-.O.OO
-OOOO.
+1 5
+OOOOO
 
-4 4
+2 4
+OOOO
+O...
+
+2 4
+OOOO
 .O..
-OOO.
+
+3 3
+O..
+OOO
+O..
+
+3 3
+O..
+OOO
+.O.
+
+3 3
+O..
+OOO
+..O
+
+3 3
+.O.
+OOO
+.O.
+
+3 3
+OO.
+.OO
+..O
+
+3 3
+O..
+O..
+OOO
+
+2 4
+OO..
 .OOO
-..O.
 
-5 6
-O.....
-O.....
-OO....
-.OOOOO
-....O.
+2 3
+OOO
+OO.
 
-4 5
-...O.
-..OOO
-.OOO.
-OO...
+2 3
+OOO
+O.O
 
-4 5
-...O.
-..OOO
-.OOO.
-OO...
-
-4 5
-...O.
-..OOO
-.OOO.
-OO...
-
-5 5
-OO...
-.O...
-.O...
-.OO..
-..OOO
-
-5 5
-OO...
-.O...
-.O...
-.OO..
-..OOO
-
-5 5
-OO...
-.O...
-.O...
-.OO..
-..OOO
+2 2
+OO
+OO

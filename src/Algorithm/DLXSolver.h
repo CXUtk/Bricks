@@ -4,6 +4,9 @@
 #include <vector>
 #include <map>
 #include <mutex>
+#include <bitset>
+#include "Scene/Default/Strucures/Shape.h"
+
 struct DLXSolver {
 public:
     DLXSolver(int r, int c);
@@ -14,9 +17,16 @@ public:
     void recover(int c);
 
     void setColDuplicates(int c, int d) { colLink[c].dup = d; }
+    void setConfigInfo(int num, int rows, int cols) {
+        numShapes = num;
+        frameRows = rows, frameCols = cols;
+    }
 
     void solve();
     std::vector<int> getIntermidiateResult();
+    std::vector<std::pair<int, std::bitset<MAX_SHAPE_SIZE>>> getHalfSolved() const { return _halfSolveRes; }
+
+    int parity[100];
 
 private:
     static constexpr int MAX_ROW = 5005;
@@ -36,16 +46,22 @@ private:
 
 
     int rows, cols, tot;
+    int frameRows, frameCols;
+    int numShapes;
     DLXNode nodes[MAX_ROW * MAX_COL];
     ColLink colLink[MAX_COL];
+    RowLink rowLink[MAX_ROW];
 
 
-    int head[MAX_ROW];
+
     int ans[MAX_ROW], top;
     bool found, finished;
+    int numSolutions;
 
 
     std::vector<int> _intermidiateResult;
+    std::vector<std::pair<int, std::bitset<MAX_SHAPE_SIZE>>> _halfSolveRes;
+
 
 
     int newNode(int r, int c) {
@@ -54,6 +70,6 @@ private:
         return tot;
     }
 
-    void _dfs();
-
+    void _dfs(int dep);
+    int _bfs(int x, std::bitset<MAX_SHAPE_SIZE>& mapp);
 };

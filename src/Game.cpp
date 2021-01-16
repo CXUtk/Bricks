@@ -81,7 +81,7 @@ void Game::run() {
         double curTime = glfwGetTime();
         oldTime = curTime;
         if (curTime - oldTime2 > 1.0) {
-            printf("FPS: %d\n", cnt);
+            //printf("FPS: %d\n", cnt);
             cnt = 0;
             oldTime2 = curTime;
         }

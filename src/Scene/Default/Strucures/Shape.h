@@ -6,7 +6,7 @@
 #include <Render\Texture2D.h>
 
 // 每个拼图块的最大占据格子数量
-static constexpr int MAX_SHAPE_SIZE = 256;
+static constexpr int MAX_SHAPE_SIZE = 64;
 
 struct Shape {
     int rows, cols;
@@ -39,4 +39,7 @@ struct Shape {
     int count() const;
 
     std::shared_ptr<Texture2D> generateTexture(glm::vec3 color) const;
+
+    int getTopLeftFittingXOffset() const;
+    std::bitset<MAX_SHAPE_SIZE> gBit(int frameCols) const;
 };

@@ -24,6 +24,8 @@ public:
     void add(const Shape& shape);
     void build();
     void solve();
+    void solve2();
+    void solve3();
 
     // 获取结果，未使用
     std::vector<Shape_Info> getResult() const { return _results; }
@@ -48,6 +50,9 @@ private:
     std::shared_ptr<std::thread> _solveThread;
 
 
+
+
+
     // 判重，移除相同块，有下面那个还要这个干嘛？？
     void remove_dupI();
     // 判重，移除本质相同块
@@ -57,4 +62,15 @@ private:
     void init_dlx();
 
     int getID(int r, int c) const { return r * _cols + c; }
+
+
+    // std::vector<Shape> _debuijnPoses[1005];
+    struct DebuijnInfo {
+        int xoffset;
+        int r, c;
+        std::bitset<MAX_SHAPE_SIZE> bits;
+    };
+    std::vector<DebuijnInfo> _debuijnPosesSols[1005];
+    std::bitset<MAX_SHAPE_SIZE> _debuijnUse;
+    void debuijn(int S, int start);
 };
