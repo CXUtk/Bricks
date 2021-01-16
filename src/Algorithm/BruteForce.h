@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <bitset>
 #include <vector>
+#include <queue>
+#include <thread>
 #include "Scene/Default/Strucures/Shape.h"
 struct ShapeBruteInfo {
     int xoffset;
@@ -12,14 +14,22 @@ class BruteForce {
 public:
 
     BruteForce() {}
+    ~BruteForce();
+
     BruteForce(int frameRows, int frameCols, int shapeNumber);
-    void run(int S, std::bitset<MAX_SHAPE_SIZE> P);
+    void push(int S, std::bitset<MAX_SHAPE_SIZE> P);
+    void startListening();
+    void notifyComplete();
+
 
     std::vector<ShapeBruteInfo> _bruteForceInfo[1005];
-    int _numSolutions;
+    static int _numSolutions;
 private:
 
-    std::bitset<MAX_SHAPE_SIZE> _bruteFrameState;
     int _rows, _cols, _shapeNums;
-    void _dfs(int S, int start);
+    bool _complete;
+    std::queue<std::pair<int, std::bitset<MAX_SHAPE_SIZE>>> _taskQueue;
+    std::vector<std::thread*> _threads;
+
+    void _dfs(int S, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& numSolutions);
 };

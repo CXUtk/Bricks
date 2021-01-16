@@ -31,11 +31,12 @@ void Puzzle::build() {
 }
 
 void Puzzle::solve() {
-    if (!_solveThread) {
-        _solveThread = std::make_shared<std::thread>([&]() {
-            _solver->solve();
-            });
-    }
+    //if (!_solveThread) {
+    //    _solveThread = std::make_shared<std::thread>([&]() {
+    //        _solver->solve();
+    //        });
+    //}
+    _solver->solve();
 }
 
 
