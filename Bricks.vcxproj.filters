@@ -99,6 +99,9 @@
     <ClCompile Include="src\Scene\Default\Strucures\Shape.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Algorithm\BruteForce.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Scene\Scene.h">
@@ -177,6 +180,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Default\Strucures\Shape.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Algorithm\BruteForce.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

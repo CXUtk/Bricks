@@ -88,7 +88,7 @@ DefaultScene::DefaultScene() {
     auto time = glfwGetTime();
 
     // dfs(0, _bricks);
-    _puzzle->solve3();
+    _puzzle->solve();
     printf("%lf seconds\n", glfwGetTime() - time);
 
     // Place results

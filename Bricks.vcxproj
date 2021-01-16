@@ -164,6 +164,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glad.c" />
+    <ClCompile Include="src\Algorithm\BruteForce.cpp" />
     <ClCompile Include="src\Algorithm\DLXSolver.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\ImUI\ImUI.cpp" />
@@ -193,6 +194,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Algorithm\BruteForce.h" />
     <ClInclude Include="src\Algorithm\DLXSolver.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\ImUI\ImUI.h" />

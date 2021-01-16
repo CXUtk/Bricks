@@ -22,6 +22,10 @@ DLXSolver::DLXSolver(int r, int c) :rows(r), cols(c) {
     numSolutions = 0;
 }
 
+DLXSolver::~DLXSolver() {
+    delete _bruteForce;
+}
+
 bool DLXSolver::isFinished() const {
     bool f;
     _mutexLock.lock();
@@ -91,11 +95,11 @@ void DLXSolver::solve() {
     finished = false;
     auto time = glfwGetTime();
 
-
     _dfs(0);
     printf("%lf seconds\n", glfwGetTime() - time);
     _intermidiateResult.clear();
     for (int i = 0; i < top; i++) _intermidiateResult.push_back(ans[i]);
+    numSolutions = _bruteForce->_numSolutions;
     //_mutexLock.lock();
     //finished = true;
     //_mutexLock.unlock();
@@ -142,7 +146,7 @@ void DLXSolver::_dfs(int level) {
 
     if (colLink[tar].sz == 0) return;
 
-    if (level == 7) {
+    if (level == 4) {
         int tar = nodes[0].R;
         int S = 0;
         std::bitset<MAX_SHAPE_SIZE> place = 0;
@@ -155,7 +159,7 @@ void DLXSolver::_dfs(int level) {
                 place.set(i - numShapes - 1, 0);
             }
         }
-        _halfSolveRes.push_back({ S, place });
+        _bruteForce->run(S, place);
         //found = true;
         return;
     }

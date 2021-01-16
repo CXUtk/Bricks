@@ -6,10 +6,12 @@
 #include <mutex>
 #include <bitset>
 #include "Scene/Default/Strucures/Shape.h"
+#include "BruteForce.h"
 
 struct DLXSolver {
 public:
     DLXSolver(int r, int c);
+    ~DLXSolver();
 
     bool isFinished() const;
     void link(int r, int c);
@@ -20,11 +22,15 @@ public:
     void setConfigInfo(int num, int rows, int cols) {
         numShapes = num;
         frameRows = rows, frameCols = cols;
+        _bruteForce = new BruteForce(frameRows, frameCols, numShapes);
+    }
+
+    void addBruteInfo(int i, ShapeBruteInfo info) {
+        _bruteForce->_bruteForceInfo[i].push_back(info);
     }
 
     void solve();
     std::vector<int> getIntermidiateResult();
-    std::vector<std::pair<int, std::bitset<MAX_SHAPE_SIZE>>> getHalfSolved() const { return _halfSolveRes; }
 
     int parity[100];
 
@@ -60,7 +66,7 @@ private:
 
 
     std::vector<int> _intermidiateResult;
-    std::vector<std::pair<int, std::bitset<MAX_SHAPE_SIZE>>> _halfSolveRes;
+    BruteForce* _bruteForce;
 
 
 

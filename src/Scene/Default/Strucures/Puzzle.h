@@ -65,12 +65,5 @@ private:
 
 
     // std::vector<Shape> _debuijnPoses[1005];
-    struct DebuijnInfo {
-        int xoffset;
-        int r, c;
-        std::bitset<MAX_SHAPE_SIZE> bits;
-    };
-    std::vector<DebuijnInfo> _debuijnPosesSols[1005];
-    std::bitset<MAX_SHAPE_SIZE> _debuijnUse;
-    void debuijn(int S, int start);
+
 };

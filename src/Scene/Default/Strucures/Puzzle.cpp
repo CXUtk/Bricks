@@ -38,31 +38,19 @@ void Puzzle::solve() {
     }
 }
 
-static int numSolutions;
-static bool found;
-static int top;
-static std::vector<int> Ans;
-void Puzzle::solve2() {
-    numSolutions = 0;
-    _debuijnUse = 0;
-    found = false;
-    top = 0;
-    debuijn((1 << (_shapes.size())) - 1, 0);
-    printf("%d\n", numSolutions);
-}
 
 void Puzzle::solve3() {
-    numSolutions = 0;
+    //numSolutions = 0;
 
-    found = false;
-    top = 0;
-    _solver->solve();
-    auto tmp = _solver->getHalfSolved();
-    for (auto& state : tmp) {
-        _debuijnUse = state.second;
-        debuijn(state.first, 0);
-    }
-    printf("%d\n", numSolutions);
+    //found = false;
+    //top = 0;
+    //_solver->solve();
+    //auto tmp = _solver->getHalfSolved();
+    //for (auto& state : tmp) {
+    //    _debuijnUse = state.second;
+    //    debuijn(state.first, 0);
+    //}
+    //printf("%d\n", numSolutions);
 }
 
 std::vector<Shape_Info> Puzzle::getResultIM() {
@@ -177,7 +165,7 @@ void Puzzle::init_dlx() {
             for (int b = 0; b < 4; b++) {
                 if (!dup.count(shape)) {
                     dup.insert(shape);
-                    _debuijnPosesSols[i].push_back({ shape.getTopLeftFittingXOffset(), shape.rows, shape.cols, shape.gBit(_cols) });
+                    _solver->addBruteInfo(i, { shape.getTopLeftFittingXOffset(), shape.rows, shape.cols, shape.gBit(_cols) });
 
                     for (int r = 0; r < _rows - shape.rows + 1; r++) {
                         for (int c = 0; c < _cols - shape.cols + 1; c++) {
@@ -210,46 +198,4 @@ void Puzzle::init_dlx() {
     //        _debuijnPosesSols[i].push_back(s.gBit(_cols));
     //    }
     //}
-}
-
-
-
-void Puzzle::debuijn(int S, int start) {
-    if (found) return;
-    if (!S) {
-        numSolutions++;
-        if (numSolutions % 30 == 0) {
-            printf("%d\n", numSolutions);
-        }
-        // found = true;
-        return;
-    }
-    int sz = _shapes.size();
-    int tR = -1, tC = -1;
-    for (int j = start; j < _rows * _cols; j++) {
-        if (!_debuijnUse[j]) {
-            tR = j / _cols;
-            tC = j % _cols;
-            break;
-        }
-    }
-    for (int i = sz - 1; i >= 0; i--) {
-        if (S >> i & 1) {
-            for (auto& p : _debuijnPosesSols[i]) {
-                if (tR >= _rows - p.r + 1) continue;
-                if (tC - p.xoffset < 0 || tC - p.xoffset >= _cols - p.c + 1) continue;
-                int id2 = tR * _cols + tC - p.xoffset;
-                // 如果放置不能匹配
-                auto tmp = (p.bits << id2);
-                if ((_debuijnUse & tmp) != 0) continue;
-
-                _debuijnUse |= tmp;
-                //Ans.push_back(i);
-                debuijn(S ^ (1 << i), tR * _cols + tC);
-                if (found) return;
-                // Ans.pop_back();
-                _debuijnUse ^= tmp;
-            }
-        }
-    }
 }
