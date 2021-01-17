@@ -29,6 +29,7 @@ public:
         _bruteForce->_bruteForceInfo[i].push_back(info);
     }
 
+    void mixSolve(int maxDepthDLX);
     void solve();
     std::vector<int> getIntermidiateResult();
 
@@ -63,6 +64,7 @@ private:
     int ans[MAX_ROW], top;
     bool found, finished;
     int numSolutions;
+    int mixMaxDepth;
 
 
     std::vector<int> _intermidiateResult;
@@ -77,5 +79,5 @@ private:
     }
 
     void _dfs(int dep);
-    int _bfs(int x, std::bitset<MAX_SHAPE_SIZE>& mapp);
+    void _dfsMix(int dep);
 };

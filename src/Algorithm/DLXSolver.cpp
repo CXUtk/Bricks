@@ -89,24 +89,40 @@ void DLXSolver::recover(int c) {
 }
 
 
+void DLXSolver::mixSolve(int maxDepthDLX) {
+    mixMaxDepth = maxDepthDLX;
+    top = 0;
+    found = false;
+    finished = false;
+    auto time = glfwGetTime();
+    _bruteForce->startListening();
+    _dfsMix(0);
+    _bruteForce->notifyComplete();
+
+    printf("%lf seconds\n", glfwGetTime() - time);
+
+    _mutexLock.lock();
+    _intermidiateResult.clear();
+    for (int i = 0; i < top; i++) _intermidiateResult.push_back(ans[i]);
+    _mutexLock.unlock();
+
+    numSolutions = _bruteForce->_numSolutions;
+    printf("Finished: %d solutions found\n", numSolutions);
+}
+
 void DLXSolver::solve() {
     top = 0;
     found = false;
     finished = false;
     auto time = glfwGetTime();
-
-    _bruteForce->startListening();
     _dfs(0);
-    _bruteForce->notifyComplete();
-
     printf("%lf seconds\n", glfwGetTime() - time);
 
+    _mutexLock.lock();
     _intermidiateResult.clear();
     for (int i = 0; i < top; i++) _intermidiateResult.push_back(ans[i]);
-    numSolutions = _bruteForce->_numSolutions;
-    //_mutexLock.lock();
-    //finished = true;
-    //_mutexLock.unlock();
+    _mutexLock.unlock();
+
     printf("Finished: %d solutions found\n", numSolutions);
 }
 
@@ -124,50 +140,20 @@ std::vector<int> DLXSolver::getIntermidiateResult() {
 
 void DLXSolver::_dfs(int level) {
     if (found) return;
-
-    int tar = nodes[0].R;
-    int cnt = 0;
-    for (int i = tar; i; i = nodes[i].R) {
-
-        cnt++;
+    if (!nodes[0].R) {
+        numSolutions++;
+        printf("Solution found!\n");
+        found = true;
+        return;
     }
-
+    int tar = nodes[0].R;
     for (int i = tar; i; i = nodes[i].R) {
         if (colLink[i].sz < colLink[tar].sz) {
             tar = i;
         }
     }
 
-    //for (int i = 0; i < frameRows * frameCols; i++) {
-    //    if (!mapp[i]) {
-    //        int num = _bfs(i, mapp);
-    //        cnt += num / 4;
-    //        if (num < 4)return;
-    //    }
-    //}
-    //if (cnt < cnts)return;
-
-
     if (colLink[tar].sz == 0) return;
-
-    if (level == 5) {
-        int tar = nodes[0].R;
-        int S = 0;
-        std::bitset<MAX_SHAPE_SIZE> place = 0;
-        place = ~place;
-        for (int i = tar; i; i = nodes[i].R) {
-            if (i <= numShapes) {
-                S |= (1 << (i - 1));
-            }
-            else {
-                place.set(i - numShapes - 1, 0);
-            }
-        }
-        _bruteForce->push(S, place);
-        //found = true;
-        return;
-    }
-
     remove(tar);
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
         // std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -186,34 +172,56 @@ void DLXSolver::_dfs(int level) {
         _mutexLock.lock();
         top--;
         _mutexLock.unlock();
-
-
     }
     recover(tar);
 }
 
-int DLXSolver::_bfs(int x, std::bitset<MAX_SHAPE_SIZE>& mapp) {
-
-    static int dr[4] = { 1, -1, 0, 0 };
-    static int dc[4] = { 0, 0, 1, -1 };
-    std::queue<int> Q;
-    Q.push(x);
-    int cnt = 0;
-    while (!Q.empty()) {
-        auto u = Q.front();
-        Q.pop();
-        if (mapp.test(u))continue;
-        mapp[u] = true;
-        cnt++;
-        int r = u / frameCols;
-        int c = u % frameCols;
-        for (int i = 0; i < 4; i++) {
-            int nr = r + dr[i];
-            int nc = c + dc[i];
-            if (nr < 0 || nc < 0 || nr >= frameRows || nc >= frameCols || mapp[nr * frameCols + nc])continue;
-            Q.push(nr * frameCols + nc);
+void DLXSolver::_dfsMix(int dep) {
+    if (found) return;
+    int tar = nodes[0].R;
+    for (int i = tar; i; i = nodes[i].R) {
+        if (colLink[i].sz < colLink[tar].sz) {
+            tar = i;
         }
     }
-    return cnt;
 
+    if (colLink[tar].sz == 0) return;
+
+    if (dep == mixMaxDepth) {
+        int tar = nodes[0].R;
+        int S = 0;
+        std::bitset<MAX_SHAPE_SIZE> place = 0;
+        place = ~place;
+        for (int i = tar; i; i = nodes[i].R) {
+            if (i <= numShapes) {
+                S |= (1 << (i - 1));
+            }
+            else {
+                place.set(i - numShapes - 1, 0);
+            }
+        }
+        _bruteForce->push(S, place);
+        return;
+    }
+
+    remove(tar);
+    for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
+        // std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        _mutexLock.lock();
+        ans[top++] = nodes[i].row;
+        _mutexLock.unlock();
+
+        for (int j = nodes[i].R; j != i; j = nodes[j].R) remove(nodes[j].col);
+        _dfsMix(dep + 1);
+        if (found) return;
+
+        for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
+
+        _mutexLock.lock();
+        top--;
+        _mutexLock.unlock();
+
+
+    }
+    recover(tar);
 }

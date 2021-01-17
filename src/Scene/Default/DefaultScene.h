@@ -25,20 +25,12 @@ private:
     int _handBrickID;
     std::vector<Shape> _shapes;
     std::vector<std::shared_ptr<Texture2D>> _textures;
-    int _cnt[MAX_BLOCKS];
 
     glm::ivec2 _puzzleBoardSize;
 
     // void randomGenerate();
     void generateBrickTextures();
-    // void cutBoard();
-    // void genBrick();
-    // bool checkRemain();
-    // void dfsCut(int r, int c);
 
-    //void applySolverToBoard();
-
-    //void dfs(int x, std::vector<Brick>& bricks);
     void solve();
 
     glm::ivec2 calculateBricksList(int maxWidth);

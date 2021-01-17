@@ -10,6 +10,7 @@ Puzzle::Puzzle() {
     _rows = 0, _cols = 0;
     _solveThread = nullptr;
     _solver = nullptr;
+    _puzzleState = 0;
 }
 
 Puzzle::~Puzzle() {
@@ -27,32 +28,39 @@ void Puzzle::add(const Shape& shape) {
 
 void Puzzle::build() {
     remove_dupStrongI();
-    init_dlx();
 }
 
 void Puzzle::solve() {
-    //if (!_solveThread) {
-    //    _solveThread = std::make_shared<std::thread>([&]() {
-    //        _solver->solve();
-    //        });
-    //}
-    _solver->solve();
-}
-
-
-void Puzzle::solve3() {
-    //numSolutions = 0;
-
-    //found = false;
-    //top = 0;
+    init_dlx();
+    if (_solveThread) {
+        if (_solveThread->joinable())
+            _solveThread->join();
+    }
+    _solveThread = std::make_shared<std::thread>([&]() {
+        _solver->solve();
+        }
+    );
+    _solveThread->join();
     //_solver->solve();
-    //auto tmp = _solver->getHalfSolved();
-    //for (auto& state : tmp) {
-    //    _debuijnUse = state.second;
-    //    debuijn(state.first, 0);
-    //}
-    //printf("%d\n", numSolutions);
 }
+
+void Puzzle::place(int id, const Shape& shape, int r, int c) {
+    assert((_puzzleState & (shape.gBit(_cols) << (r * _cols + c))) == 0);
+    _puzzleState |= shape.gBit(_cols) << (r * _cols + c);
+    _curShapeDups[id]--;
+}
+
+void Puzzle::unplace(int id, const std::bitset<MAX_SHAPE_SIZE>& S, int r, int c) {
+    _puzzleState ^= S;
+    assert((_puzzleState & S) == 0);
+    _curShapeDups[id]++;
+}
+
+void Puzzle::clear() {
+    _puzzleState = 0;
+    _curShapeDups = _shapeDups;
+}
+
 
 std::vector<Shape_Info> Puzzle::getResultIM() {
     _results.clear();
@@ -123,24 +131,34 @@ void Puzzle::remove_dupStrongI() {
         }
     }
     _shapes = shapes;
+
+    _curShapeDups = _shapeDups;
 }
 
 void Puzzle::init_dlx() {
     int shapeCount = _shapes.size();
-    int numBlocks = _rows * _cols;
+    int numBlocks = 0;
+    for (int i = 0; i < _cols * _rows; i++) {
+        if (!_puzzleState[i]) {
+            _idMap[i] = numBlocks;
+            numBlocks++;
+        }
+    }
 
-
+    _shapeInfo.clear();
     _shapeInfo.push_back({ -1,-1,-1,-1 });
 
     int activeBlocks = 0;
-    for (int i = 0; i < shapeCount; i++) activeBlocks += _shapes[i].count() * _shapeDups[i];
+    for (int i = 0; i < shapeCount; i++) activeBlocks += _shapes[i].count() * _curShapeDups[i];
 
     if (numBlocks - activeBlocks > 0) {
         shapeCount++;
     }
     int dlxCols = shapeCount + numBlocks;
 
-    _solver = new DLXSolver(3000, dlxCols);
+    if (_solver)
+        delete _solver;
+    _solver = new DLXSolver(5000, dlxCols);
     _solver->setConfigInfo(numBlocks - activeBlocks > 0 ? shapeCount - 1 : shapeCount, _rows, _cols);
     if (numBlocks - activeBlocks > 0) {
 
@@ -158,7 +176,11 @@ void Puzzle::init_dlx() {
 
     for (int i = 0; i < _shapes.size(); i++) {
         Shape shape = _shapes[i];
-        _solver->setColDuplicates(i + 1, _shapeDups[i]);
+        if (!_curShapeDups[i]) {
+            _solver->remove(i + 1);
+            continue;
+        }
+        _solver->setColDuplicates(i + 1, _curShapeDups[i]);
 
         // 判重+编号加入DLX
         std::set<Shape> dup;
@@ -170,6 +192,21 @@ void Puzzle::init_dlx() {
 
                     for (int r = 0; r < _rows - shape.rows + 1; r++) {
                         for (int c = 0; c < _cols - shape.cols + 1; c++) {
+
+
+                            bool can = true;
+                            for (int s = 0; s < shape.rows; s++) {
+                                for (int t = 0; t < shape.cols; t++) {
+                                    if (_puzzleState[(s + r) * _cols + t + c]) {
+                                        can = false;
+                                        goto END_LOOP;
+                                    }
+                                }
+                            }
+
+                        END_LOOP:
+                            if (!can) continue;
+
                             int id = _shapeInfo.size();
                             _shapeInfo.push_back(Shape_Info(i, r, c, a << 2 | b));
                             _solver->link(id, i + 1);
@@ -192,11 +229,4 @@ void Puzzle::init_dlx() {
         }
     }
     printf("%d\n", _shapeInfo.size());
-
-
-    //for (int i = 0; i < _shapes.size(); i++) {
-    //    for (auto s : _debuijnPoses[i]) {
-    //        _debuijnPosesSols[i].push_back(s.gBit(_cols));
-    //    }
-    //}
 }

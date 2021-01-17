@@ -78,10 +78,6 @@ DefaultScene::DefaultScene() {
 
     _puzzle->build();
 
-    for (int i = 0; i < _shapes.size(); i++) {
-        _cnt[i] = 1;
-    }
-
     _shapes = _puzzle->getShapeList();
     generateBrickTextures();
 
@@ -111,8 +107,7 @@ void DefaultScene::update() {
     auto pos = _board->getIndexFromMousePos(_handBrick, mousePos);
     auto shadowPos = _board->getShadowIndexFromMousePos(_handBrick, mousePos);
 
-    //auto shadowBit = _handBrick.gBit(_board->getCols()) << (shadowPos.x * _board->getCols() + shadowPos.y);
-    bool canplace = (_handBrickID != -1 && _board->canPlace(_handBrick, shadowPos) && _cnt[_handBrickID]);
+    bool canplace = (_handBrickID != -1 && _board->canPlace(_handBrick, shadowPos) && _puzzle->getCurCount(_handBrickID));
     if (_handBrickID != -1)
         _board->placeShadow(_handBrick, shadowPos, canplace ? 1 : 2);
 
@@ -121,14 +116,15 @@ void DefaultScene::update() {
 
     if (_handBrickID != -1) {
         if (input->getCurMouseDown() && !input->getOldMouseDown() && canplace && _board->mouseInside(mousePos)) {
-            _board->place(_handBrick, shadowPos, _handBrickID);
-            _cnt[_handBrickID]--;
+            _board->place(_handBrick, shadowPos, _handBrickID, _handBrickID);
+            _puzzle->place(_handBrickID, _handBrick, shadowPos.x, shadowPos.y);
         }
     }
     if (input->getCurMouseRightDown() && !input->getOldMouseRightDown() && _board->mouseInside(mousePos)) {
-        int c = _board->unplace(pos);
-        if (c != -1) {
-            _cnt[c]++;
+        int id;
+        auto s = _board->unplace(pos, id);
+        if (id != -1) {
+            _puzzle->unplace(id, s, pos.x, pos.y);
         }
     }
     if (input->getIsKeyDown(GLFW_KEY_Z) && !input->getWasKeyDown(GLFW_KEY_Z)) {
@@ -152,22 +148,6 @@ void DefaultScene::draw() {
     // 绘制砖块图的UI帧
     ImUI::BeginFrame(glm::vec2(8, 8), _puzzleBoardSize, glm::vec3(1));
     {
-        _board->clear();
-
-        int cur = 0;
-
-        auto result = _puzzle->getResultIM();
-        for (auto& a : result) {
-            bool extra;
-            Shape b = _puzzle->getShape(a, extra);
-            if (a.s & 4) b = b.flip();
-            for (int i = 0; i < (a.s & 3); i++) {
-                b = b.rotateClockwise();
-            }
-            _board->place(b, glm::ivec2(a.r, a.c), extra ? -2 : cur);
-            cur++;
-        }
-
         auto rect = ImUI::getContainerRect();
         auto size = _board->getSize();
         _board->update(glm::ivec2((int)(rect.pos.x + rect.size.x / 2.f - size.x / 2.f), (int)(rect.pos.y + rect.size.y / 2.f - size.y / 2.f)));
@@ -199,7 +179,7 @@ void DefaultScene::draw() {
                     scale *= 0.9f;
                     if (ImUI::img_button(texture, glm::vec2(startX, startY),
                         glm::vec2(64, 64), scale,
-                        _cnt[i] > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
+                        _puzzle->getCurCount(i) > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
                         _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
                         printf("%d is Clicked!\n", i);
                         _handBrick = _shapes[i];
@@ -229,29 +209,31 @@ void DefaultScene::draw() {
         auto rect = ImUI::getContainerRect();
 
         if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 8), glm::vec2(120, 50), glm::vec3(0.5, 1, 0.5), glm::vec3(0, 1, 0), "Clear", glm::vec3(0, 0, 0))) {
-            _board->clear();
-            for (int i = 0; i < _shapes.size(); i++) {
-                _cnt[i] = 1;
-            }
+            _board->clear(0);
+            _puzzle->clear();
         }
         if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 50 + 16), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
             glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
+            _puzzle->solve();
+            _board->clear(_puzzle->getMask());
+            auto result = _puzzle->getResultIM();
+            for (auto& a : result) {
+                bool extra;
+                Shape b = _puzzle->getShape(a, extra);
+                if (a.s & 4) b = b.flip();
+                for (int i = 0; i < (a.s & 3); i++) {
+                    b = b.rotateClockwise();
+                }
 
+                int id = extra ? -2 : a.id;
+                if (id != -2) {
+                    _board->place(b, glm::ivec2(a.r, a.c), id, id);
+                    _puzzle->place(id, b, a.r, a.c);
+                }
+            }
         }
     }
     ImUI::EndFrame();
-    //if (!solver->isFinished() || (!_oldFinished && solver->isFinished())) {
-    //    _oldFinished = solver->isFinished();
-    //    applySolverToBoard();
-    //}
-
-    //std::vector<glm::vec2> lines;
-    //lines.push_back(glm::vec2(0, 0));
-    //lines.push_back(glm::vec2(500, 500));
-    //Game::GetInstance().getGraphics()->drawLines(lines, glm::vec3(1, 1, 1), 2);
-
-    // game.getGraphics()->drawDirectedArrow(glm::vec2(0, 0), glm::vec2(500, 500), glm::vec3(1, 0, 0), 1);
-    // Input end
     input->endInput();
     ImUI::EndGUI();
 }

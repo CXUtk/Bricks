@@ -18,18 +18,19 @@ static glm::vec3 colors[] = {
 };
 
 Board::Board(int rows, int columns) :_rows(rows), _columns(columns) {
-    tiles = new int[_rows * _columns];
-    shadow = new int[_rows * _columns];
-    memset(tiles, -1, sizeof(int) * _rows * _columns);
-    memset(shadow, 0, sizeof(int) * _rows * _columns);
+    tiles = new Tile[_rows * _columns];
+    for (int i = 0; i < _rows * _columns; i++) {
+        tiles[i].id = -1;
+        tiles[i].color = 0;
+        tiles[i].shadow = 0;
+    }
 }
-
-void Board::place(const Shape& brick, glm::ivec2 pos, int id) {
+void Board::place(const Shape& brick, glm::ivec2 pos, int id, int color) {
     for (int i = pos.x; i < std::min(pos.x + brick.rows, _rows); i++) {
         for (int j = pos.y; j < std::min(pos.y + brick.cols, _columns); j++) {
             int r = i - pos.x, c = j - pos.y;
             if (brick.get(r, c)) {
-                setTile(i, j, id);
+                setTile(i, j, id, color);
             }
         }
     }
@@ -47,25 +48,27 @@ void Board::place(const Shape& brick, glm::ivec2 pos, int id) {
 
 static int dr[4] = { 1, -1, 0, 0 };
 static int dc[4] = { 0, 0, 1, -1 };
-int Board::unplace(glm::ivec2 pos) {
+std::bitset<MAX_SHAPE_SIZE> Board::unplace(glm::ivec2 pos, int& id) {
     std::queue<glm::ivec2> Q;
     Q.push(pos);
-    int color = getTileColor(pos.x, pos.y);
-    if (color == -1) return -1;
+    std::bitset<MAX_SHAPE_SIZE> S(0);
+    id = getTileID(pos.x, pos.y);
+    if (id == -1) return S;
     while (!Q.empty()) {
         auto p = Q.front();
-        setTile(p.x, p.y, -1);
+        setTile(p.x, p.y, -1, 0);
+        S.set(p.x * _columns + p.y);
         Q.pop();
         for (int i = 0; i < 4; i++) {
             int nr = p.x + dr[i];
             int nc = p.y + dc[i];
             if (nr < 0 || nc < 0 || nr >= _rows || nc >= _columns
-                || getTileColor(nr, nc) == -1 || getTileColor(nr, nc) != color)
+                || getTileID(nr, nc) == -1 || getTileID(nr, nc) != id)
                 continue;
             Q.push(glm::ivec2(nr, nc));
         }
     }
-    return color;
+    return S;
 }
 
 void Board::placeShadow(const Shape& brick, glm::ivec2 pos, int color) {
@@ -73,7 +76,7 @@ void Board::placeShadow(const Shape& brick, glm::ivec2 pos, int color) {
         for (int j = pos.y; j < std::min(pos.y + brick.cols, _columns); j++) {
             int r = i - pos.x, c = j - pos.y;
             if (brick.get(r, c)) {
-                shadow[i * _columns + j] = color;
+                tiles[i * _columns + j].shadow = color;
             }
         }
     }
@@ -84,7 +87,7 @@ bool Board::canPlace(const Shape& brick, glm::ivec2 pos) {
     for (int i = pos.x; i < std::min(pos.x + brick.rows, _rows); i++) {
         for (int j = pos.y; j < std::min(pos.y + brick.cols, _columns); j++) {
             int r = i - pos.x, c = j - pos.y;
-            if (brick.get(r, c) && getTileColor(i, j) != -1) {
+            if (brick.get(r, c) && getTileID(i, j) != -1) {
                 return false;
             }
         }
@@ -127,7 +130,9 @@ static int vis[100][100];
 
 
 void Board::clearShadow() {
-    memset(shadow, 0, sizeof(int) * _rows * _columns);
+    for (int i = 0; i < _rows * _columns; i++) {
+        tiles[i].shadow = 0;
+    }
 }
 
 void Board::update(glm::ivec2 topLeft) {
@@ -160,7 +165,7 @@ void Board::draw() {
     std::vector<Triangle> triangles;
     for (int i = 0; i < _rows; i++) {
         for (int j = 0; j < _columns; j++) {
-            int color = getTileColor(i, j);
+            int color = getTileID(i, j);
             if (color != -1) {
                 //glm::vec2 bl = glm::vec2(_topLeft.x + j * BLOCK_SIZE, _topLeft.y + i * BLOCK_SIZE);
                 //game.getGraphics()->drawQuad(bl, glm::vec2(BLOCK_SIZE), colors[color % 10]);
@@ -188,16 +193,17 @@ void Board::remove(const Shape& brick, glm::ivec2 pos) {
         for (int j = pos.y; j < std::min(pos.y + brick.cols, _columns); j++) {
             int r = i - pos.x, c = j - pos.y;
             if (brick.get(r, c)) {
-                setTile(i, j, -1);
+                setTile(i, j, -1, 0);
             }
         }
     }
 }
 
-void Board::clear() {
+void Board::clear(const std::bitset<MAX_SHAPE_SIZE>& mask) {
     for (int i = 0; i < _rows; i++) {
         for (int j = 0; j < _columns; j++) {
-            setTile(i, j, -1);
+            if (!mask[i * _columns + j])
+                setTile(i, j, -1, 0);
         }
     }
 }
@@ -215,13 +221,13 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic) {
     static int dr[4] = { 1, -1, 0, 0 };
     static int dc[4] = { 0, 0, 1, -1 };
 
-    int color = getTileColor(r, c);
+    int color = getTileID(r, c);
 
     std::vector<Triangle> drakTri;
     std::vector<Triangle> lightTri;
 
     auto judge = [=](int i, int j) {
-        return i >= 0 && j >= 0 && i < _rows&& j < _columns&& getTileColor(i, j) == color;
+        return i >= 0 && j >= 0 && i < _rows&& j < _columns&& getTileID(i, j) == color;
     };
 
     // 上方，左边是否有联通块
@@ -342,17 +348,18 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic) {
     }
 }
 
-void Board::setTile(int r, int c, int color) {
+void Board::setTile(int r, int c, int k, int color) {
     int id = r * _columns + c;
-    tiles[id] = color;
+    tiles[id].id = k;
+    tiles[id].color = color;
 }
 
-int Board::getTileColor(int r, int c) const {
+int Board::getTileID(int r, int c) const {
     int id = r * _columns + c;
-    return tiles[id];
+    return tiles[id].id;
 }
 
 int Board::getShadow(int r, int c) const {
     int id = r * _columns + c;
-    return shadow[id];
+    return tiles[id].shadow;
 }

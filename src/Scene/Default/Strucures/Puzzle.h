@@ -23,9 +23,16 @@ public:
     void setFrameSize(int r, int c);
     void add(const Shape& shape);
     void build();
+
+
     void solve();
-    void solve2();
-    void solve3();
+
+    void place(int id, const Shape& shape, int r, int c);
+    void unplace(int id, const std::bitset<MAX_SHAPE_SIZE>& S, int r, int c);
+    void clear();
+    int getCurCount(int id) const {
+        return _curShapeDups[id];
+    }
 
     // 获取结果，未使用
     std::vector<Shape_Info> getResult() const { return _results; }
@@ -35,12 +42,17 @@ public:
 
     Shape getShape(Shape_Info info, bool& extra) const;
 
+    std::bitset<MAX_SHAPE_SIZE> getMask() const {
+        return _puzzleState;
+    }
 private:
 
     int _rows, _cols;
 
     std::vector<Shape> _shapes;
     std::vector<int> _shapeDups;
+    std::vector<int> _curShapeDups;
+
     std::vector<Shape_Info> _shapeInfo;
     // Shape _mainFrame;
     DLXSolver* _solver;
@@ -49,8 +61,8 @@ private:
 
     std::shared_ptr<std::thread> _solveThread;
 
-
-
+    std::bitset<MAX_SHAPE_SIZE> _puzzleState;
+    int _idMap[MAX_SHAPE_SIZE];
 
 
     // 判重，移除相同块，有下面那个还要这个干嘛？？
@@ -60,10 +72,6 @@ private:
 
 
     void init_dlx();
-
-    int getID(int r, int c) const { return r * _cols + c; }
-
-
-    // std::vector<Shape> _debuijnPoses[1005];
+    int getID(int r, int c) const { return _idMap[r * _cols + c]; }
 
 };
