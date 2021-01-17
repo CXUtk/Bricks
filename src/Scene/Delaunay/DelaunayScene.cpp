@@ -207,7 +207,7 @@ void DelaunayScene::update() {
 
         }
         ++t2;
-        if (t2 == 1) {
+        if (t2 == 7) {
             t2 = 0;
         }
     }
@@ -220,11 +220,12 @@ bool vis[MAXN * 2];
 void DelaunayScene::draw() {
 
     std::vector<Segment> segments;
+    for (int i = 1; i <= totV; i++) {
+        Vertex& v = vPool[i];
+        Game::GetInstance().getGraphics()->drawCircle(glm::vec2(v.pos.x - 3, v.pos.y - 3), glm::vec2(6), glm::vec3(1, 0, 0));
+    }
+
     if (t < MAX_VERTICES) {
-        for (int i = 1; i <= totV; i++) {
-            Vertex& v = vPool[i];
-            Game::GetInstance().getGraphics()->drawCircle(glm::vec2(v.pos.x - 3, v.pos.y - 3), glm::vec2(6), glm::vec3(1, 0, 0));
-        }
 
         for (int i = 1; i <= totF; i++) {
             Face& f = fPool[i];

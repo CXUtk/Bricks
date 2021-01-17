@@ -95,9 +95,10 @@ void DLXSolver::solve() {
     finished = false;
     auto time = glfwGetTime();
 
-
-    _dfs(0);
     _bruteForce->startListening();
+    _dfs(0);
+    _bruteForce->notifyComplete();
+
     printf("%lf seconds\n", glfwGetTime() - time);
 
     _intermidiateResult.clear();
@@ -149,7 +150,7 @@ void DLXSolver::_dfs(int level) {
 
     if (colLink[tar].sz == 0) return;
 
-    if (level == 3) {
+    if (level == 5) {
         int tar = nodes[0].R;
         int S = 0;
         std::bitset<MAX_SHAPE_SIZE> place = 0;

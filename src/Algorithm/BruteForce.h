@@ -24,10 +24,11 @@ public:
 
     std::vector<ShapeBruteInfo> _bruteForceInfo[1005];
     static int _numSolutions;
+    bool _complete;
 private:
 
     int _rows, _cols, _shapeNums;
-    bool _complete;
+
     std::queue<std::pair<int, std::bitset<MAX_SHAPE_SIZE>>> _taskQueue;
     std::vector<std::thread*> _threads;
 

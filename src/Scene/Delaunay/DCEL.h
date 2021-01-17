@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 constexpr int MAXN = 100005;
-constexpr int MAX_VERTICES = 1000;
+constexpr int MAX_VERTICES = 30;
 constexpr double EPS = 1e-9;
 
 static std::mt19937 mt;

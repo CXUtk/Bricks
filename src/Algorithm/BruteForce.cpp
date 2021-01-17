@@ -25,28 +25,38 @@ void BruteForce::push(int S, std::bitset<MAX_SHAPE_SIZE> P) {
 
 }
 
+static int numThreads = 10;
 void BruteForce::startListening() {
-    int numThreads = 4;
+
     for (int i = 0; i < numThreads; i++) {
         _threads.push_back(new std::thread([&]() {
-            while (!_complete) {
-                std::pair<int, std::bitset<MAX_SHAPE_SIZE>> config;
+            while (true) {
+                std::vector<std::pair<int, std::bitset<MAX_SHAPE_SIZE>>> config;
 
                 bool empty = false;
                 taskQueueLock.lock();
                 if (!_taskQueue.empty()) {
-                    config = _taskQueue.front();
-                    _taskQueue.pop();
+                    int c = 0;
+                    while (c < 1 && !_taskQueue.empty()) {
+                        config.push_back(_taskQueue.front());
+                        _taskQueue.pop();
+                        c++;
+                    }
                 }
                 else {
                     empty = true;
                 }
                 taskQueueLock.unlock();
-                if (empty) break;
+                if (empty) {
+                    if (_complete)break;
+                    continue;
+                }
 
 
                 int num = 0;
-                _dfs(config.first, 0, config.second, num);
+                for (auto& conf : config) {
+                    _dfs(conf.first, 0, conf.second, num);
+                }
 
                 resultLock.lock();
                 _numSolutions += num;
@@ -56,13 +66,14 @@ void BruteForce::startListening() {
             }
             }));
     }
-    for (int i = 0; i < numThreads; i++) {
-        _threads[i]->join();
-    }
+
 }
 
 void BruteForce::notifyComplete() {
     _complete = true;
+    for (int i = 0; i < numThreads; i++) {
+        _threads[i]->join();
+    }
 }
 
 void BruteForce::_dfs(int S, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& numSolutions) {
@@ -72,27 +83,31 @@ void BruteForce::_dfs(int S, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& num
         return;
     }
     int sz = _shapeNums;
-    int tR = -1, tC = -1;
+    int minj = -1;
+
+    int cnt = 0;
     for (int j = start; j < _rows * _cols; j++) {
         if (!P[j]) {
-            tR = j / _cols;
-            tC = j % _cols;
-            break;
+            if (minj == -1) minj = j;
+
+            if (j != 0 && P[j - 1] && j + _cols < _rows * _cols && P[j + _cols] && j - _cols >= 0 && P[j - _cols] && j != _rows * _cols - 1 && P[j + 1]) return;
         }
     }
+    int tR = minj / _cols;
+    int tC = minj % _cols;
+    std::bitset<MAX_SHAPE_SIZE> M = P >> (tR * _cols + tC);
     for (int i = 0; i < sz; i++) {
         if (S >> i & 1) {
             for (const auto& p : _bruteForceInfo[i]) {
                 if (tR >= _rows - p.r + 1) continue;
                 if (tC - p.xoffset < 0 || tC - p.xoffset >= _cols - p.c + 1) continue;
-                int id2 = tR * _cols + tC - p.xoffset;
-                // 如果放置不能匹配
-                auto tmp = (p.bits << id2);
-                if ((P & tmp).any()) continue;
 
+                // 如果放置不能匹配
+                if (((M << p.xoffset) & p.bits).any()) continue;
+                auto tmp = p.bits << (minj - p.xoffset);
                 P |= tmp;
                 //Ans.push_back(i);
-                _dfs(S ^ (1 << i), tR * _cols + tC + 1, P, numSolutions);
+                _dfs(S ^ (1 << i), minj + 1, P, numSolutions);
                 // Ans.pop_back();
                 P ^= tmp;
             }

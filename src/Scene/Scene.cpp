@@ -6,7 +6,7 @@ std::shared_ptr<Scene> Scene::makeScene(const std::string& name) {
     if (name == "default") {
         return std::shared_ptr<DefaultScene>(new DefaultScene());
     }
-    else if (name == "delauny") {
+    else if (name == "delaunay") {
         return std::shared_ptr<DelaunayScene>(new DelaunayScene());
     }
     return nullptr;
