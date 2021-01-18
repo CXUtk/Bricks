@@ -26,12 +26,17 @@ public:
 
 
     void solve();
+    void stop();
 
     void place(int id, const Shape& shape, int r, int c);
     void unplace(int id, const std::bitset<MAX_SHAPE_SIZE>& S, int r, int c);
     void clear();
     int getCurCount(int id) const {
         return _curShapeDups[id];
+    }
+
+    bool isRunning() const {
+        return _solving;
     }
 
     // 获取结果，未使用
@@ -48,6 +53,7 @@ public:
 private:
 
     int _rows, _cols;
+    bool _solving;
 
     std::vector<Shape> _shapes;
     std::vector<int> _shapeDups;

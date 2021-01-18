@@ -32,10 +32,10 @@ void TextRenderer::drawText(glm::vec2 pos, const std::string& text, float scale,
 
     for (const auto c : text) {
         Character chr = (*defaultFont)[c];
-        glm::vec2 bottomLeft = glm::vec2(pos.x + chr.Bearing.x * scale,
-            pos.y + size.y - chr.Size.y * scale);
+        glm::vec2 topLeft = glm::vec2(pos.x + chr.Bearing.x * scale,
+            (pos.y) - (chr.Bearing.y) * scale);
         glm::vec2 size = glm::vec2(chr.Size) * scale;
-        draw_quad(chr.TextureID, bottomLeft, size);
+        draw_quad(chr.TextureID, topLeft, size);
         pos.x += chr.Advance / 64 * scale;
     }
     glBindVertexArray(0);

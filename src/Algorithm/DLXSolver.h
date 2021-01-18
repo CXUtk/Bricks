@@ -32,8 +32,7 @@ public:
     void mixSolve(int maxDepthDLX);
     void solve();
     std::vector<int> getIntermidiateResult();
-
-    int parity[100];
+    bool found, finished;
 
 private:
     static constexpr int MAX_ROW = 5005;
@@ -62,7 +61,7 @@ private:
 
 
     int ans[MAX_ROW], top;
-    bool found, finished;
+
     int numSolutions;
     int mixMaxDepth;
 

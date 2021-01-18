@@ -11,6 +11,7 @@ Puzzle::Puzzle() {
     _solveThread = nullptr;
     _solver = nullptr;
     _puzzleState = 0;
+    _solving = false;
 }
 
 Puzzle::~Puzzle() {
@@ -33,15 +34,27 @@ void Puzzle::build() {
 void Puzzle::solve() {
     init_dlx();
     if (_solveThread) {
+        _solver->found = true;
         if (_solveThread->joinable())
             _solveThread->join();
     }
+    _solving = true;
     _solveThread = std::make_shared<std::thread>([&]() {
         _solver->solve();
+        _solving = false;
         }
     );
-    _solveThread->join();
+    // _solveThread->join();
     //_solver->solve();
+}
+
+void Puzzle::stop() {
+    if (_solveThread) {
+        _solver->found = true;
+        if (_solveThread->joinable())
+            _solveThread->join();
+    }
+    _solving = false;
 }
 
 void Puzzle::place(int id, const Shape& shape, int r, int c) {
@@ -197,7 +210,7 @@ void Puzzle::init_dlx() {
                             bool can = true;
                             for (int s = 0; s < shape.rows; s++) {
                                 for (int t = 0; t < shape.cols; t++) {
-                                    if (_puzzleState[(s + r) * _cols + t + c]) {
+                                    if (_puzzleState[(s + r) * _cols + t + c] && shape.bits.test(s * shape.cols + t)) {
                                         can = false;
                                         goto END_LOOP;
                                     }

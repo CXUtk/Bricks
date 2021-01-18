@@ -12,7 +12,7 @@ public:
     static constexpr int BLOCK_EDGE = 1;
 
     Board(int rows, int columns);
-    void place(const Shape& brick, glm::ivec2 pos, int id, int color);
+    void place(const Shape& brick, glm::ivec2 pos, int id);
 
     // 拿走这个位置所代表的砖块，返回砖块的覆盖掩码
     std::bitset<MAX_SHAPE_SIZE> unplace(glm::ivec2 pos, int& id);
@@ -49,5 +49,6 @@ private:
     void setTile(int r, int c, int k, int color);
 
     int getTileID(int r, int c) const;
+    int getTileColor(int r, int c) const;
     int getShadow(int r, int c)const;
 };

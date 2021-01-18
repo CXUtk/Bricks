@@ -6,7 +6,7 @@
 #include <Render\Texture2D.h>
 
 // 每个拼图块的最大占据格子数量
-static constexpr int MAX_SHAPE_SIZE = 64;
+static constexpr int MAX_SHAPE_SIZE = 144;
 
 struct Shape {
     int rows, cols;

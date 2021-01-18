@@ -41,22 +41,29 @@ DefaultScene::DefaultScene() {
             id += c;
         }
         Shape shape(r, c, S);
-        _puzzle->add(shape);
+        //_puzzle->add(shape);
     }
 
-    //Shape orz(3, 5,
-    //    "..OOO"
-    //    "OOO.O"
-    //    "....O");
-    //Shape orz2(3, 3,
-    //    ".O."
-    //    "OOO"
-    //    ".O."
-    //);
-    //_puzzle->add(orz2);
-    //for (int i = 0; i < 10; i++) {
-    //    _puzzle->add(orz);
-    //}
+    Shape orz(4, 3,
+        "O.."
+        "OOO"
+        ".O."
+        ".O.");
+    Shape orz2(4, 3,
+        "O.O"
+        "OOO"
+        "O.O"
+        "O.O"
+    );
+    Shape orz3(2, 3,
+        "OOO"
+        ".O."
+    );
+    _puzzle->add(orz2);
+    for (int i = 0; i < 19; i++) {
+        _puzzle->add(orz);
+    }
+    _puzzle->add(orz3);
 
 
     fclose(file);
@@ -116,7 +123,7 @@ void DefaultScene::update() {
 
     if (_handBrickID != -1) {
         if (input->getCurMouseDown() && !input->getOldMouseDown() && canplace && _board->mouseInside(mousePos)) {
-            _board->place(_handBrick, shadowPos, _handBrickID, _handBrickID);
+            _board->place(_handBrick, shadowPos, _handBrickID);
             _puzzle->place(_handBrickID, _handBrick, shadowPos.x, shadowPos.y);
         }
     }
@@ -148,6 +155,25 @@ void DefaultScene::draw() {
     // 绘制砖块图的UI帧
     ImUI::BeginFrame(glm::vec2(8, 8), _puzzleBoardSize, glm::vec3(1));
     {
+        if (_puzzle->isRunning()) {
+            _board->clear(0);
+            auto result = _puzzle->getResultIM();
+            _puzzle->clear();
+            for (auto& a : result) {
+                bool extra;
+                Shape b = _puzzle->getShape(a, extra);
+                if (a.s & 4) b = b.flip();
+                for (int i = 0; i < (a.s & 3); i++) {
+                    b = b.rotateClockwise();
+                }
+
+                int id = extra ? -2 : a.id;
+                if (id != -2) {
+                    _board->place(b, glm::ivec2(a.r, a.c), id);
+                    _puzzle->place(id, b, a.r, a.c);
+                }
+            }
+        }
         auto rect = ImUI::getContainerRect();
         auto size = _board->getSize();
         _board->update(glm::ivec2((int)(rect.pos.x + rect.size.x / 2.f - size.x / 2.f), (int)(rect.pos.y + rect.size.y / 2.f - size.y / 2.f)));
@@ -182,8 +208,14 @@ void DefaultScene::draw() {
                         _puzzle->getCurCount(i) > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
                         _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
                         printf("%d is Clicked!\n", i);
-                        _handBrick = _shapes[i];
-                        _handBrickID = i;
+                        if (_handBrickID == i) {
+                            _handBrick = Shape(0, 0);
+                            _handBrickID = -1;
+                        }
+                        else {
+                            _handBrick = _shapes[i];
+                            _handBrickID = i;
+                        }
                     }
                     startX += 74;
                     if (startX + 64 > rect2.size.x - 32) {
@@ -227,10 +259,16 @@ void DefaultScene::draw() {
 
                 int id = extra ? -2 : a.id;
                 if (id != -2) {
-                    _board->place(b, glm::ivec2(a.r, a.c), id, id);
+                    _board->place(b, glm::ivec2(a.r, a.c), id);
                     _puzzle->place(id, b, a.r, a.c);
                 }
             }
+        }
+        if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 100 + 24), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
+            glm::vec3(1, 0, 0), "Stop", glm::vec3(0, 0, 0))) {
+            _puzzle->stop();
+            _board->clear(0);
+            _puzzle->clear();
         }
     }
     ImUI::EndFrame();

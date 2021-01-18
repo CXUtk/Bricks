@@ -25,12 +25,15 @@ Board::Board(int rows, int columns) :_rows(rows), _columns(columns) {
         tiles[i].shadow = 0;
     }
 }
-void Board::place(const Shape& brick, glm::ivec2 pos, int id, int color) {
+
+static int curID = 0;
+void Board::place(const Shape& brick, glm::ivec2 pos, int id) {
+    curID++;
     for (int i = pos.x; i < std::min(pos.x + brick.rows, _rows); i++) {
         for (int j = pos.y; j < std::min(pos.y + brick.cols, _columns); j++) {
             int r = i - pos.x, c = j - pos.y;
             if (brick.get(r, c)) {
-                setTile(i, j, id, color);
+                setTile(i, j, id, curID);
             }
         }
     }
@@ -221,13 +224,14 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic) {
     static int dr[4] = { 1, -1, 0, 0 };
     static int dc[4] = { 0, 0, 1, -1 };
 
-    int color = getTileID(r, c);
+    int tid = getTileID(r, c);
+    int color = getTileColor(r, c);
 
     std::vector<Triangle> drakTri;
     std::vector<Triangle> lightTri;
 
     auto judge = [=](int i, int j) {
-        return i >= 0 && j >= 0 && i < _rows&& j < _columns&& getTileID(i, j) == color;
+        return i >= 0 && j >= 0 && i < _rows&& j < _columns&& getTileID(i, j) == tid && getTileColor(i, j) == color;
     };
 
     // 上方，左边是否有联通块
@@ -238,11 +242,11 @@ void Board::drawCell(int r, int c, std::shared_ptr<Graphics> graphic) {
     int t2 = judge(r + 1, c);
     t2 |= judge(r, c + 1) << 1;
     glm::vec3 drawColor;
-    if (color == -2) {
+    if (tid == -2) {
         drawColor = glm::vec3(0.2, 0.2, 0.2);
     }
     else {
-        drawColor = colors[color % 10];
+        drawColor = colors[tid % 10];
     }
     for (int i = 0; i < 4; i++) {
         int nr = r + dr[i];
@@ -357,6 +361,11 @@ void Board::setTile(int r, int c, int k, int color) {
 int Board::getTileID(int r, int c) const {
     int id = r * _columns + c;
     return tiles[id].id;
+}
+
+int Board::getTileColor(int r, int c) const {
+    int id = r * _columns + c;
+    return tiles[id].color;
 }
 
 int Board::getShadow(int r, int c) const {
