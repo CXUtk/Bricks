@@ -33,23 +33,21 @@ void Puzzle::build() {
 
 void Puzzle::solve() {
     init_dlx();
-    /*if (_solveThread) {
-        _solver->found = true;
-        if (_solveThread->joinable())
-            _solveThread->join();
+    if (_solveThread) {
+        stop();
     }
     _solving = true;
     _solveThread = std::make_shared<std::thread>([&]() {
         _solver->solve();
         _solving = false;
         }
-    );*/
-    // _solveThread->join();
+    );
+    //_solveThread->join();
     //_solver->solve();
-    std::bitset<MAX_SHAPE_SIZE> S = 0;
-    int num = 0;
-    _solver->solve_brute(_curShapeDups, 0, S, num);
-    printf("%d\n", num);
+    //std::bitset<MAX_SHAPE_SIZE> S = 0;
+    //int num = 0;
+    //_solver->solve_brute(_curShapeDups, 0, S, num);
+    //printf("%d\n", num);
 }
 
 void Puzzle::stop() {

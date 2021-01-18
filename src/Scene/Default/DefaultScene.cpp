@@ -14,6 +14,7 @@
 
 
 DefaultScene::DefaultScene() {
+
     FILE* file = fopen("Resources/Bricks/test.in", "r");
     int n, rows, cols;
     fscanf(file, "%d%d", &rows, &cols);
@@ -41,29 +42,29 @@ DefaultScene::DefaultScene() {
             id += c;
         }
         Shape shape(r, c, S);
-        //_puzzle->add(shape);
+        _puzzle->add(shape);
     }
 
-    Shape orz(4, 3,
-        "O.."
-        "OOO"
-        ".O."
-        ".O.");
-    Shape orz2(4, 3,
-        "O.O"
-        "OOO"
-        "O.O"
-        "O.O"
-    );
-    Shape orz3(2, 3,
-        "OOO"
-        ".O."
-    );
-    _puzzle->add(orz2);
-    for (int i = 0; i < 19; i++) {
-        _puzzle->add(orz);
-    }
-    _puzzle->add(orz3);
+    //Shape orz(4, 3,
+    //    "O.."
+    //    "OOO"
+    //    ".O."
+    //    ".O.");
+    //Shape orz2(4, 3,
+    //    "O.O"
+    //    "OOO"
+    //    "O.O"
+    //    "O.O"
+    //);
+    //Shape orz3(2, 3,
+    //    "OOO"
+    //    ".O."
+    //);
+    //_puzzle->add(orz2);
+    //for (int i = 0; i < 19; i++) {
+    //    _puzzle->add(orz);
+    //}
+    //_puzzle->add(orz3);
 
 
     fclose(file);
@@ -89,7 +90,7 @@ DefaultScene::DefaultScene() {
     generateBrickTextures();
 
     auto time = glfwGetTime();
-
+    _isFinished = false;
     // dfs(0, _bricks);
     _puzzle->solve();
     printf("%lf seconds\n", glfwGetTime() - time);
@@ -155,8 +156,9 @@ void DefaultScene::draw() {
     // 绘制砖块图的UI帧
     ImUI::BeginFrame(glm::vec2(8, 8), _puzzleBoardSize, glm::vec3(1));
     {
-        if (_puzzle->isRunning()) {
-            _board->clear(0);
+        if (_puzzle->isRunning() || !_isFinished) {
+            _isFinished = false;
+            _board->clear(_puzzle->getMask());
             auto result = _puzzle->getResultIM();
             _puzzle->clear();
             for (auto& a : result) {
@@ -173,6 +175,9 @@ void DefaultScene::draw() {
                     _puzzle->place(id, b, a.r, a.c);
                 }
             }
+        }
+        if (!_puzzle->isRunning()) {
+            _isFinished = true;
         }
         auto rect = ImUI::getContainerRect();
         auto size = _board->getSize();
@@ -267,13 +272,14 @@ void DefaultScene::draw() {
         if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 100 + 24), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
             glm::vec3(1, 0, 0), "Stop", glm::vec3(0, 0, 0))) {
             _puzzle->stop();
-            _board->clear(0);
+            _board->clear(_puzzle->getMask());
             _puzzle->clear();
         }
     }
     ImUI::EndFrame();
     input->endInput();
     ImUI::EndGUI();
+
 }
 
 

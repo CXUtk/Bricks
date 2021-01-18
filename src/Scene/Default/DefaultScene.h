@@ -27,6 +27,7 @@ private:
     std::vector<std::shared_ptr<Texture2D>> _textures;
 
     glm::ivec2 _puzzleBoardSize;
+    bool _isFinished;
 
     // void randomGenerate();
     void generateBrickTextures();
