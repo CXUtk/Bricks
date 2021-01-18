@@ -33,7 +33,7 @@ void Puzzle::build() {
 
 void Puzzle::solve() {
     init_dlx();
-    if (_solveThread) {
+    /*if (_solveThread) {
         _solver->found = true;
         if (_solveThread->joinable())
             _solveThread->join();
@@ -43,9 +43,13 @@ void Puzzle::solve() {
         _solver->solve();
         _solving = false;
         }
-    );
+    );*/
     // _solveThread->join();
     //_solver->solve();
+    std::bitset<MAX_SHAPE_SIZE> S = 0;
+    int num = 0;
+    _solver->solve_brute(_curShapeDups, 0, S, num);
+    printf("%d\n", num);
 }
 
 void Puzzle::stop() {
@@ -184,6 +188,9 @@ void Puzzle::init_dlx() {
             }
         }
         _solver->setColDuplicates(shapeCount, numBlocks - activeBlocks);
+        std::bitset<MAX_SHAPE_SIZE> shape = 0;
+        shape.set(0);
+        _solver->addBruteInfo(shapeCount - 1, { 0,1, 1, shape });
     }
 
 
@@ -240,6 +247,9 @@ void Puzzle::init_dlx() {
             }
             shape = shape.flip();
         }
+    }
+    if (numBlocks - activeBlocks > 0) {
+        _curShapeDups.push_back(numBlocks - activeBlocks);
     }
     printf("%d\n", _shapeInfo.size());
 }

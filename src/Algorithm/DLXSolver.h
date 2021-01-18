@@ -22,12 +22,13 @@ public:
     void setConfigInfo(int num, int rows, int cols) {
         numShapes = num;
         frameRows = rows, frameCols = cols;
-        _bruteForce = new BruteForce(frameRows, frameCols, numShapes);
+        _bruteForce = new BruteForce(frameRows, frameCols, numShapes + 1);
     }
 
     void addBruteInfo(int i, ShapeBruteInfo info) {
         _bruteForce->_bruteForceInfo[i].push_back(info);
     }
+    void solve_brute(std::vector<int>& cnt, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& numSolutions);
 
     void mixSolve(int maxDepthDLX);
     void solve();

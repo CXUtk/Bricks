@@ -10,6 +10,7 @@ BruteForce::BruteForce(int frameRows, int frameCols, int shapeNumber) :
     _rows(frameRows), _cols(frameCols), _shapeNums(shapeNumber) {
     _numSolutions = 0;
     _complete = false;
+    _found = false;
 }
 
 BruteForce::~BruteForce() {
@@ -76,6 +77,10 @@ void BruteForce::notifyComplete() {
     }
 }
 
+void BruteForce::reset() {
+    _found = false;
+}
+
 void BruteForce::_dfs(int S, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& numSolutions) {
     if (!S) {
         numSolutions++;
@@ -85,12 +90,10 @@ void BruteForce::_dfs(int S, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& num
     int sz = _shapeNums;
     int minj = -1;
 
-    int cnt = 0;
     for (int j = start; j < _rows * _cols; j++) {
         if (!P[j]) {
-            if (minj == -1) minj = j;
-
-            if (j != 0 && P[j - 1] && j + _cols < _rows * _cols && P[j + _cols] && j - _cols >= 0 && P[j - _cols] && j != _rows * _cols - 1 && P[j + 1]) return;
+            minj = j;
+            break;
         }
     }
     int tR = minj / _cols;
@@ -108,6 +111,53 @@ void BruteForce::_dfs(int S, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& num
                 P |= tmp;
                 //Ans.push_back(i);
                 _dfs(S ^ (1 << i), minj + 1, P, numSolutions);
+                // Ans.pop_back();
+                P ^= tmp;
+            }
+        }
+    }
+}
+
+void BruteForce::_dfs(std::vector<int>& cnt, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& numSolutions) {
+    bool need = false;
+    for (int i = 0; i < _shapeNums; i++) {
+        if (cnt[i]) {
+            need = true;
+            break;
+        }
+    }
+    if (!need) {
+        numSolutions++;
+        _found = true;
+        return;
+    }
+    int sz = _shapeNums;
+    int minj = -1;
+
+    for (int j = start; j < _rows * _cols; j++) {
+        if (!P[j]) {
+            minj = j;
+            break;
+        }
+    }
+    int tR = minj / _cols;
+    int tC = minj % _cols;
+    std::bitset<MAX_SHAPE_SIZE> M = P >> (tR * _cols + tC);
+    for (int i = 0; i < sz; i++) {
+        if (cnt[i]) {
+            for (const auto& p : _bruteForceInfo[i]) {
+                if (tR >= _rows - p.r + 1) continue;
+                if (tC - p.xoffset < 0 || tC - p.xoffset >= _cols - p.c + 1) continue;
+
+                // 如果放置不能匹配
+                if (((M << p.xoffset) & p.bits).any()) continue;
+                auto tmp = p.bits << (minj - p.xoffset);
+                P |= tmp;
+                cnt[i]--;
+                //Ans.push_back(i);
+                _dfs(cnt, minj + 1, P, numSolutions);
+                if (_found) return;
+                cnt[i]++;
                 // Ans.pop_back();
                 P ^= tmp;
             }

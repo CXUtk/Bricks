@@ -89,6 +89,11 @@ void DLXSolver::recover(int c) {
 }
 
 
+void DLXSolver::solve_brute(std::vector<int>& cnt, int start, std::bitset<MAX_SHAPE_SIZE>& P, int& numSolutions) {
+    _bruteForce->reset();
+    _bruteForce->_dfs(cnt, start, P, numSolutions);
+}
+
 void DLXSolver::mixSolve(int maxDepthDLX) {
     mixMaxDepth = maxDepthDLX;
     top = 0;

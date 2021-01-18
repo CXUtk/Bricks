@@ -62,6 +62,7 @@ private:
     std::vector<Shape_Info> _shapeInfo;
     // Shape _mainFrame;
     DLXSolver* _solver;
+    BruteForce* _solver2;
 
     std::vector<Shape_Info> _results;
 
