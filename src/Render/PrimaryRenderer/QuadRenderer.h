@@ -12,6 +12,7 @@ public:
     ~QuadRenderer();
 
     void drawQuad(glm::vec2 pos, glm::vec2 size, const glm::vec3& color);
+    void drawCircle(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, float thickness);
 
 private:
 

@@ -56,7 +56,7 @@ void Game::init() {
     _graphics = std::make_shared<Graphics>();
     _inputManager = std::make_shared<InputManager>(_window);
     _fontManager = std::make_shared<FontManager>();
-    _curScene = Scene::makeScene("default");
+    _curScene = Scene::makeScene("MCC");
 }
 
 

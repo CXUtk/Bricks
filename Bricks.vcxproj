@@ -190,6 +190,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClCompile Include="src\Scene\Default\Strucures\Shape.cpp" />
     <ClCompile Include="src\Scene\Delaunay\DCEL.cpp" />
     <ClCompile Include="src\Scene\Delaunay\DelaunayScene.cpp" />
+    <ClCompile Include="src\Scene\MCC\MCCScene.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
@@ -219,6 +220,7 @@ xcopy $(ProjectDir)dlls\glfw3.dll $(TargetDir) /Y /D</Command>
     <ClInclude Include="src\Scene\Default\Strucures\Shape.h" />
     <ClInclude Include="src\Scene\Delaunay\DCEL.h" />
     <ClInclude Include="src\Scene\Delaunay\DelaunayScene.h" />
+    <ClInclude Include="src\Scene\MCC\MCCScene.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Utils.h" />
   </ItemGroup>

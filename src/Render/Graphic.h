@@ -24,7 +24,7 @@ public:
     // void drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 size, float scale, const glm::vec3& color);
     void drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::vec2 origin, float scale, float rotation, const glm::vec3& color);
 
-    void drawCircle(glm::vec2 pos, glm::vec2 size, const glm::vec3& color);
+    void drawCircle(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, float thickness = 0.5f);
 
     void drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color);
 

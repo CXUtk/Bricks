@@ -55,9 +55,10 @@ void Graphics::drawSprite(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm
     _spriteRenderer->drawSprite(texture, pos, texture->getSize(), origin, scale, rotation, color);
 }
 
-void Graphics::drawCircle(glm::vec2 pos, glm::vec2 size, const glm::vec3& color) {
-    _circleRenderer->drawQuad(pos, size, color);
+void Graphics::drawCircle(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, float thickness) {
+    _circleRenderer->drawCircle(pos, size, color, thickness);
 }
+
 
 void Graphics::drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color) {
     _textRenderer->drawText(pos, text, scale, color);

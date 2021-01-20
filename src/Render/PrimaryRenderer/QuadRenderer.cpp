@@ -42,3 +42,22 @@ void QuadRenderer::drawQuad(glm::vec2 pos, glm::vec2 size, const glm::vec3& colo
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
+
+void QuadRenderer::drawCircle(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, float thickness) {
+    auto& game = Game::GetInstance();
+    auto model = glm::identity<glm::mat4>();
+    model = glm::translate(model, glm::vec3(pos.x, pos.y, 0));
+    model = glm::scale(model, glm::vec3(size.x, size.y, 1));
+    _shaderData->apply();
+
+    glUniformMatrix4fv(glGetUniformLocation(_shaderData->getID(), "model"), 1, false, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(_shaderData->getID(), "projection"), 1, false, glm::value_ptr(game.getGraphics()->getProjectionMatrix()));
+    glUniform3f(glGetUniformLocation(_shaderData->getID(), "uColor"), color.r, color.g, color.b);
+    glUniform1f(glGetUniformLocation(_shaderData->getID(), "uThickness"), thickness);
+
+
+    glBindVertexArray(_vaoQuad);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
