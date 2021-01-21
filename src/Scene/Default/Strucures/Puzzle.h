@@ -29,7 +29,9 @@ public:
     void stop();
 
     void place(int id, const Shape& shape, int r, int c);
-    void unplace(int id, const std::bitset<MAX_SHAPE_SIZE>& S, int r, int c);
+    void unplace(int id, const std::bitset<MAX_SHAPE_SIZE>& S);
+    void place2(int id, const Shape& shape, int r, int c);
+    void undo();
     void clear();
     int getCurCount(int id) const {
         return _curShapeDups[id];
@@ -39,8 +41,6 @@ public:
         return _solving;
     }
 
-    // 获取结果，未使用
-    std::vector<Shape_Info> getResult() const { return _results; }
     // 获取DLX当前求解的局面，确保线程安全
     std::vector<Shape_Info> getResultIM();
     std::vector<Shape> getShapeList() const { return _shapes; }
@@ -59,16 +59,25 @@ private:
     std::vector<int> _shapeDups;
     std::vector<int> _curShapeDups;
 
+
     std::vector<Shape_Info> _shapeInfo;
     // Shape _mainFrame;
     DLXSolver* _solver;
     BruteForce* _solver2;
 
-    std::vector<Shape_Info> _results;
+
 
     std::shared_ptr<std::thread> _solveThread;
 
     std::bitset<MAX_SHAPE_SIZE> _puzzleState;
+
+
+    struct PlaceAction {
+        int id;
+        std::bitset<MAX_SHAPE_SIZE> S;
+    };
+
+    std::vector<PlaceAction> _placeActionStack;
     int _idMap[MAX_SHAPE_SIZE];
 
 

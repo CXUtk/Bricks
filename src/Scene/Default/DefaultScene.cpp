@@ -132,7 +132,7 @@ void DefaultScene::update() {
         int id;
         auto s = _board->unplace(pos, id);
         if (id != -1) {
-            _puzzle->unplace(id, s, pos.x, pos.y);
+            _puzzle->unplace(id, s);
         }
     }
     if (input->getIsKeyDown(GLFW_KEY_Z) && !input->getWasKeyDown(GLFW_KEY_Z)) {
@@ -158,9 +158,10 @@ void DefaultScene::draw() {
     {
         if (_puzzle->isRunning() || !_isFinished) {
             _isFinished = false;
+            _puzzle->undo();
             _board->clear(_puzzle->getMask());
             auto result = _puzzle->getResultIM();
-            _puzzle->clear();
+            // _puzzle->clear();
             for (auto& a : result) {
                 bool extra;
                 Shape b = _puzzle->getShape(a, extra);
@@ -172,7 +173,7 @@ void DefaultScene::draw() {
                 int id = extra ? -2 : a.id;
                 if (id != -2) {
                     _board->place(b, glm::ivec2(a.r, a.c), id);
-                    _puzzle->place(id, b, a.r, a.c);
+                    _puzzle->place2(id, b, a.r, a.c);
                 }
             }
         }
@@ -251,8 +252,10 @@ void DefaultScene::draw() {
         }
         if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 50 + 16), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
             glm::vec3(1, 0, 0), "Solve", glm::vec3(0, 0, 0))) {
+            _isFinished = false;
             _puzzle->solve();
             _board->clear(_puzzle->getMask());
+            /*
             auto result = _puzzle->getResultIM();
             for (auto& a : result) {
                 bool extra;
@@ -265,15 +268,14 @@ void DefaultScene::draw() {
                 int id = extra ? -2 : a.id;
                 if (id != -2) {
                     _board->place(b, glm::ivec2(a.r, a.c), id);
-                    _puzzle->place(id, b, a.r, a.c);
+                    _puzzle->place2(id, b, a.r, a.c);
                 }
-            }
+            }*/
         }
         if (ImUI::pure_button(glm::vec2(rect.size.x / 2 - 60, 100 + 24), glm::vec2(120, 50), glm::vec3(1, 0.5, 0.5),
             glm::vec3(1, 0, 0), "Stop", glm::vec3(0, 0, 0))) {
             _puzzle->stop();
             _board->clear(_puzzle->getMask());
-            _puzzle->clear();
         }
     }
     ImUI::EndFrame();

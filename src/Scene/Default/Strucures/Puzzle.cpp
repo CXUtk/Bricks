@@ -32,6 +32,7 @@ void Puzzle::build() {
 }
 
 void Puzzle::solve() {
+    _placeActionStack.clear();
     init_dlx();
     if (_solveThread) {
         stop();
@@ -52,9 +53,13 @@ void Puzzle::solve() {
 
 void Puzzle::stop() {
     if (_solveThread) {
-        _solver->found = true;
-        if (_solveThread->joinable())
-            _solveThread->join();
+        if (!_solver->found) {
+            _solver->found = true;
+            if (_solveThread->joinable()) {
+                _solveThread->join();
+                undo();
+            }
+        }
     }
     _solving = false;
 }
@@ -65,10 +70,22 @@ void Puzzle::place(int id, const Shape& shape, int r, int c) {
     _curShapeDups[id]--;
 }
 
-void Puzzle::unplace(int id, const std::bitset<MAX_SHAPE_SIZE>& S, int r, int c) {
+void Puzzle::unplace(int id, const std::bitset<MAX_SHAPE_SIZE>& S) {
     _puzzleState ^= S;
     assert((_puzzleState & S) == 0);
     _curShapeDups[id]++;
+}
+
+void Puzzle::place2(int id, const Shape& shape, int r, int c) {
+    _placeActionStack.push_back({ id, shape.gBit(_cols) << (r * _cols + c) });
+    place(id, shape, r, c);
+}
+
+void Puzzle::undo() {
+    for (auto& action : _placeActionStack) {
+        unplace(action.id, action.S);
+    }
+    _placeActionStack.clear();
 }
 
 void Puzzle::clear() {
@@ -78,13 +95,13 @@ void Puzzle::clear() {
 
 
 std::vector<Shape_Info> Puzzle::getResultIM() {
-    _results.clear();
+    std::vector<Shape_Info> res;
     std::vector<int> tmp = _solver->getIntermidiateResult();
     for (int i = 0; i < tmp.size(); i++) {
         auto& info = _shapeInfo[tmp[i]];
-        _results.push_back(info);
+        res.push_back(info);
     }
-    return _results;
+    return res;
 }
 
 Shape Puzzle::getShape(Shape_Info info, bool& extra) const {
