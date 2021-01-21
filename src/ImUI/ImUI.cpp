@@ -95,7 +95,7 @@ bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, co
     drawLineRect(pos, size, borderColor);
 
     glm::vec2 fsize = game.getGraphics()->measureString("default", text, 1.f);
-    game.getGraphics()->drawText(pos + size * 0.5f - glm::vec2(fsize.x, -fsize.y) * 0.5f, text, 1.f, textColor);
+    game.getGraphics()->drawText("default", pos + size * 0.5f - glm::vec2(fsize.x, -fsize.y) * 0.5f, text, 1.f, textColor);
     return clicked;
 }
 

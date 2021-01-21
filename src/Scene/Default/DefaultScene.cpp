@@ -33,38 +33,36 @@ DefaultScene::DefaultScene() {
     fscanf(file, "%d", &n);
 
     for (int i = 0; i < n; i++) {
-        int r, c;
+        int r, c, num;
         char S[10005];
-        fscanf(file, "%d%d", &r, &c);
+        fscanf(file, "%d%d%d", &r, &c, &num);
         int id = 0;
         for (int i = 0; i < r; i++) {
             fscanf(file, "%s", S + id);
             id += c;
         }
         Shape shape(r, c, S);
-        _puzzle->add(shape);
+        // _puzzle->add(shape, num);
     }
 
-    //Shape orz(4, 3,
-    //    "O.."
-    //    "OOO"
-    //    ".O."
-    //    ".O.");
-    //Shape orz2(4, 3,
-    //    "O.O"
-    //    "OOO"
-    //    "O.O"
-    //    "O.O"
-    //);
-    //Shape orz3(2, 3,
-    //    "OOO"
-    //    ".O."
-    //);
-    //_puzzle->add(orz2);
-    //for (int i = 0; i < 19; i++) {
-    //    _puzzle->add(orz);
-    //}
-    //_puzzle->add(orz3);
+    Shape orz(4, 3,
+        "O.."
+        "OOO"
+        ".O."
+        ".O.");
+    Shape orz2(4, 3,
+        "O.O"
+        "OOO"
+        "O.O"
+        "O.O"
+    );
+    Shape orz3(2, 3,
+        "OOO"
+        ".O."
+    );
+    _puzzle->add(orz2, 1);
+    _puzzle->add(orz, 19);
+    _puzzle->add(orz3, 1);
 
 
     fclose(file);
@@ -90,9 +88,10 @@ DefaultScene::DefaultScene() {
     generateBrickTextures();
 
     auto time = glfwGetTime();
-    _isFinished = false;
+    _isFinished = true;
+    // _isFinished = false;
     // dfs(0, _bricks);
-    _puzzle->solve();
+    //_puzzle->solve();
     printf("%lf seconds\n", glfwGetTime() - time);
 
     // Place results
@@ -200,6 +199,7 @@ void DefaultScene::draw() {
             auto rect2 = ImUI::getContainerRect();
             ImUI::BeginScrollableArea(glm::vec2(0), glm::vec2(rect2.size.x - 32, rect2.size.y), sliderValue);
             {
+                auto rect3 = ImUI::getContainerRect();
                 size = calculateBricksList(rect2.size.x - 32 - 16);
                 // Gap: 64 + 10
                 int startX = 8;
@@ -209,9 +209,11 @@ void DefaultScene::draw() {
                     float scale = std::min(64.f / texture->getSize().x, 64.f / texture->getSize().y);
                     scale = std::min(scale, 1.0f);
                     scale *= 0.9f;
+
+                    int count = _puzzle->getCurCount(i);
                     if (ImUI::img_button(texture, glm::vec2(startX, startY),
                         glm::vec2(64, 64), scale,
-                        _puzzle->getCurCount(i) > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
+                        count > 0 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0),
                         _handBrickID == i ? glm::vec3(1, 1, 0) : glm::vec3(0, 1, 0))) {
                         printf("%d is Clicked!\n", i);
                         if (_handBrickID == i) {
@@ -223,6 +225,10 @@ void DefaultScene::draw() {
                             _handBrickID = i;
                         }
                     }
+                    auto str = std::to_string(count);
+                    auto size = game.getGraphics()->measureString("default16", str, 1.f);
+                    game.getGraphics()->drawText("default16", glm::vec2(rect3.pos.x + startX + 64 - size.x, rect3.pos.y + startY + 64 - 4), str, 1.f, glm::vec3(1));
+
                     startX += 74;
                     if (startX + 64 > rect2.size.x - 32) {
                         startX = 8;
@@ -359,71 +365,6 @@ struct Node {
 //    }
 //}
 
-
-
-void DefaultScene::solve() {
-
-    //int n = _bricks.size();
-    //printf("Number of bricks: %d\n", n);
-
-    //int curSum = 0;
-    //for (int i = 0; i < _bricks.size(); i++) {
-    //    curSum += _bricks[i].S.count();
-    //}
-
-    //int totSize = Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE;
-    ////for (int i = 0; i < totSize - curSum; i++) {
-    ////    _bricks.insert(_bricks.begin(), Brick(1, 1, "O"));
-    ////}
-
-    //// 列号 1 ~ n 是砖块的ID，n + 1 ~ n + 100 是格子ID约束
-    //solver = new DLXSolver(n * 8 * totSize, n + totSize, totSize - curSum);
-    //// 储存格式：0-7位存砖块ID，8-11位存，12-32存坐标
-
-    //int tot = 0;
-
-    //for (int i = 0; i < _bricks.size(); i++) {
-    //    int col = 1 + i;
-    //    Brick b = _bricks[i];
-    //    b.gBit();
-
-    //    std::set<Brick> bricks;
-    //    for (int j = 0; j < 2; j++) {
-    //        for (int k = 0; k < 4; k++) {
-    //            if (bricks.count(b))continue;
-    //            bricks.insert(b);
-    //            for (int r = 0; r <= Board::MAX_BOARD_SIZE - b.n; r++) {
-    //                for (int c = 0; c <= Board::MAX_BOARD_SIZE - b.m; c++) {
-    //                    int id = r * Board::MAX_BOARD_SIZE + c;
-    //                    int info = i;
-    //                    info <<= 3;
-    //                    info |= ((j << 2) | k);
-    //                    info <<= 20;
-    //                    info |= id;
-    //                    _idMap[++tot] = info;
-
-    //                    auto res = b.G << id;
-    //                    solver->link(tot, 1 + i);
-    //                    for (int l = 0; l < Board::MAX_BOARD_SIZE * Board::MAX_BOARD_SIZE; l++) {
-    //                        if (res.test(l)) {
-    //                            solver->link(tot, l + n + 1);
-    //                        }
-    //                    }
-    //                }
-    //            }
-    //            b = b.rotateClockwise();
-    //        }
-    //        b = b.flip();
-    //    }
-    //}
-    ////solver->solve();
-    //_solverThread = new std::thread([]() {
-    //    auto time = glfwGetTime();
-    //    solver->solve();
-    //    printf("%lf seconds\n", glfwGetTime() - time);
-    //    });
-    //// 传入idMap为了追踪砖块信息
-}
 
 // 计算可选物块列表的行数和列数
 glm::ivec2 DefaultScene::calculateBricksList(int maxWidth) {

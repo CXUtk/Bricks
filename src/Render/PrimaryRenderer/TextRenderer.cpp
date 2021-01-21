@@ -11,7 +11,7 @@ TextRenderer::TextRenderer(std::shared_ptr<ShaderData> shaderData) :_shaderData(
 TextRenderer::~TextRenderer() {
 }
 
-void TextRenderer::drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color) {
+void TextRenderer::drawText(const std::string& font, glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color) {
     auto& game = Game::GetInstance();
     _shaderData->apply();
     auto model = glm::identity<glm::mat4>();
@@ -26,9 +26,9 @@ void TextRenderer::drawText(glm::vec2 pos, const std::string& text, float scale,
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(_vao);
     auto fontManager = Game::GetInstance().getFontManager();
-    auto defaultFont = fontManager->getFont("default");
+    auto defaultFont = fontManager->getFont(font);
 
-    auto size = measureString("default", text, scale);
+    auto size = measureString(font, text, scale);
 
     for (const auto c : text) {
         Character chr = (*defaultFont)[c];
@@ -47,13 +47,13 @@ void TextRenderer::drawText(glm::vec2 pos, const std::string& text, float scale,
 glm::ivec2 TextRenderer::measureString(const std::string& font, const std::string& text, float scale) const {
     glm::ivec2 result = glm::ivec2(0);
     auto fontManager = Game::GetInstance().getFontManager();
-    std::shared_ptr<Font> defaultFont = fontManager->getFont("default");
+    std::shared_ptr<Font> defaultFont = fontManager->getFont(font);
     for (const auto c : text) {
         Character chr = (*defaultFont)[c];
         result.y = std::max(result.y, chr.Size.y);
         result.x += chr.Advance / 64;
     }
-    return result;
+    return glm::ivec2((int)(result.x * scale), (int)(result.y * scale));
 }
 
 void TextRenderer::draw_quad(GLuint textureId, glm::vec2 bottomLeft, glm::vec2 size) {

@@ -56,6 +56,7 @@ std::bitset<MAX_SHAPE_SIZE> Board::unplace(glm::ivec2 pos, int& id) {
     Q.push(pos);
     std::bitset<MAX_SHAPE_SIZE> S(0);
     id = getTileID(pos.x, pos.y);
+    int color = getTileColor(pos.x, pos.y);
     if (id == -1) return S;
     while (!Q.empty()) {
         auto p = Q.front();
@@ -66,7 +67,7 @@ std::bitset<MAX_SHAPE_SIZE> Board::unplace(glm::ivec2 pos, int& id) {
             int nr = p.x + dr[i];
             int nc = p.y + dc[i];
             if (nr < 0 || nc < 0 || nr >= _rows || nc >= _columns
-                || getTileID(nr, nc) == -1 || getTileID(nr, nc) != id)
+                || getTileID(nr, nc) == -1 || getTileID(nr, nc) != id || getTileColor(nr, nc) != color)
                 continue;
             Q.push(glm::ivec2(nr, nc));
         }

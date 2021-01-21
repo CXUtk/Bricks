@@ -11,7 +11,7 @@ public:
     ~TextRenderer();
 
     // 注意这里的位置是文字的左上角
-    void drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color);
+    void drawText(const std::string& font, glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color);
     glm::ivec2 measureString(const std::string& font, const std::string& text, float scale) const;
 
 private:

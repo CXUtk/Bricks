@@ -21,7 +21,7 @@ public:
     ~Puzzle();
 
     void setFrameSize(int r, int c);
-    void add(const Shape& shape);
+    void add(const Shape& shape, int cnt);
     void build();
 
 
@@ -88,6 +88,7 @@ private:
 
 
     void init_dlx();
-    int getID(int r, int c) const { return _idMap[r * _cols + c]; }
+    int getID(int r, int c) const { 
+        return _idMap[r * _cols + c]; }
 
 };

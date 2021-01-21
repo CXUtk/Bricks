@@ -60,8 +60,8 @@ void Graphics::drawCircle(glm::vec2 pos, glm::vec2 size, const glm::vec3& color,
 }
 
 
-void Graphics::drawText(glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color) {
-    _textRenderer->drawText(pos, text, scale, color);
+void Graphics::drawText(const std::string& font, glm::vec2 pos, const std::string& text, float scale, const glm::vec3& color) {
+    _textRenderer->drawText(font, pos, text, scale, color);
 }
 
 void Graphics::drawTriangles(const std::vector<Triangle>& triangles, const glm::mat4& transform, const glm::vec3& color) {

@@ -32,8 +32,6 @@ private:
     // void randomGenerate();
     void generateBrickTextures();
 
-    void solve();
-
     glm::ivec2 calculateBricksList(int maxWidth);
 
 };

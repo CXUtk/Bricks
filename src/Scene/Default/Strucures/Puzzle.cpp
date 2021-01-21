@@ -23,8 +23,9 @@ void Puzzle::setFrameSize(int r, int c) {
     _rows = r, _cols = c;
 }
 
-void Puzzle::add(const Shape& shape) {
-    _shapes.push_back(shape);
+void Puzzle::add(const Shape& shape, int cnt) {
+    for (int i = 0; i < cnt; i++)
+        _shapes.push_back(shape);
 }
 
 void Puzzle::build() {
@@ -196,6 +197,7 @@ void Puzzle::init_dlx() {
 
         for (int i = 0; i < _rows; i++) {
             for (int j = 0; j < _cols; j++) {
+                if (_puzzleState[i * _cols + j])continue;
                 int id = _shapeInfo.size();
                 _shapeInfo.push_back(Shape_Info(shapeCount, i, j, 0));
                 _solver->link(id, shapeCount);
