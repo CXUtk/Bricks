@@ -66,9 +66,11 @@ bool ImUI::img_button(std::shared_ptr<Texture2D> texture, glm::vec2 pos, glm::ve
     auto input = game.getInputManager();
     bool clicked = false;
     pos += containerRect.pos;
-    if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0 && inside(input->getMousePosition(), pos, size)) {
-        clicked = true;
-        activeItem = id;
+    if (inside(input->getMousePosition(), containerRect.pos, containerRect.size)) {
+        if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0 && inside(input->getMousePosition(), pos, size)) {
+            clicked = true;
+            activeItem = id;
+        }
     }
 
     drawLineRect(pos, size, borderColor);
@@ -82,9 +84,12 @@ bool ImUI::pure_button(glm::vec2 pos, glm::vec2 size, const glm::vec3& color, co
     auto input = game.getInputManager();
     bool clicked = false;
     pos += containerRect.pos;
-    if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0 && inside(input->getMousePosition(), pos, size)) {
-        clicked = true;
-        activeItem = id;
+    if (inside(input->getMousePosition(), containerRect.pos, containerRect.size)) {
+        if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0
+            && inside(input->getMousePosition(), pos, size)) {
+            clicked = true;
+            activeItem = id;
+        }
     }
     game.getGraphics()->drawQuad(pos, size, color);
     drawLineRect(pos, size, borderColor);
@@ -106,11 +111,13 @@ bool ImUI::slider(glm::vec2 pos, int height, int max, int& value) {
     if (max)
         ypos = ((height - 16 - 16) * value) / max;
     glm::vec3 buttonColor = glm::vec3(0.5f);
-    if (inside(input->getMousePosition(), glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16))) {
-        if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0) {
-            activeItem = id;
+    if (inside(input->getMousePosition(), containerRect.pos, containerRect.size)) {
+        if (inside(input->getMousePosition(), glm::vec2(pos.x + 8, pos.y + 8), glm::vec2(16, height - 16))) {
+            if (!input->getOldMouseDown() && input->getCurMouseDown() && activeItem == 0) {
+                activeItem = id;
+            }
+            buttonColor = glm::vec3(0.9f);
         }
-        buttonColor = glm::vec3(0.9f);
     }
 
     bool valueChanged = false;

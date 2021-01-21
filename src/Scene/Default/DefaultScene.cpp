@@ -171,7 +171,7 @@ void DefaultScene::draw() {
                 }
 
                 int id = extra ? -2 : a.id;
-                if (id != -2) {
+                if (id >= 0) {
                     _board->place(b, glm::ivec2(a.r, a.c), id);
                     _puzzle->place2(id, b, a.r, a.c);
                 }
