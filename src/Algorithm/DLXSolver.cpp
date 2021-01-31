@@ -174,7 +174,7 @@ void DLXSolver::_dfs(int level) {
         if (found) return;
 
         // for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
-        for (int j = nodes[i].R; j != i; j = nodes[j].R) recover(nodes[j].col);
+        for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
 
         _mutexLock.lock();
         top--;
