@@ -1,5 +1,6 @@
 # 拼图
 一个基于GLFW3和freetype字体库的拼图游戏框架
+夹带私货，一个Voronoi图的实现和最小圆覆盖算法
 
 ![sample](brick235.gif)
 

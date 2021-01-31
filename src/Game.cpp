@@ -51,7 +51,6 @@ Game::~Game() {
 }
 
 void Game::init() {
-
     _shaderManager = std::make_shared<ShaderManager>();
     _graphics = std::make_shared<Graphics>();
     _inputManager = std::make_shared<InputManager>(_window);

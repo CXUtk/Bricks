@@ -64,6 +64,7 @@ void DLXSolver::remove(int c) {
     // 把占有这一列的所有行删除
     for (int i = nodes[c].D; i != c; i = nodes[i].D) {
         for (int j = nodes[i].R; j != i; j = nodes[j].R) {
+
             // 删除其垂直链表，但是水平链表不动
             nodes[nodes[j].U].D = nodes[j].D;
             nodes[nodes[j].D].U = nodes[j].U;
@@ -78,6 +79,7 @@ void DLXSolver::recover(int c) {
     // 把占有这一列的所有行恢复
     for (int i = nodes[c].U; i != c; i = nodes[i].U) {
         for (int j = nodes[i].L; j != i; j = nodes[j].L) {
+            //if (nodes[nodes[j].U].D == j)continue;
             // 恢复垂直链表
             nodes[nodes[j].U].D = j;
             nodes[nodes[j].D].U = j;
@@ -158,7 +160,7 @@ void DLXSolver::_dfs(int level) {
         }
     }
 
-    if (colLink[tar].sz == 0) return;
+    //if (colLink[tar].sz <= 0) return;
     remove(tar);
     for (int i = nodes[tar].D; i != tar; i = nodes[i].D) {
         // std::this_thread::sleep_for(std::chrono::milliseconds(20));
@@ -171,8 +173,8 @@ void DLXSolver::_dfs(int level) {
         _dfs(level + 1);
         if (found) return;
 
-        for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
-
+        // for (int j = nodes[i].L; j != i; j = nodes[j].L) recover(nodes[j].col);
+        for (int j = nodes[i].R; j != i; j = nodes[j].R) recover(nodes[j].col);
 
         _mutexLock.lock();
         top--;
